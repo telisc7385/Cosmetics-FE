@@ -77,8 +77,8 @@ const NavItems = async () => {
               <ul className="absolute top-full left-0 mt-2 w-48 bg-white border border-gray-400 rounded shadow-lg opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all duration-200 z-50">
                 {categories.map((cat) => (
                   <li key={cat.id}>
-                    <Link href={`/categories/${cat.id}`}>
-                      <span className="block px-4 py-2 hover:bg-[#edf3f8] hover:text-blue-100">
+                    <Link href={`/category/${cat.id}`}>
+                      <span className="block px-4 py-2 hover:bg-[#edf3f8] ">
                         {cat.name}
                       </span>
                     </Link>
