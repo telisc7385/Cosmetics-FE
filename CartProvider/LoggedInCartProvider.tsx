@@ -13,7 +13,7 @@ import { CartItem, CartItemFromAPI } from "@/types/cart";
 
 
 const parseCartResponse = (response: any): CartItem[] => {
-  console.log(
+  console.log( 
     "LoggedInCartProvider: Raw response to parse (GET /cart):",
     response
   );

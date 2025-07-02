@@ -14,7 +14,8 @@ import {
 } from "@/store/slices/cartSlice";
 import { selectIsLoggedIn } from "@/store/slices/authSlice";
 import { CartItem } from "@/types/cart";
-import { useLoggedInCart } from "@/providers/LoggedInCartProvider";
+import { useLoggedInCart } from "@/CartProvider/LoggedInCartProvider";
+
 
 
 

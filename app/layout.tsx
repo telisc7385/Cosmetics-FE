@@ -8,7 +8,7 @@ import { Toaster } from "react-hot-toast";
 import Footer from "@/components/ServersideComponent/Footer/Footer";
 import { fetchTopCategories } from "@/api/fetchTopCategories";
 import { getNewArrivalProducts } from "@/api/fetchNewArrivalProducts";
-import ReduxProviderWrapper from "@/providers/ReduxProviderWrapper";
+import ReduxProviderWrapper from "@/CartProvider/ReduxProviderWrapper";
 
 
 

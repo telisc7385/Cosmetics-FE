@@ -10,7 +10,7 @@ import { selectCartItems as selectGuestCartItems } from "@/store/slices/cartSlic
 
 import UserAvatar from "@/components/UserAvatar/UserAvatar"; // Assuming this path is correct
 import { CartItem } from "@/types/cart"; // Import CartItem type
-import { useLoggedInCart } from "@/providers/LoggedInCartProvider";
+import { useLoggedInCart } from "@/CartProvider/LoggedInCartProvider";
 
 
 
