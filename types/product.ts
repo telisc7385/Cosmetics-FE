@@ -1,4 +1,3 @@
-
 // types/product.ts
  
 export interface ProductImage {
@@ -40,6 +39,10 @@ export interface ProductVariant {
   createdAt: string;
   isDeleted: boolean;
   images: ProductVariantImage[]; // Variant-specific images
+  product: { // Added for more complete variant data, often includes parent product info
+    name: string;
+    description: string;
+  };
 }
  
 export interface ProductCategory {

@@ -1,5 +1,3 @@
-
-
 // Providers/LoggedInCartProvider.tsx
 "use client";
 
@@ -7,13 +5,14 @@ import React, { useState, useEffect, useCallback, useContext } from "react";
 import { useAppSelector } from "@/store/hooks/hooks";
 import { selectToken } from "@/store/slices/authSlice";
 import { apiCore } from "@/api/ApiCore";
-import LoggedInCartContext from "./LoggedInCartContext";
+import LoggedInCartContext from "./LoggedInCartContext"; // Correct import
 
+// Import types from their new files
 import { CartItem, CartItemFromAPI } from "@/types/cart";
-
+import { Product, ProductVariant } from "@/types/product"; // Ensure Product and ProductVariant are imported if used in CartItem
 
 const parseCartResponse = (response: any): CartItem[] => {
-  console.log( 
+  console.log(
     "LoggedInCartProvider: Raw response to parse (GET /cart):",
     response
   );
@@ -116,7 +115,6 @@ const parseCartResponse = (response: any): CartItem[] => {
 
         const quantity = item.quantity;
 
-  
         let displayName = "Unknown Product";
 
         if (item.variant && item.variant.product?.name) {
