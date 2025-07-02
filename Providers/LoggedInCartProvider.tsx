@@ -8,7 +8,7 @@ import { apiCore } from "@/api/ApiCore";
 import LoggedInCartContext from "./LoggedInCartContext";
 
 import { CartItem, CartItemFromAPI } from "@/types/cart";
-import { ProductVariant } from "@/types/product";
+
 
 const parseCartResponse = (response: any): CartItem[] => {
   console.log(

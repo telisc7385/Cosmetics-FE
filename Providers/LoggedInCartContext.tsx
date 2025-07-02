@@ -1,9 +1,5 @@
-
-
+import { CartItem } from "@/types/cart";
 import { createContext } from "react";
-import { CartItem } from "@/types/cart"; 
-
-
 interface LoggedInCartContextType {
   items: CartItem[];
   loading: boolean;
