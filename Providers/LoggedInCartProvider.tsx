@@ -114,10 +114,7 @@ const parseCartResponse = (response: any): CartItem[] => {
 
         const quantity = item.quantity;
 
-        // Determine the display name:
-        // 1. If it's a variant and the variant has its own name, use "Product Name - Variant Name"
-        // 2. If it's a variant but variant.name is null, use just "Product Name" from variant.product.name
-        // 3. If it's a base product (no variant), use product.name
+  
         let displayName = "Unknown Product";
 
         if (item.variant && item.variant.product?.name) {

@@ -4,9 +4,6 @@ import { Product } from "@/types/product";
 import Image from "next/image";
 import Link from "next/link";
 
-
-
-
 const Footer = ({ topCategories,newArrivals }: { topCategories: Category[];  newArrivals: Product[]; }) => {
   return (
     <footer className="bg-white border-t text-gray-700">
@@ -77,15 +74,19 @@ const Footer = ({ topCategories,newArrivals }: { topCategories: Category[];  new
             </h4>
             <ul className="space-y-2 text-gray-600">
               {topCategories.map((category) => (
+                  
                 <li key={category.id} className="cursor-pointer hover:text-black">
+                    <Link href={`/category/${category.id}`} passHref>
                   {category.name}
-                </li>
+                  </Link>
+                  </li>
+          
               ))}
             </ul>
           </div>
         </div>
       </div>
-
+  
       {/* Bottom Section */}
       <div className="border-t py-4 text-center text-sm text-gray-600">
         <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 mb-2">

@@ -5,7 +5,7 @@ import { persistor, store } from "@/store/store";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 
-import { LoggedInCartProvider } from "@/Providers/LoggedInCartProvider"; // Correct path
+import { LoggedInCartProvider } from "@/providers/LoggedInCartProvider"; // Correct path
 
 export default function ReduxProviderWrapper({
   children,
@@ -22,8 +22,7 @@ export default function ReduxProviderWrapper({
         }
         persistor={persistor}
       >
-        {/* LoggedInCartProvider is always rendered here and now wraps children */}
-        {/* It internally checks for `token` to decide whether to activate its logic */}
+   
         <LoggedInCartProvider>{children}</LoggedInCartProvider>
       </PersistGate>
     </Provider>

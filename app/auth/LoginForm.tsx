@@ -7,7 +7,8 @@ import toast from "react-hot-toast";
 import { loginSuccess } from "@/store/slices/authSlice";
 import Image from "next/image";
 import { Eye, EyeOff } from "lucide-react";
-import ForgotPassword from "../ForgotPassword/page";
+import ForgotPassword from "@/components/ClientsideComponent/ForgotPassword/ForgotPassword";
+
 
 export default function LoginPage() {
   const dispatch = useDispatch();

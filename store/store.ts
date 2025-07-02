@@ -10,11 +10,13 @@ import {
   PURGE,
   REGISTER,
 } from "redux-persist"; // Import all necessary actions
-import storage from "redux-persist/lib/storage";
+
 import { combineReducers } from "redux";
 
 import authReducer from "./slices/authSlice";
 import cartReducer from "./slices/cartSlice";
+import storage from "./storage";
+
 
 const rootReducer = combineReducers({
   auth: authReducer,

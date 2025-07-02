@@ -1,14 +1,11 @@
+"use client";
+export const dynamic = 'force-dynamic';
+import React, { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
-
-
-'use client';
-
-import React, { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { useRouter } from 'next/navigation';
-import toast from 'react-hot-toast';
-
-import { RootState } from '@/store/store';
+import { RootState } from "@/store/store";
 import {
   resetPasswordFailure,
   resetPasswordFlowReset,
@@ -19,8 +16,8 @@ import {
   resetRequestSuccess,
   verifyOtpFailure,
   verifyOtpStart,
-  verifyOtpSuccess
-} from '@/store/slices/authSlice';
+  verifyOtpSuccess,
+} from "@/store/slices/authSlice";
 
 export default function ForgotPassword() {
   const dispatch = useDispatch();
@@ -30,20 +27,19 @@ export default function ForgotPassword() {
     (state: RootState) => state.auth
   );
 
-  const [email, setEmail] = useState('');
-  const [otp, setOtp] = useState('');
-  const [newPassword, setNewPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [otp, setOtp] = useState("");
+  const [newPassword, setNewPassword] = useState("");
 
   useEffect(() => {
     dispatch(resetPasswordFlowReset());
   }, [dispatch]);
 
-  // Show toast and redirect after successful password reset
   useEffect(() => {
     if (resetSuccess && resetStep === 3) {
-      toast.success('Password reset successful! Redirecting to login...');
+      toast.success("Password reset successful! Redirecting to login...");
       setTimeout(() => {
-        router.push('/auth'); 
+        router.push("/auth");
       }, 2000);
     }
   }, [resetSuccess, resetStep, router]);
@@ -53,10 +49,10 @@ export default function ForgotPassword() {
 
     try {
       const res = await fetch(
-        'https://ecom-testing.up.railway.app/password-reset/request-reset',
+        `${process.env.NEXT_PUBLIC_BASE_URL}/password-reset/request-reset`,
         {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email }),
         }
       );
@@ -65,10 +61,10 @@ export default function ForgotPassword() {
       if (res.ok) {
         dispatch(resetRequestSuccess());
       } else {
-        dispatch(resetRequestFailure(data.error || 'Failed to send OTP'));
+        dispatch(resetRequestFailure(data.error || "Failed to send OTP"));
       }
     } catch {
-      dispatch(resetRequestFailure('Network error'));
+      dispatch(resetRequestFailure("Network error"));
     }
   };
 
@@ -77,10 +73,10 @@ export default function ForgotPassword() {
 
     try {
       const res = await fetch(
-        'https://ecom-testing.up.railway.app/password-reset/verify-otp',
+        `${process.env.NEXT_PUBLIC_BASE_URL}/password-reset/verify-otp`,
         {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, otp }),
         }
       );
@@ -89,10 +85,10 @@ export default function ForgotPassword() {
       if (res.ok) {
         dispatch(verifyOtpSuccess());
       } else {
-        dispatch(verifyOtpFailure(data.error || 'OTP verification failed'));
+        dispatch(verifyOtpFailure(data.error || "OTP verification failed"));
       }
     } catch {
-      dispatch(verifyOtpFailure('Network error'));
+      dispatch(verifyOtpFailure("Network error"));
     }
   };
 
@@ -101,10 +97,10 @@ export default function ForgotPassword() {
 
     try {
       const res = await fetch(
-        'https://ecom-testing.up.railway.app/password-reset/reset-password',
+        `${process.env.NEXT_PUBLIC_BASE_URL}/password-reset/reset-password`,
         {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, otp, newPassword }),
         }
       );
@@ -113,24 +109,24 @@ export default function ForgotPassword() {
       if (res.ok) {
         dispatch(resetPasswordSuccess());
       } else {
-        dispatch(resetPasswordFailure(data.error || 'Password reset failed'));
+        dispatch(resetPasswordFailure(data.error || "Password reset failed"));
       }
     } catch {
-      dispatch(resetPasswordFailure('Network error'));
+      dispatch(resetPasswordFailure("Network error"));
     }
   };
 
   return (
-    <div className="max-w-md mx-auto p-4 border rounded space-y-4 bg-white shadow">
+    <div className="w-full mx-auto p-4 rounded space-y-4 bg-white shadow">
       {resetStep === 1 && (
         <>
           <p>Enter your email to receive a verification OTP.</p>
           <input
             type="email"
-            placeholder="Email"
+            placeholder="Enter your email"
             value={email}
-            onChange={e => setEmail(e.target.value)}
-            className="w-full p-2 border rounded"
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full p-2 rounded border"
             disabled={resetLoading}
             autoComplete="email"
           />
@@ -139,7 +135,7 @@ export default function ForgotPassword() {
             disabled={!email || resetLoading}
             className="w-full bg-blue-600 text-white py-2 rounded disabled:opacity-50"
           >
-            {resetLoading ? 'Sending...' : 'Send OTP'}
+            {resetLoading ? "Sending..." : "Send OTP"}
           </button>
         </>
       )}
@@ -147,21 +143,23 @@ export default function ForgotPassword() {
       {resetStep === 2 && (
         <>
           <p>Enter the OTP sent to your email.</p>
-          <input
-            type="text"
-            placeholder="OTP"
-            value={otp}
-            onChange={e => setOtp(e.target.value)}
-            className="w-full p-2 border rounded"
-            disabled={resetLoading}
-            autoComplete="one-time-code"
-          />
+          <div className="w-full max-w-md px-4 py-2 rounded-md border border-gray-300 bg-white shadow-sm flex items-center gap-3">
+            <input
+              type="text"
+              placeholder="OTP"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              className="w-full bg-transparent outline-none placeholder-gray-400 text-gray-700 text-sm"
+              disabled={resetLoading}
+              autoComplete="one-time-code"
+            />
+          </div>
           <button
             onClick={handleVerifyOtp}
             disabled={!otp || resetLoading}
             className="w-full bg-blue-600 text-white py-2 rounded disabled:opacity-50"
           >
-            {resetLoading ? 'Verifying...' : 'Verify OTP'}
+            {resetLoading ? "Verifying..." : "Verify OTP"}
           </button>
         </>
       )}
@@ -169,21 +167,23 @@ export default function ForgotPassword() {
       {resetStep === 3 && (
         <>
           <p>Enter your new password.</p>
-          <input
-            type="password"
-            placeholder="New Password"
-            value={newPassword}
-            onChange={e => setNewPassword(e.target.value)}
-            className="w-full p-2 border rounded"
-            disabled={resetLoading}
-            autoComplete="new-password"
-          />
+          <div className="w-full max-w-md px-4 py-2 rounded-md border border-gray-300 bg-white shadow-sm flex items-center gap-3">
+            <input
+              type="password"
+              placeholder="New Password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="w-full bg-transparent outline-none placeholder-gray-400 text-gray-700 text-sm"
+              disabled={resetLoading}
+              autoComplete="new-password"
+            />
+          </div>
           <button
             onClick={handleResetPassword}
             disabled={!newPassword || resetLoading}
             className="w-full bg-blue-600 text-white py-2 rounded disabled:opacity-50"
           >
-            {resetLoading ? 'Resetting...' : 'Reset Password'}
+            {resetLoading ? "Resetting..." : "Reset Password"}
           </button>
         </>
       )}

@@ -175,11 +175,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { logout } from "@/store/slices/authSlice";
 import { RootState } from "@/store/store";
 import { FiUser } from "react-icons/fi";
-import { BsBoxSeam, BsTag } from "react-icons/bs";
-import { MdLogout, MdOutlineEmail } from "react-icons/md";
-import { FaRegHeart, FaBell, FaUserEdit } from "react-icons/fa";
-import { GiReceiveMoney } from "react-icons/gi";
-import { BiGift } from "react-icons/bi";
+import { BsBoxSeam } from "react-icons/bs";
+import { MdLogout } from "react-icons/md";
+import {  FaUserEdit } from "react-icons/fa";
 import Image from "next/image";
  
 export default function UserAvatar() {

@@ -24,7 +24,7 @@ export const apiCore = async <T>(
   const requestOptions: RequestInit = {
     method,
     headers,
-    cache: "no-store",
+    next: { revalidate: 3600 },
   };
  
   if (body && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {

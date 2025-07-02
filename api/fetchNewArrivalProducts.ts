@@ -1,7 +1,6 @@
 export async function getNewArrivalProducts() {
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/product`, {
-      next: { revalidate: 60 },
       cache: "no-store",
     });
  if (!res.ok) {

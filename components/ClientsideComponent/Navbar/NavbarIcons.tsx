@@ -7,7 +7,7 @@ import { FiHeart, FiShoppingBag } from "react-icons/fi"; // Using FiShoppingBag 
 import { useAppSelector } from "@/store/hooks/hooks";
 import { selectIsLoggedIn } from "@/store/slices/authSlice";
 import { selectCartItems as selectGuestCartItems } from "@/store/slices/cartSlice"; // Alias to avoid confusion
-import { useLoggedInCart } from "@/Providers/LoggedInCartProvider"; // Corrected import path
+import { useLoggedInCart } from "@/providers/LoggedInCartProvider"; // Corrected import path
 import UserAvatar from "@/components/UserAvatar/UserAvatar"; // Assuming this path is correct
 import { CartItem } from "@/types/cart"; // Import CartItem type
 

@@ -3,6 +3,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import ProductTabs from './ProductTabs';
 import { Product, ProductVariant } from '@/types/product';
+import ProductCard from '../CommonComponents/ProductCard/ProductCard';
 
 type Props = {
   product: Product;
@@ -192,7 +193,7 @@ export default function ProductDetailClient({ product,relatedProducts }: Props) 
       {/* Product Tabs */}
       <div className="px-10 ">
         <ProductTabs
-          productDetails={product.description}
+          productDetails={product.productDetails}
           keyIngredients={[]}
           benefits={[]}
           howToUse={''}
@@ -208,30 +209,18 @@ export default function ProductDetailClient({ product,relatedProducts }: Props) 
         />
       </div>
 
-    <h2>Similar Product</h2>
+    
 
-
-      {relatedProducts && relatedProducts.length > 0 && (
-  <div className="px-10 py-10">
+    {relatedProducts && relatedProducts.length > 0 && (
+        <div className="mx-auto px-4 py-10">
     <h2 className="text-xl font-semibold mb-4">You may also like</h2>
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-      {relatedProducts.map((item) => (
-        <div key={item.id} className="border rounded-lg p-4 bg-white">
-          <Image
-            src={item.images?.[0]?.image || '/placeholder.png'}
-            alt={item.name}
-            width={200}
-            height={200}
-            className="object-contain mx-auto h-[150px]"
-          />
-          <h3 className="text-sm mt-2 font-medium">{item.name}</h3>
-          <p className="text-gray-600 text-sm">₹{item.sellingPrice}</p>
-        </div>
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+    {relatedProducts.slice(0, 5).map((item) => (
+        <ProductCard key={item.id} product={item} />
       ))}
     </div>
   </div>
 )}
-
     </div>
   );
 }

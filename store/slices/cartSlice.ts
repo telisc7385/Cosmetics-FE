@@ -42,7 +42,6 @@ const getInitialState = (): CartState => {
             };
           }).filter(Boolean) as CartItem[]; // Filter out nulls
 
-          console.log("cartSlice: Initializing state from localStorage. Valid items:", validItems);
           return { items: validItems };
         }
       } catch (e) {
@@ -50,7 +49,7 @@ const getInitialState = (): CartState => {
       }
     }
   }
-  console.log("cartSlice: Initializing state with empty cart.");
+
   return { items: [] };
 };
 

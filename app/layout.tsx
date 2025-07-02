@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Josefin_Sans } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/ServersideComponent/Navbar/NavbarComponent"; 
-import ReduxProviderWrapper from "@/store/providers/ReduxProviderWrapper"; 
+import ReduxProviderWrapper from "@/providers/ReduxProviderWrapper"; 
 import { Toaster } from "react-hot-toast";
 import Footer from "@/components/ServersideComponent/Footer/Footer";
 import { fetchTopCategories } from "@/api/fetchTopCategories";

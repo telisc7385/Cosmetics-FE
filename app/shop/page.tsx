@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import React from 'react';
 import ShopPageClient from '@/components/ClientsideComponent/shopPageClient/shopPageClient';
 import { fetchCategories } from '@/api/fetchCategories';

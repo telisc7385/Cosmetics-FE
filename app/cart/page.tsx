@@ -2,7 +2,7 @@
 "use client";
 
 import React from "react";
-import { useLoggedInCart } from "@/Providers/LoggedInCartProvider"; // Corrected import path
+import { useLoggedInCart } from "@/providers/LoggedInCartProvider"; // Corrected import path
 import { useAppSelector, useAppDispatch } from "@/store/hooks/hooks";
 import Image from "next/image";
 import {
