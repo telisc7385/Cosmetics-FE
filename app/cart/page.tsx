@@ -16,6 +16,8 @@ import { selectIsLoggedIn } from "@/store/slices/authSlice";
 import { CartItem } from "@/types/cart";
 import { useLoggedInCart } from "@/providers/LoggedInCartProvider";
 
+
+
 const CartPage = () => {
   const isLoggedIn = useAppSelector(selectIsLoggedIn);
   const guestCartItems = useAppSelector(selectGuestCartItems);
