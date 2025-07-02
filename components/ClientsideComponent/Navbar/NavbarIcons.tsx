@@ -12,6 +12,8 @@ import UserAvatar from "@/components/UserAvatar/UserAvatar"; // Assuming this pa
 import { CartItem } from "@/types/cart"; // Import CartItem type
 import { useLoggedInCart } from "@/providers/LoggedInCartProvider";
 
+
+
 const NavbarIcons = () => {
   const isLoggedIn = useAppSelector(selectIsLoggedIn);
   const guestCartItems = useAppSelector(selectGuestCartItems); // Guest cart items from Redux slice
