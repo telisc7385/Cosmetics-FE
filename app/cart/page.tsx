@@ -15,6 +15,7 @@ import {
 import { selectIsLoggedIn } from "@/store/slices/authSlice";
 import { CartItem } from "@/types/cart";
 import { useLoggedInCart } from "@/CartProvider/LoggedInCartProvider";
+import { useRouter } from "next/navigation";
 
 
 
@@ -24,6 +25,7 @@ const CartPage = () => {
   const isLoggedIn = useAppSelector(selectIsLoggedIn);
   const guestCartItems = useAppSelector(selectGuestCartItems);
   const dispatch = useAppDispatch();
+  const router= useRouter()
 
   const {
     items: loggedInCartItems,
@@ -218,7 +220,8 @@ const CartPage = () => {
             </div>
           </div>
 
-          <button className="w-full py-3 mt-6 bg-purple-600 text-white font-semibold rounded-md hover:bg-purple-700 transition-colors">
+          <button onClick={()=>router.push("/checkout")}
+          className="w-full py-3 mt-6 bg-purple-600 text-white font-semibold rounded-md hover:bg-purple-700 transition-colors">
             Checkout
           </button>
           <button className="w-full py-3 mt-4 bg-gray-200 text-gray-800 font-semibold rounded-md hover:bg-gray-300 transition-colors">
