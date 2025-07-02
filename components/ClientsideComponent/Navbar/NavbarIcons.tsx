@@ -7,9 +7,10 @@ import { FiHeart, FiShoppingBag } from "react-icons/fi"; // Using FiShoppingBag 
 import { useAppSelector } from "@/store/hooks/hooks";
 import { selectIsLoggedIn } from "@/store/slices/authSlice";
 import { selectCartItems as selectGuestCartItems } from "@/store/slices/cartSlice"; // Alias to avoid confusion
-import { useLoggedInCart } from "@/providers/LoggedInCartProvider"; // Corrected import path
+
 import UserAvatar from "@/components/UserAvatar/UserAvatar"; // Assuming this path is correct
 import { CartItem } from "@/types/cart"; // Import CartItem type
+import { useLoggedInCart } from "@/providers/LoggedInCartProvider";
 
 const NavbarIcons = () => {
   const isLoggedIn = useAppSelector(selectIsLoggedIn);

@@ -2,7 +2,7 @@
 "use client";
 
 import React from "react";
-import { useLoggedInCart } from "@/providers/LoggedInCartProvider"; // Corrected import path
+
 import { useAppSelector, useAppDispatch } from "@/store/hooks/hooks";
 import Image from "next/image";
 import {
@@ -14,6 +14,7 @@ import {
 } from "@/store/slices/cartSlice";
 import { selectIsLoggedIn } from "@/store/slices/authSlice";
 import { CartItem } from "@/types/cart";
+import { useLoggedInCart } from "@/providers/LoggedInCartProvider";
 
 const CartPage = () => {
   const isLoggedIn = useAppSelector(selectIsLoggedIn);
@@ -44,13 +45,10 @@ const CartPage = () => {
 
   const handleDecrement = (cartItemId: number) => {
     if (isLoggedIn) {
-      // This will call the LoggedInCartProvider's decrement function,
-      // which already handles removing the item if its quantity becomes 0 or less.
+   
       decrementLoggedInItem(cartItemId);
     } else {
-      // This dispatches to your Redux cartSlice. Your cartSlice's
-      // decrementQuantity reducer is expected to handle removing the item
-      // if its quantity becomes 0 or less.
+
       dispatch(decrementQuantity(cartItemId));
     }
   };

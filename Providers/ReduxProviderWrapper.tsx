@@ -4,8 +4,9 @@
 import { persistor, store } from "@/store/store";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
+import { LoggedInCartProvider } from "./LoggedInCartProvider";
 
-import { LoggedInCartProvider } from "@/providers/LoggedInCartProvider"; // Correct path
+
 
 export default function ReduxProviderWrapper({
   children,
