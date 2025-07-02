@@ -11,6 +11,7 @@ import { getNewArrivalProducts } from "@/api/fetchNewArrivalProducts";
 import ReduxProviderWrapper from "@/providers/ReduxProviderWrapper";
 
 
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],

@@ -14,6 +14,7 @@ import { useLoggedInCart } from "@/providers/LoggedInCartProvider";
 
 
 
+
 const NavbarIcons = () => {
   const isLoggedIn = useAppSelector(selectIsLoggedIn);
   const guestCartItems = useAppSelector(selectGuestCartItems); 
