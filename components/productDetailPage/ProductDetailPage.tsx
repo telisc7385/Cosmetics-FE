@@ -2,10 +2,9 @@
 "use client";
 import { useState } from "react";
 import Image from "next/image";
-// Removed: import ProductTabs from '../../CommonComponents/ProductDetail/ProductTabs';
+// Removed: import ProductTabs from '../../CommonComponents/ProductDetail/ProductTabs'; // As per your previous request
 import { Product, ProductVariant } from "@/types/product";
 import ProductCard from "../CommonComponents/ProductCard/ProductCard";
-
 // Import Redux hooks and actions for guest cart
 import { useAppSelector, useAppDispatch } from "@/store/hooks/hooks";
 import { selectIsLoggedIn } from "@/store/slices/authSlice";
@@ -51,7 +50,7 @@ export default function ProductDetailClient({
 
   const sellingPrice =
     selectedVariant?.selling_price || Number(product.sellingPrice);
-  const basePrice = Number(product.basePrice) || sellingPrice;
+  const basePrice = Number(product.basePrice) || sellingPrice; // For display
 
   const discount =
     basePrice && sellingPrice
@@ -71,21 +70,22 @@ export default function ProductDetailClient({
 
   const handleAddToCart = async () => {
     const itemToAdd: Omit<CartItem, "cartItemId"> = {
-      // If a variant is selected, use its ID and details
-      id: product.id, // Always product ID for the main item
+      // 'id' here refers to the main product ID, as the API expects productId and variantId separately.
+      id: product.id,
       name: product.name,
       quantity: 1, // Default quantity
       sellingPrice: selectedVariant
         ? selectedVariant.selling_price
         : parseFloat(product.sellingPrice),
-      basePrice: selectedVariant
-        ? selectedVariant.base_and_selling_price_difference_in_percent // Assuming this means base price or can be calculated
-        : parseFloat(product.basePrice),
+      // Base price should always come from the main product's basePrice,
+      // as variant's 'base_and_selling_price_difference_in_percent' is a discount.
+      basePrice: parseFloat(product.basePrice),
       image:
         selectedVariant?.images?.[0]?.url ||
         product.images?.[0]?.image ||
         "/placeholder.jpg",
-      variantId: selectedVariant?.id || null, // Pass variant ID if selected, otherwise null
+      // Pass variantId if a variant is selected, otherwise null
+      variantId: selectedVariant?.id || null,
       variant: selectedVariant || null, // Pass the full variant object if selected
       product: product, // Pass the full product object
     };
@@ -98,7 +98,7 @@ export default function ProductDetailClient({
     if (isLoggedIn) {
       // Logged-in user: use API
       try {
-        await addLoggedInCartItem(itemToAdd);
+        await addLoggedInCartItem(itemToAdd); // This calls the addCartItem in LoggedInCartProvider
         console.log("Product added to logged-in cart:", itemToAdd);
         // Optionally, show a success message or redirect
       } catch (error) {
@@ -107,10 +107,10 @@ export default function ProductDetailClient({
       }
     } else {
       // Guest user: use local storage (Redux slice)
-      // Generate a temporary cartItemId for guest items
+      // Generate a unique negative cartItemId for guest items
       const guestCartItem: CartItem = {
         ...itemToAdd,
-        cartItemId: Date.now() * -1 - Math.random(), // Unique negative ID for guest items
+        cartItemId: Date.now() * -1 - Math.random(),
       };
       dispatch(addGuestCartItem(guestCartItem));
       console.log("Product added to guest cart:", guestCartItem);
@@ -265,25 +265,6 @@ export default function ProductDetailClient({
           </div>
         </div>
       </div>
-
-      {/* Removed Product Tabs section */}
-      {/* <div className="px-10 ">
-        <ProductTabs
-          productDetails={product.productDetails}
-          keyIngredients={[]}
-          benefits={[]}
-          howToUse={''}
-          shippingInfo={`Free standard shipping on orders over $50<br/>
-            Standard shipping (5–7 business days)<br/>
-            Express shipping (2–3 business days) available<br/>
-            International shipping available to select countries`}
-              returnPolicy={`30-day return window<br/>
-            Items must be unworn with original tags attached<br/>
-            Free returns on US orders<br/>
-            See our full returns policy for more details`}
-            
-        />
-      </div> */}
 
       {relatedProducts && relatedProducts.length > 0 && (
         <div className="mx-auto px-4 py-10">

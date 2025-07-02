@@ -1,3 +1,4 @@
+// GuestCheckout.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -38,6 +39,30 @@ const GuestCheckout = () => {
       return;
     }
 
+    // --- START OF MODIFICATION ---
+    // Transform cartItems to match the backend's expectation (either productId OR variantId)
+    const itemsForPayload = cartItems.map((item: CartItem) => {
+      const itemPayload: {
+        productId?: number;
+        variantId?: number;
+        quantity: number;
+        price: number;
+      } = {
+        quantity: item.quantity,
+        price: item.sellingPrice,
+      };
+
+      if (item.variantId !== null && item.variantId !== undefined) {
+        // If it's a variant, pass only variantId
+        itemPayload.variantId = item.variantId;
+      } else {
+        // If no variant, pass only productId (which is item.id from our CartItem structure)
+        itemPayload.productId = item.id;
+      }
+      return itemPayload;
+    });
+    // --- END OF MODIFICATION ---
+
     const payload = {
       email: formData.email,
       address: {
@@ -49,41 +74,43 @@ const GuestCheckout = () => {
         addressLine: formData.addressLine,
         landmark: formData.landmark,
       },
-      items: cartItems.map((item: CartItem) => ({
-        productId: item.product.id,
-        ...(item.variant?.id && { variantId: item.variant.id }),
-        quantity: item.quantity,
-        price: item.sellingPrice,
-      })),
+      items: itemsForPayload, // Use the transformed items array
       totalAmount: subtotal,
       paymentMethod: "COD",
     };
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/guest/checkout`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/guest/checkout`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
 
-      if (!response.ok) throw new Error("Order failed");
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Order failed");
+      }
 
       const data = await response.json();
       const orderId = data.order.id;
-      console.log(orderId,"orderid")
-      router.push(`/thank-you/${orderId}`)
-    //   console.log("Order success:", data);
+      console.log(orderId, "orderid");
+      router.push(`/thank-you/${orderId}`);
       toast.success("Order placed successfully!");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Order error:", error);
-      toast.success("Error placing order");
+      toast.error(error.message || "Error placing order");
     }
   };
 
   if (cartItems.length === 0) {
-    return <div className="text-center text-gray-500 py-10">Your cart is empty</div>;
+    return (
+      <div className="text-center text-gray-500 py-10">Your cart is empty</div>
+    );
   }
 
   return (
@@ -171,8 +198,15 @@ const GuestCheckout = () => {
       <div className="bg-white p-6 rounded shadow">
         <h2 className="text-xl font-semibold mb-4">Cart Items</h2>
         {cartItems.map((item: CartItem) => (
-          <div key={item.cartItemId} className="flex gap-4 items-center border-b py-4">
-            <img src={item.image} alt={item.name} className="w-20 h-20 rounded object-cover" />
+          <div
+            key={item.cartItemId}
+            className="flex gap-4 items-center border-b py-4"
+          >
+            <img
+              src={item.image}
+              alt={item.name}
+              className="w-20 h-20 rounded object-cover"
+            />
             <div>
               <p className="font-medium text-gray-800">{item.name}</p>
               <p className="text-sm text-gray-600">Qty: {item.quantity}</p>

@@ -1,3 +1,4 @@
+// components/CategorySlider/CategorySlider.tsx
 "use client";
 import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -19,7 +20,8 @@ const bgColors = ["#e6ffe6", "#cce0ff", "#ffb3b3", "#CCE6FF", "#FFCCCC"];
 
 export default function CategorySlider({ categories }: Props) {
   return (
-    <div className="px-4 pb-6">
+    // Added a new container div here
+    <div className="container mx-auto max-w-7xl">
       <Swiper
         spaceBetween={24}
         slidesPerView={1}
@@ -41,11 +43,11 @@ export default function CategorySlider({ categories }: Props) {
       >
         {categories.map((cat, index) => (
           <SwiperSlide key={cat.id}>
-              <Link href={`/category/${cat.id}`} passHref>
-            <div className="flex-shrink-0 w-[260px] h-[420px] bg-white rounded-lg group cursor-pointer relative overflow-hidden transition-all duration-300 mx-auto">
-              {/* 🔵 Background Bubble */}
-              <div
-                className={`
+            <Link href={`/category/${cat.id}`} passHref>
+              <div className="flex-shrink-0 w-[260px] h-[420px] bg-white rounded-lg group cursor-pointer relative overflow-hidden transition-all duration-300 mx-auto">
+                {/* 🔵 Background Bubble */}
+                <div
+                  className={`
                   absolute
                   bottom-[80px]
                   left-1/2
@@ -59,28 +61,28 @@ export default function CategorySlider({ categories }: Props) {
                   group-hover:h-[180px]
                   group-hover:rounded-[10px]
                 `}
-                style={{
-                  backgroundColor: bgColors[index % bgColors.length],
-                }}
-              />
-
-              {/* 🖼 Main Image (zoom + shadow only on image) */}
-              <div className="relative z-10 flex justify-center h-[300px] sm:h-[280px] items-start pt-6">
-                <Image
-                  src={cat.imageUrl}
-                  alt={cat.name}
-                  width={280}
-                  height={280}
-                  className="object-contain transition-transform duration-500 group-hover:scale-115 group-hover:drop-shadow-lg"
+                  style={{
+                    backgroundColor: bgColors[index % bgColors.length],
+                  }}
                 />
-              </div>
 
-              {/* 🔤 Category Name */}
-              <h3 className="relative z-10 mt-20 text-center text-base font-semibold text-black">
-                {cat.name}
-              </h3>
+                {/* 🖼 Main Image (zoom + shadow only on image) */}
+                <div className="relative z-10 flex justify-center h-[300px] sm:h-[280px] items-start pt-6">
+                  <Image
+                    src={cat.imageUrl}
+                    alt={cat.name}
+                    width={280}
+                    height={280}
+                    className="object-contain transition-transform duration-500 group-hover:scale-115 group-hover:drop-shadow-lg"
+                  />
+                </div>
+
+                {/* 🔤 Category Name */}
+                <h3 className="relative z-10 mt-20 text-center text-base font-semibold text-black">
+                  {cat.name}
+                </h3>
               </div>
-              </Link>
+            </Link>
           </SwiperSlide>
         ))}
       </Swiper>

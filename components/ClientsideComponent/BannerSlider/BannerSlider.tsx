@@ -75,7 +75,7 @@ export default function BannerSlider({ banners }: { banners: BannerItem[] }) {
   );
 
   return (
-    <div className="relative w-full h-[250px] sm:h-[300px] md:h-[400px] lg:h-[450px] xl:h-[450px] overflow-hidden">
+    <div className="relative w-full h-[250px] sm:h-[300px] md:h-[400px] lg:h-[450px] xl:h-[500px] overflow-hidden">
       {/* Slider */}
       <div ref={sliderRef} className="keen-slider w-full h-full">
         {banners.map((banner) => (

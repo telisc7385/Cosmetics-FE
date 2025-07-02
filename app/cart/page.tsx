@@ -2,7 +2,6 @@
 "use client";
 
 import React from "react";
-
 import { useAppSelector, useAppDispatch } from "@/store/hooks/hooks";
 import Image from "next/image";
 import {
@@ -16,16 +15,57 @@ import { selectIsLoggedIn } from "@/store/slices/authSlice";
 import { CartItem } from "@/types/cart";
 import { useLoggedInCart } from "@/CartProvider/LoggedInCartProvider";
 import { useRouter } from "next/navigation";
+import { apiCore } from "@/api/ApiCore"; // Assuming apiCore is available for checkout API calls
+import { selectToken } from "@/store/slices/authSlice"; // To get token for checkout API
 
+// Import Lottie player and the animation JSON
+import Lottie from "react-lottie-player";
+import emptyCartAnimationData from "@/public/cart.json"; // Assuming your Lottie JSON is here
 
-
-
+const EmptyCartAnimation = () => (
+  <div className="flex flex-col items-center justify-center py-10 bg-white rounded-lg shadow-md animate-fadeIn">
+    <style jsx>{`
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .animate-fadeIn {
+        animation: fadeIn 0.8s ease-out forwards;
+      }
+    `}</style>
+    <Lottie
+      loop
+      animationData={emptyCartAnimationData}
+      play
+      style={{ width: 300, height: 300 }} // Increased size from 200x200 to 300x300
+    />
+    <p className="mt-6 text-xl font-semibold text-gray-700">
+      Your cart is empty!
+    </p>
+    <p className="mt-2 text-gray-500">
+      Looks like you haven't added anything to your cart yet.
+    </p>
+    <button
+      onClick={() => (window.location.href = "/shop")} // Assuming a /products page
+      className="mt-6 px-6 py-3 bg-purple-600 text-white rounded-md shadow-lg hover:bg-purple-700 transition-all duration-300 transform hover:scale-105 hover:cursor-pointer"
+    >
+      Start Shopping
+    </button>
+  </div>
+);
 
 const CartPage = () => {
   const isLoggedIn = useAppSelector(selectIsLoggedIn);
   const guestCartItems = useAppSelector(selectGuestCartItems);
   const dispatch = useAppDispatch();
-  const router= useRouter()
+  const router = useRouter();
+  const token = useAppSelector(selectToken); // Get token for API calls
 
   const {
     items: loggedInCartItems,
@@ -51,10 +91,8 @@ const CartPage = () => {
 
   const handleDecrement = (cartItemId: number) => {
     if (isLoggedIn) {
-   
       decrementLoggedInItem(cartItemId);
     } else {
-
       dispatch(decrementQuantity(cartItemId));
     }
   };
@@ -75,11 +113,45 @@ const CartPage = () => {
     }
   };
 
+  const prepareCartForCheckoutAPI = () => {
+    return items.map((item) => {
+      const payloadItem: {
+        productId?: number;
+        variantId?: number | null;
+        quantity: number;
+      } = {
+        quantity: item.quantity,
+      };
+
+      if (item.variantId !== null && item.variantId !== undefined) {
+        payloadItem.variantId = item.variantId;
+      } else {
+        payloadItem.productId = item.id;
+      }
+      return payloadItem;
+    });
+  };
+
+  const handleCheckout = async () => {
+    const checkoutPayload = prepareCartForCheckoutAPI();
+    console.log("Checkout Payload for API:", checkoutPayload);
+
+    try {
+      // Example: If your checkout API expects the cart items in this format
+      // const response = await apiCore('/checkout-api-endpoint', 'POST', { items: checkoutPayload }, isLoggedIn ? token : undefined);
+      // console.log("Checkout API Response:", response);
+      alert("Simulating checkout. Check console for payload.");
+      // Handle success (e.g., redirect to order confirmation)
+    } catch (err: any) {
+      console.error("Checkout failed:", err);
+      alert(`Checkout failed: ${err.message || "Unknown error"}`);
+      // Handle error (e.g., show error message to user)
+    }
+  };
+
   const subtotal = items.reduce(
-    (
-      total: number,
-      item: CartItem // Explicitly typed 'total' and 'item'
-    ) => total + item.sellingPrice * item.quantity,
+    (total: number, item: CartItem) =>
+      total + item.sellingPrice * item.quantity,
     0
   );
   const shipping = 5;
@@ -99,11 +171,7 @@ const CartPage = () => {
   }
 
   if (items.length === 0 && !loading) {
-    return (
-      <div className="text-center py-10 text-gray-500">
-        Your cart is empty. Start shopping!
-      </div>
-    );
+    return <EmptyCartAnimation />; // Display the animated empty cart
   }
 
   return (
@@ -120,7 +188,7 @@ const CartPage = () => {
             >
               <div className="flex items-start sm:items-center w-full sm:w-auto mb-4 sm:mb-0">
                 <Image
-                  src={item.image} 
+                  src={item.image}
                   alt={item.name}
                   width={112} // Same as Tailwind's w-28
                   height={112} // Same as Tailwind's h-28
@@ -220,8 +288,10 @@ const CartPage = () => {
             </div>
           </div>
 
-          <button onClick={()=>router.push("/checkout")}
-          className="w-full py-3 mt-6 bg-purple-600 text-white font-semibold rounded-md hover:bg-purple-700 transition-colors">
+          <button
+            onClick={() => router.push("/checkout")}
+            className="w-full py-3 mt-6 bg-purple-600 text-white font-semibold rounded-md hover:bg-purple-700 transition-colors"
+          >
             Checkout
           </button>
           <button className="w-full py-3 mt-4 bg-gray-200 text-gray-800 font-semibold rounded-md hover:bg-gray-300 transition-colors">
@@ -229,12 +299,27 @@ const CartPage = () => {
           </button>
 
           <div className="flex justify-center mt-6 space-x-3">
-            <Image src="/icons/visa.svg" alt="Visa"   width={40}
-  height={24} className="h-6" />
-            <Image src="/icons/mastercard.svg" alt="Mastercard"   width={40}
-  height={24} className="h-6" />
-            <Image src="/icons/amex.svg" alt="American Express"   width={40}
-  height={24} className="h-6" />
+            <Image
+              src="/icons/visa.svg"
+              alt="Visa"
+              width={40}
+              height={24}
+              className="h-6"
+            />
+            <Image
+              src="/icons/mastercard.svg"
+              alt="Mastercard"
+              width={40}
+              height={24}
+              className="h-6"
+            />
+            <Image
+              src="/icons/amex.svg"
+              alt="American Express"
+              width={40}
+              height={24}
+              className="h-6"
+            />
           </div>
         </div>
       </div>

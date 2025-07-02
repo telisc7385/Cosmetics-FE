@@ -1,12 +1,13 @@
+// store/slices/cartSlice.ts
 "use client";
- 
+
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { CartItem } from "@/types/cart"; // Import CartItem from central location
- 
+
 interface CartState {
   items: CartItem[];
 }
- 
+
 // Function to get initial state from localStorage
 const getInitialState = (): CartState => {
   if (typeof window !== 'undefined') {
@@ -21,13 +22,13 @@ const getInitialState = (): CartState => {
             const cartItemId = typeof item.cartItemId === 'number' && !isNaN(item.cartItemId)
                                ? item.cartItemId
                                : Date.now() * -1 - Math.random(); // Generate a unique negative ID for guest
-           
+            
             // Ensure product ID and name are present
             if (typeof item.id !== 'number' || typeof item.name !== 'string') {
               console.warn("cartSlice: Skipping malformed item from localStorage:", item);
               return null; // Filter out later
             }
- 
+
             // Construct CartItem, ensuring number types for prices and quantity
             return {
               cartItemId: cartItemId,
@@ -40,7 +41,7 @@ const getInitialState = (): CartState => {
               variantId: typeof item.variantId === 'number' || item.variantId === null ? item.variantId : undefined,
             };
           }).filter(Boolean) as CartItem[]; // Filter out nulls
- 
+
           return { items: validItems };
         }
       } catch (e) {
@@ -48,10 +49,10 @@ const getInitialState = (): CartState => {
       }
     }
   }
- 
+
   return { items: [] };
 };
- 
+
 const cartSlice = createSlice({
   name: "cart",
   initialState: getInitialState(),
@@ -63,7 +64,7 @@ const cartSlice = createSlice({
         console.warn("cartSlice: state.items was not an array, initializing to [].");
         state.items = [];
       }
- 
+
       // Find existing item by product ID and variant ID (if applicable)
       // This is for combining quantities of the same product for guests
       const existing = state.items.find((item) => {
@@ -72,7 +73,7 @@ const cartSlice = createSlice({
                  ? item.variantId === action.payload.variantId
                  : item.variantId === undefined || item.variantId === null);
       });
- 
+
       if (existing) {
         existing.quantity += action.payload.quantity;
         console.log("cartSlice: Updated quantity for existing item. New state.items:", state.items);
@@ -85,13 +86,13 @@ const cartSlice = createSlice({
         state.items.push(action.payload);
         console.log("cartSlice: Added new item. New state.items:", state.items);
       }
-     
+      
       if (typeof window !== 'undefined') {
         localStorage.setItem('guestCart', JSON.stringify(state.items));
         console.log("cartSlice: Guest cart saved to localStorage.");
       }
     },
- 
+
     removeFromCart: (state, action: PayloadAction<number>) => { // Accepts cartItemId
       console.log("cartSlice: removeFromCart action received. Cart Item ID:", action.payload);
       if (!Array.isArray(state.items)) {
@@ -104,7 +105,7 @@ const cartSlice = createSlice({
         console.log("cartSlice: Guest cart saved to localStorage after removal.");
       }
     },
- 
+
     incrementQuantity: (state, action: PayloadAction<number>) => { // Accepts cartItemId
       console.log("cartSlice: incrementQuantity action received. Cart Item ID:", action.payload);
       if (!Array.isArray(state.items)) {
@@ -120,7 +121,7 @@ const cartSlice = createSlice({
         console.log("cartSlice: Guest cart saved to localStorage after increment.");
       }
     },
- 
+
     decrementQuantity: (state, action: PayloadAction<number>) => { // Accepts cartItemId
       console.log("cartSlice: decrementQuantity action received. Cart Item ID:", action.payload);
       if (!Array.isArray(state.items)) {
@@ -142,7 +143,7 @@ const cartSlice = createSlice({
         console.log("cartSlice: Guest cart saved to localStorage after decrement.");
       }
     },
- 
+
     clearCart: (state) => {
       console.log("cartSlice: clearCart action received.");
       state.items = [];
@@ -152,7 +153,7 @@ const cartSlice = createSlice({
         console.log("cartSlice: Guest cart cleared from localStorage.");
       }
     },
- 
+
     // setCart is typically used to load a cart (e.g., from backend after login)
     // For guest cart, it might be used to explicitly replace the whole cart, e.g., on merge.
     setCart: (state, action: PayloadAction<CartItem[]>) => {
@@ -171,7 +172,7 @@ const cartSlice = createSlice({
     },
   },
 });
- 
+
 export const {
   addToCart,
   removeFromCart,
@@ -180,7 +181,7 @@ export const {
   clearCart,
   setCart,
 } = cartSlice.actions;
- 
+
 export const selectCartItems = (state: { cart: CartState }) => state.cart.items;
- 
+
 export default cartSlice.reducer;

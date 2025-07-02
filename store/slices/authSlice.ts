@@ -1,19 +1,20 @@
+// store/slices/authSlice.ts
 import { AuthCustomer, User } from "@/types/auth";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../store";
- 
+
 interface AuthState {
   user?: User;
   items?: string[];
   customer: AuthCustomer | null;
   token: string | null;
- 
+
   resetLoading: boolean;
   resetError: string | null;
   resetStep: number;
   resetSuccess: boolean;
 }
- 
+
 const initialState: AuthState = {
   customer: null,
   token: null,
@@ -24,7 +25,7 @@ const initialState: AuthState = {
   items: undefined,
   user: undefined,
 };
- 
+
 const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -37,7 +38,7 @@ const authSlice = createSlice({
       state.customer = null;
       state.token = null;
     },
- 
+
     resetRequestStart(state) {
       state.resetLoading = true;
       state.resetError = null;
@@ -50,7 +51,7 @@ const authSlice = createSlice({
       state.resetLoading = false;
       state.resetError = action.payload;
     },
- 
+
     verifyOtpStart(state) {
       state.resetLoading = true;
       state.resetError = null;
@@ -63,7 +64,7 @@ const authSlice = createSlice({
       state.resetLoading = false;
       state.resetError = action.payload;
     },
- 
+
     resetPasswordStart(state) {
       state.resetLoading = true;
       state.resetError = null;
@@ -76,7 +77,7 @@ const authSlice = createSlice({
       state.resetLoading = false;
       state.resetError = action.payload;
     },
- 
+
     resetPasswordFlowReset(state) {
       state.resetLoading = false;
       state.resetError = null;
@@ -85,7 +86,7 @@ const authSlice = createSlice({
     },
   },
 });
- 
+
 export const {
   loginSuccess,
   logout,
@@ -100,9 +101,8 @@ export const {
   resetPasswordFailure,
   resetPasswordFlowReset,
 } = authSlice.actions;
- 
+
 export const selectToken = (state: RootState) => state.auth.token;
 export const selectIsLoggedIn = (state: RootState) => state.auth.token !== null;
- 
+
 export default authSlice.reducer;
- 

@@ -1,5 +1,3 @@
-// types/product.ts
- 
 export interface ProductImage {
   id: number;
   image: string; // URL for main product images

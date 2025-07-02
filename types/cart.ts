@@ -46,7 +46,7 @@ export interface CartItemFromAPI {
     };
   } | null;
 }
- 
+
 export interface CartItem {
   cartItemId: number;
   id: number; // Changed to strictly number as per your API response for product/variant ID
@@ -59,7 +59,7 @@ export interface CartItem {
   variant?: ProductVariant | null; // Optional, full variant object if needed, can be null
   product?: any; // Optional, full product object if needed (for non-variant items), can be null
 }
- 
+
 // Assuming ProductVariant is defined elsewhere or directly in this file
 // If ProductVariant needs to allow 'null' for properties like 'name' or 'description',
 // ensure those are also updated as 'string | null'. Your current Postman implies this.
