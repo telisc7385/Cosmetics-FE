@@ -7,9 +7,6 @@ import { PersistGate } from "redux-persist/integration/react";
 import { LoggedInCartProvider } from "./LoggedInCartProvider";
 
 
-
-
-
 export default function ReduxProviderWrapper({
   children,
 }: {
@@ -25,7 +22,6 @@ export default function ReduxProviderWrapper({
         }
         persistor={persistor}
       >
-   
         <LoggedInCartProvider>{children}</LoggedInCartProvider>
       </PersistGate>
     </Provider>
