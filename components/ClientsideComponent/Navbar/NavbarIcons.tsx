@@ -16,7 +16,8 @@ import { useLoggedInCart } from "@/providers/LoggedInCartProvider";
 
 const NavbarIcons = () => {
   const isLoggedIn = useAppSelector(selectIsLoggedIn);
-  const guestCartItems = useAppSelector(selectGuestCartItems); // Guest cart items from Redux slice
+  const guestCartItems = useAppSelector(selectGuestCartItems); 
+  // Guest cart items from Redux slice
 
 
   const loggedInCart = useLoggedInCart();
