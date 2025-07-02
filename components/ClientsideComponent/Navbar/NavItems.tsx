@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import Link from "next/link";
 import { getNavbarData } from "@/api/NavbarApi";
 import { NavItem } from "@/types/nav";

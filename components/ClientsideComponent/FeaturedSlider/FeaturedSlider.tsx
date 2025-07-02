@@ -69,11 +69,11 @@ export default function FeaturedSlider({ products }: { products: Product[] }) {
                     ● In Stock ({product.stock} available)
                   </p>
                   <div className="mt-4 flex gap-2">
-                  <Link href={`/product/${product.slug}`} className="block">
+                  {/* <Link href={`/product/${product.slug}`} className="block">
                     <button className="px-4 py-2 border  text-gray-600 rounded cursor-pointer ">
                       Select Variant
                       </button>
-                   </Link>
+                   </Link> */}
                     <button className="px-4 py-2 border text-gray-600 rounded hover:bg-gray-100">
                       Wishlist
                     </button>

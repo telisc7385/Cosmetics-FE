@@ -16,7 +16,7 @@ import { Category } from "@/types/category";
 
 export async function fetchTopCategories(): Promise<Category[]> {
   try {
-    const response = await fetch("https://cosmaticadmin.twilightparadox.com/category", {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/category`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

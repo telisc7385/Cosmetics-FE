@@ -2,9 +2,12 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Josefin_Sans } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/ServersideComponent/Navbar/NavbarComponent"; // Correct import path for Navbar
-import ReduxProviderWrapper from "@/store/providers/ReduxProviderWrapper"; // Correct import path for ReduxProviderWrapper
+import Navbar from "@/components/ServersideComponent/Navbar/NavbarComponent"; 
+import ReduxProviderWrapper from "@/store/providers/ReduxProviderWrapper"; 
 import { Toaster } from "react-hot-toast";
+import Footer from "@/components/ServersideComponent/Footer/Footer";
+import { fetchTopCategories } from "@/api/fetchTopCategories";
+import { getNewArrivalProducts } from "@/api/fetchNewArrivalProducts";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,6 +35,9 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
+  const topCategories = await fetchTopCategories();
+  const newArrivals = await getNewArrivalProducts();
   return (
     <html lang="en">
       <body
@@ -39,10 +45,9 @@ export default async function RootLayout({
       >
         <ReduxProviderWrapper>
           <Toaster position="top-right" />
-          {/* CRITICAL CHANGE: Navbar and children (main content) are now wrapped by LoggedInCartProvider */}
-          {/* This ensures that NavbarIconsWrapper and CartPage have access to the LoggedInCartContext */}
           <Navbar />
           <main className="pt-0">{children}</main>
+          <Footer topCategories={topCategories}  newArrivals={newArrivals}  />
         </ReduxProviderWrapper>
       </body>
     </html>

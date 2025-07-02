@@ -15,19 +15,19 @@ const NavbarIcons = () => {
   const isLoggedIn = useAppSelector(selectIsLoggedIn);
   const guestCartItems = useAppSelector(selectGuestCartItems); // Guest cart items from Redux slice
 
-  // Get the logged-in cart context. It will be empty/loading if not logged in.
+
   const loggedInCart = useLoggedInCart();
 
-  // Determine which cart items to use based on login status
+
   const currentCartItems = isLoggedIn ? loggedInCart.items : guestCartItems;
 
-  // Calculate total quantity of items in the cart
+
   const totalCartQuantity = currentCartItems.reduce(
-    (total: number, item: CartItem) => total + item.quantity, // Explicitly typed 'total' and 'item'
+    (total: number, item: CartItem) => total + item.quantity, 
     0
   );
 
-  // Check if the logged-in cart is loading (only relevant for logged-in users)
+
   const isLoadingCart = isLoggedIn && loggedInCart.loading;
 
   return (

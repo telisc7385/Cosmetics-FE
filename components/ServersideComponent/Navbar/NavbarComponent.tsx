@@ -1,7 +1,3 @@
-// components/ServersideComponent/Navbar/Navbar.tsx
-// NO CHANGES ARE NEEDED IN THIS FILE.
-// Its current form is correct for the requirements.
-
 import Image from "next/image";
 import Link from "next/link";
 import NavItems from "@/components/ClientsideComponent/Navbar/NavItems";
@@ -57,7 +53,7 @@ const Navbar = async () => {
               <Image src="/sitelogo.png" alt="Logo" width={100} height={30} />
             </Link>
             <div className="flex items-center gap-4">
-              {/* The NavbarIconsWrapper component encapsulates the dynamic cart count and user icon logic */}
+            
               <NavbarIconsWrapper />
               <MobileMenu />
             </div>

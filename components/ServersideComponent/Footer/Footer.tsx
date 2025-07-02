@@ -1,18 +1,24 @@
 // components/Footer.tsx
+import { Category } from "@/types/category";
+import { Product } from "@/types/product";
 import Image from "next/image";
+import Link from "next/link";
 
-const Footer = () => {
+
+
+
+const Footer = ({ topCategories,newArrivals }: { topCategories: Category[];  newArrivals: Product[]; }) => {
   return (
     <footer className="bg-white border-t text-gray-700">
       <div className="max-w-7xl mx-auto px-4 py-12 grid grid-cols-1 lg:grid-cols-5 gap-6 text-[15px]">
         {/* Column 1: Logo + Slogan (always first) */}
         <div className="text-center col-span-full lg:col-span-1">
           <Image
-            src="/sitelogo.png"
+            src="/logo1.png"
             alt="Site Logo"
             width={180}
             height={70}
-            className="mx-auto mb-5"
+            className="mx-auto "
           />
           <p className="text-sm text-gray-500 leading-relaxed max-w-sm mx-auto">
             Skincare that soothes, makeup that empowers. Designed to bring out
@@ -52,22 +58,15 @@ const Footer = () => {
               Quick Links
             </h4>
             <ul className="space-y-2 text-gray-600">
-              <li className="cursor-pointer hover:text-black">
-                Lancome La Base
-              </li>
-              <li className="cursor-pointer hover:text-black">
-                Vitamin C Glow
-              </li>
-              <li className="cursor-pointer hover:text-black">
-                Orange Face Wash
-              </li>
-              <li className="cursor-pointer hover:text-black">Dry Shampoo</li>
-              <li className="cursor-pointer hover:text-black">
-                Eyeshadow Primer
-              </li>
-              <li className="cursor-pointer hover:text-black">
-                Matte Lipstick
-              </li>
+              {newArrivals.length > 0 ? (
+                newArrivals.map((product) => (
+                  <li key={product.id} className="cursor-pointer hover:text-black">
+                    <Link href={`/product/${product.slug}`}>{product.name}</Link>
+                  </li>
+                ))
+              ) : (
+                <li className="text-gray-400 italic">No new arrivals</li>
+              )}
             </ul>
           </div>
 
@@ -77,14 +76,11 @@ const Footer = () => {
               Top Categories
             </h4>
             <ul className="space-y-2 text-gray-600">
-              <li className="cursor-pointer hover:text-black">Face Primer</li>
-              <li className="cursor-pointer hover:text-black">Skin Glow</li>
-              <li className="cursor-pointer hover:text-black">Face Wash</li>
-              <li className="cursor-pointer hover:text-black">Dry Shampoo</li>
-              <li className="cursor-pointer hover:text-black">Eye Primer</li>
-              <li className="cursor-pointer hover:text-black">Lipstick</li>
-              <li className="cursor-pointer hover:text-black">Body Butter</li>
-              <li className="cursor-pointer hover:text-black">Nail Polish</li>
+              {topCategories.map((category) => (
+                <li key={category.id} className="cursor-pointer hover:text-black">
+                  {category.name}
+                </li>
+              ))}
             </ul>
           </div>
         </div>
