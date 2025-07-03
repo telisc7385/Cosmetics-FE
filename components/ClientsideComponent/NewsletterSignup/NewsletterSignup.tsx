@@ -18,16 +18,16 @@ export default function NewsletterSignup() {
     e.preventDefault();
     setIsSubmitting(true);
 
-    if (!token) {
-      toast.error('Authentication token not found');
-      setIsSubmitting(false);
-      return;
-    }
+    // if (!token) {
+    //   toast.error('Authentication token not found');
+    //   setIsSubmitting(false);
+    //   return;
+    // }
 
     const formData = new FormData();
     formData.append('email', email);
 
-    const res = await subscribeToNewsletter(formData, token);
+    const res = await subscribeToNewsletter(formData);
 
     if (res.success) {
       toast.success(res.message);

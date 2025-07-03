@@ -174,10 +174,10 @@ const ProductCard = ({ product }: Props) => {
               ₹
               {selectedVariant
                 ? selectedVariant.selling_price.toFixed(2)
-                : parseFloat(product.sellingPrice).toFixed(2)}
+                : parseFloat(product.basePrice).toFixed(2)}
             </span>
             <span className="text-sm text-gray-400 line-through">
-              ₹{parseFloat(product.basePrice).toFixed(2)}
+              ₹{parseFloat(product.sellingPrice).toFixed(2)}
             </span>
           </div>
         </div>

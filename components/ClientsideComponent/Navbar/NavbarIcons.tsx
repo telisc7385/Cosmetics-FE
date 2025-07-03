@@ -32,11 +32,11 @@ const NavbarIcons = () => {
       <div className="flex  items-center text-xs font-semibold">
         <UserAvatar />
       </div>
-
+{/* 
       <div className="flex flex-col items-center text-xs font-semibold">
         <FiHeart size={20} />
 
-      </div>
+      </div> */}
 
       <Link
         href="/cart"

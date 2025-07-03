@@ -1,11 +1,10 @@
 // 'use client';
 
-// import React, { useState, useMemo, useEffect } from 'react';
+// import React, { useState, useEffect, useMemo } from 'react';
 // import { useSearchParams, useRouter } from 'next/navigation';
 // import Image from 'next/image';
 // import { Category } from '@/types/category';
 // import { Product } from '@/types/product';
-
 // import SortDropdown from '../SortDropdown.tsx/SortDropdown';
 // import ProductCard from '@/components/CommonComponents/ProductCard/ProductCard';
 // import { Funnel } from 'lucide-react';
@@ -13,58 +12,82 @@
 
 // interface Props {
 //   categories: Category[];
-//   products: Product[];
 // }
 
 // type SortOrder = 'price_asc' | 'price_desc';
 
-// export default function ShopPageClient({ categories, products }: Props) {
-//   const [selectedCategory, setSelectedCategory] = useState('all');
+// export default function ShopPageClient({ categories }: Props) {
+//   const [selectedCategory, setSelectedCategory] = useState<'all' | number>('all');
+//   const [products, setProducts] = useState<Product[]>([]);
+//   const [loading, setLoading] = useState(false);
 //   const [priceRange, setPriceRange] = useState<[number, number]>([100, 3999]);
 //   const [sortOrder, setSortOrder] = useState<SortOrder>('price_asc');
 //   const [currentPage, setCurrentPage] = useState(1);
 
 //   const itemsPerPage = 8;
-
 //   const searchParams = useSearchParams();
 //   const router = useRouter();
 //   const searchQuery = searchParams.get('search')?.toLowerCase() || '';
 
-//   // Reset current page when filters/search change
+//   // 🔄 Fetch products by category ID
+//   useEffect(() => {
+//     const fetchProducts = async () => {
+//       setLoading(true);
+
+//       try {
+//         let url = '';
+
+//         if (selectedCategory === 'all') {
+//           url = 'https://cosmaticadmin.twilightparadox.com/product';
+//         } else {
+//           url = `https://cosmaticadmin.twilightparadox.com/category/${selectedCategory}`;
+//         }
+
+//         const res = await fetch(url);
+//         const data = await res.json();
+
+//         if (data.products) {
+//           setProducts(data.products)
+//         } else {
+//           setProducts(data.category.products || []);
+//         }
+
+//       } catch (err) {
+//         console.error('Error fetching products:', err);
+//         setProducts([]);
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+
+//     fetchProducts();
+//   }, [selectedCategory]);
+
+//   // Reset page on filters/search change
 //   useEffect(() => {
 //     setCurrentPage(1);
 //   }, [searchQuery, selectedCategory, priceRange, sortOrder]);
 
-//   // Filter products based on search, category, price
+//   // Filter products by search and price
 //   const filteredProducts = useMemo(() => {
 //     return products.filter((product) => {
-//       const matchesSearch =
-//         !searchQuery || product.name.toLowerCase().includes(searchQuery);
-
-//       const inCategory =
-//         selectedCategory === 'all' ||
-//         String(product.categoryId) === selectedCategory;
-
+//       const matchesSearch = !searchQuery || product.name.toLowerCase().includes(searchQuery);
 //       const price = Number(product.sellingPrice);
 //       const inPriceRange = price >= priceRange[0] && price <= priceRange[1];
-
-//       return matchesSearch && inCategory && inPriceRange;
+//       return matchesSearch && inPriceRange;
 //     });
-//   }, [products, searchQuery, selectedCategory, priceRange]);
+//   }, [products, searchQuery, priceRange]);
 
-//   // Sort the filtered products
+//   // Sort filtered products
 //   const sortedProducts = useMemo(() => {
 //     return [...filteredProducts].sort((a, b) => {
 //       const priceA = Number(a.sellingPrice);
 //       const priceB = Number(b.sellingPrice);
-
-//       if (sortOrder === 'price_asc') return priceA - priceB;
-//       if (sortOrder === 'price_desc') return priceB - priceA;
-//       return 0;
+//       return sortOrder === 'price_asc' ? priceA - priceB : priceB - priceA;
 //     });
 //   }, [filteredProducts, sortOrder]);
 
-//   // Paginate the sorted products
+//   // Pagination logic
 //   const totalPages = Math.ceil(sortedProducts.length / itemsPerPage);
 //   const paginatedProducts = useMemo(() => {
 //     const start = (currentPage - 1) * itemsPerPage;
@@ -72,31 +95,24 @@
 //   }, [sortedProducts, currentPage]);
 
 //   return (
-//     <div>
-//       {/* Banner */}
-//       <div className="w-full h-[200px] relative">
-//         <Image
-//           src="/shopPage2.jpg"
-//           alt="Shop Banner"
-//           fill
-//           className="object-cover rounded"
-//         />
+//     <div className="min-h-screen">
+//       {/* 🖼️ Banner */}
+//       <div className="w-full h-[250px] relative">
+//         <Image src="/shopPage2.jpg" alt="Shop Banner" fill className="object-cover rounded" />
 //       </div>
 
-//       {/* Main content */}
 //       <div className="mt-6 px-4 flex flex-col gap-4">
-//         {/* Header row with filter + sort */}
+//         {/* 🔘 Header */}
 //         <div className="flex justify-between items-center">
 //           <div className="bg-[#966ad7] border lg:w-1/5 w-full border-gray-300 rounded h-12 flex items-center px-4 shadow-sm">
-//             <h1 className="text-base flex gap-0.5 font-semibold text-gray-800">
+//             <h1 className="text-base flex gap-1 font-semibold text-gray-800">
 //               <Funnel /> Filter
 //             </h1>
 //           </div>
-
 //           <SortDropdown sortOrder={sortOrder} setSortOrder={setSortOrder} />
 //         </div>
 
-//         {/* Search Result Info */}
+//         {/* 🔍 Search Info */}
 //         {searchQuery && (
 //           <div className="flex items-center justify-between mt-2">
 //             <p className="text-sm text-gray-600">
@@ -111,7 +127,7 @@
 //           </div>
 //         )}
 
-//         {/* Layout: Sidebar + Product grid */}
+//         {/* 🧱 Main Content */}
 //         <div className="flex gap-3">
 //           {/* Sidebar */}
 //           <SidebarFiltersClient
@@ -123,18 +139,20 @@
 //           />
 
 //           {/* Product Grid */}
-//           <div className="flex-1">
-//             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-//               {paginatedProducts.length > 0 ? (
-//                 paginatedProducts.map((product) => (
-//                   <ProductCard key={product.id} product={product} />
-//                 ))
-//               ) : (
-//                 <p className="col-span-full text-center text-gray-500">
-//                   No products found.
-//                 </p>
-//               )}
-//             </div>
+//           <div className="flex-1 flex flex-col min-h-[500px] justify-between">
+//             {loading ? (
+//               <div className="text-center mt-10 text-gray-500">Loading products...</div>
+//             ) : (
+//               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+//                 {paginatedProducts.length > 0 ? (
+//                   paginatedProducts.map((product) => (
+//                     <ProductCard key={product.id} product={product} />
+//                   ))
+//                 ) : (
+//                   <p className="col-span-full text-center text-gray-500">No products found.</p>
+//                 )}
+//               </div>
+//             )}
 
 //             {/* Pagination */}
 //             {totalPages > 1 && (
@@ -160,9 +178,7 @@
 //                 ))}
 
 //                 <button
-//                   onClick={() =>
-//                     setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-//                   }
+//                   onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
 //                   disabled={currentPage === totalPages}
 //                   className="px-3 py-1 border rounded disabled:opacity-50"
 //                 >
@@ -181,14 +197,17 @@
 
 
 
+
+
+
+
 // 'use client';
 
-// import React, { useState, useMemo, useEffect } from 'react';
+// import React, { useState, useEffect, useMemo } from 'react';
 // import { useSearchParams, useRouter } from 'next/navigation';
 // import Image from 'next/image';
 // import { Category } from '@/types/category';
 // import { Product } from '@/types/product';
-
 // import SortDropdown from '../SortDropdown.tsx/SortDropdown';
 // import ProductCard from '@/components/CommonComponents/ProductCard/ProductCard';
 // import { Funnel } from 'lucide-react';
@@ -196,54 +215,82 @@
 
 // interface Props {
 //   categories: Category[];
-//   products: Product[];
 // }
 
 // type SortOrder = 'price_asc' | 'price_desc';
 
-// export default function ShopPageClient({ categories, products }: Props) {
-//   const [selectedCategory, setSelectedCategory] = useState('all');
+// export default function ShopPageClient({ categories }: Props) {
+//   const [selectedCategory, setSelectedCategory] = useState<'all' | number>('all');
+//   const [products, setProducts] = useState<Product[]>([]);
+//   const [loading, setLoading] = useState(false);
 //   const [priceRange, setPriceRange] = useState<[number, number]>([100, 3999]);
 //   const [sortOrder, setSortOrder] = useState<SortOrder>('price_asc');
 //   const [currentPage, setCurrentPage] = useState(1);
 
 //   const itemsPerPage = 8;
-
 //   const searchParams = useSearchParams();
 //   const router = useRouter();
 //   const searchQuery = searchParams.get('search')?.toLowerCase() || '';
 
+//   // 🔄 Fetch products by category ID
+//   useEffect(() => {
+//     const fetchProducts = async () => {
+//       setLoading(true);
+
+//       try {
+//         let url = '';
+
+//         if (selectedCategory === 'all') {
+//           url = 'https://cosmaticadmin.twilightparadox.com/product';
+//         } else {
+//           url = `https://cosmaticadmin.twilightparadox.com/category/${selectedCategory}`;
+//         }
+
+//         const res = await fetch(url);
+//         const data = await res.json();
+
+//         if (data.products) {
+//           setProducts(data.products)
+//         } else {
+//           setProducts(data.category.products || []);
+//         }
+
+//       } catch (err) {
+//         console.error('Error fetching products:', err);
+//         setProducts([]);
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+
+//     fetchProducts();
+//   }, [selectedCategory]);
+
+//   // Reset page on filters/search change
 //   useEffect(() => {
 //     setCurrentPage(1);
 //   }, [searchQuery, selectedCategory, priceRange, sortOrder]);
 
+//   // Filter products by search and price
 //   const filteredProducts = useMemo(() => {
 //     return products.filter((product) => {
-//       const matchesSearch =
-//         !searchQuery || product.name.toLowerCase().includes(searchQuery);
-
-//       const inCategory =
-//         selectedCategory === 'all' ||
-//         String(product.categoryId) === selectedCategory;
-
+//       const matchesSearch = !searchQuery || product.name.toLowerCase().includes(searchQuery);
 //       const price = Number(product.sellingPrice);
 //       const inPriceRange = price >= priceRange[0] && price <= priceRange[1];
-
-//       return matchesSearch && inCategory && inPriceRange;
+//       return matchesSearch && inPriceRange;
 //     });
-//   }, [products, searchQuery, selectedCategory, priceRange]);
+//   }, [products, searchQuery, priceRange]);
 
+//   // Sort filtered products
 //   const sortedProducts = useMemo(() => {
 //     return [...filteredProducts].sort((a, b) => {
 //       const priceA = Number(a.sellingPrice);
 //       const priceB = Number(b.sellingPrice);
-
-//       if (sortOrder === 'price_asc') return priceA - priceB;
-//       if (sortOrder === 'price_desc') return priceB - priceA;
-//       return 0;
+//       return sortOrder === 'price_asc' ? priceA - priceB : priceB - priceA;
 //     });
 //   }, [filteredProducts, sortOrder]);
 
+//   // Pagination logic
 //   const totalPages = Math.ceil(sortedProducts.length / itemsPerPage);
 //   const paginatedProducts = useMemo(() => {
 //     const start = (currentPage - 1) * itemsPerPage;
@@ -251,30 +298,24 @@
 //   }, [sortedProducts, currentPage]);
 
 //   return (
-//     <div className="relative min-h-screen pb-24">
-//       {/* Banner */}
-//       <div className="w-full h-[300px] relative">
-//         <Image
-//           src="/shoppageBanner.webp"
-//           alt="Shop Banner"
-//           fill
-//           className="object-cover rounded"
-//         />
+//     <div className="min-h-screen">
+//       {/* 🖼️ Banner */}
+//       <div className="w-full h-[250px] relative">
+//         <Image src="/shopPage2.jpg" alt="Shop Banner" fill className="object-cover rounded" />
 //       </div>
 
-//       {/* Content */}
 //       <div className="mt-6 px-4 flex flex-col gap-4">
-//         {/* Header */}
+//         {/* 🔘 Header */}
 //         <div className="flex justify-between items-center">
 //           <div className="bg-[#966ad7] border lg:w-1/5 w-full border-gray-300 rounded h-12 flex items-center px-4 shadow-sm">
-//             <h1 className="text-base flex gap-0.5 font-semibold text-gray-800">
+//             <h1 className="text-base flex gap-1 font-semibold text-gray-800">
 //               <Funnel /> Filter
 //             </h1>
 //           </div>
 //           <SortDropdown sortOrder={sortOrder} setSortOrder={setSortOrder} />
 //         </div>
 
-//         {/* Search Info */}
+//         {/* 🔍 Search Info */}
 //         {searchQuery && (
 //           <div className="flex items-center justify-between mt-2">
 //             <p className="text-sm text-gray-600">
@@ -289,7 +330,7 @@
 //           </div>
 //         )}
 
-//         {/* Main Grid */}
+//         {/* 🧱 Main Content */}
 //         <div className="flex gap-3">
 //           {/* Sidebar */}
 //           <SidebarFiltersClient
@@ -301,56 +342,56 @@
 //           />
 
 //           {/* Product Grid */}
-//           <div className="flex-1 pb-16">
-//             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-//               {paginatedProducts.length > 0 ? (
-//                 paginatedProducts.map((product) => (
-//                   <ProductCard key={product.id} product={product} />
-//                 ))
-//               ) : (
-//                 <p className="col-span-full text-center text-gray-500">
-//                   No products found.
-//                 </p>
-//               )}
-//             </div>
+//           <div className="flex-1 flex flex-col min-h-[500px] justify-between">
+//             {loading ? (
+//               <div className="text-center mt-10 text-gray-500">Loading products...</div>
+//             ) : (
+//               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+//                 {paginatedProducts.length > 0 ? (
+//                   paginatedProducts.map((product) => (
+//                     <ProductCard key={product.id} product={product} />
+//                   ))
+//                 ) : (
+//                   <p className="col-span-full text-center text-gray-500">No products found.</p>
+//                 )}
+//               </div>
+//             )}
+
+//             {/* Pagination */}
+//             {totalPages > 1 && (
+//               <div className="flex justify-center mt-6 gap-2 flex-wrap">
+//                 <button
+//                   onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+//                   disabled={currentPage === 1}
+//                   className="px-3 py-1 border rounded disabled:opacity-50"
+//                 >
+//                   Prev
+//                 </button>
+
+//                 {[...Array(totalPages)].map((_, index) => (
+//                   <button
+//                     key={index}
+//                     onClick={() => setCurrentPage(index + 1)}
+//                     className={`px-3 py-1 border rounded ${
+//                       currentPage === index + 1 ? 'bg-[#966ad7] text-white' : ''
+//                     }`}
+//                   >
+//                     {index + 1}
+//                   </button>
+//                 ))}
+
+//                 <button
+//                   onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+//                   disabled={currentPage === totalPages}
+//                   className="px-3 py-1 border rounded disabled:opacity-50"
+//                 >
+//                   Next
+//                 </button>
+//               </div>
+//             )}
 //           </div>
 //         </div>
 //       </div>
-
-//       {/* Fixed Pagination */}
-//       {totalPages > 1 && (
-//         <div className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 shadow z-50 py-3 flex justify-center gap-2 flex-wrap">
-//           <button
-//             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-//             disabled={currentPage === 1}
-//             className="px-3 py-1 border rounded disabled:opacity-50"
-//           >
-//             Prev
-//           </button>
-
-//           {[...Array(totalPages)].map((_, index) => (
-//             <button
-//               key={index}
-//               onClick={() => setCurrentPage(index + 1)}
-//               className={`px-3 py-1 border rounded ${
-//                 currentPage === index + 1 ? 'bg-[#966ad7] text-white' : ''
-//               }`}
-//             >
-//               {index + 1}
-//             </button>
-//           ))}
-
-//           <button
-//             onClick={() =>
-//               setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-//             }
-//             disabled={currentPage === totalPages}
-//             className="px-3 py-1 border rounded disabled:opacity-50"
-//           >
-//             Next
-//           </button>
-//         </div>
-//       )}
 //     </div>
 //   );
 // }
@@ -360,64 +401,86 @@
 
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import Image from 'next/image';
 import { Category } from '@/types/category';
 import { Product } from '@/types/product';
-
-import SortDropdown from '../SortDropdown.tsx/SortDropdown';
-import ProductCard from '@/components/CommonComponents/ProductCard/ProductCard';
-import { Funnel } from 'lucide-react';
+import Image from 'next/image';
 import SidebarFiltersClient from '@/components/ServersideComponent/SidebarFilters/SidebarFilters';
+import ProductCard from '@/components/CommonComponents/ProductCard/ProductCard';
+import SortDropdown from '../SortDropdown.tsx/SortDropdown';
+import { Funnel } from 'lucide-react';
 
 interface Props {
   categories: Category[];
-  products: Product[];
 }
 
 type SortOrder = 'price_asc' | 'price_desc';
 
-export default function ShopPageClient({ categories, products }: Props) {
-  const [selectedCategory, setSelectedCategory] = useState('all');
+export default function ShopPageClient({ categories }: Props) {
+  const [selectedCategories, setSelectedCategories] = useState<Set<number>>(new Set());
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(false);
   const [priceRange, setPriceRange] = useState<[number, number]>([100, 3999]);
   const [sortOrder, setSortOrder] = useState<SortOrder>('price_asc');
   const [currentPage, setCurrentPage] = useState(1);
 
-  const itemsPerPage = 8;
-
   const searchParams = useSearchParams();
   const router = useRouter();
   const searchQuery = searchParams.get('search')?.toLowerCase() || '';
+  const itemsPerPage = 8;
+
+  const handleCategoryChange = (id: number) => {
+    setSelectedCategories((prev) => {
+      const newSet = new Set(prev);
+      newSet.has(id) ? newSet.delete(id) : newSet.add(id);
+      return newSet;
+    });
+  };
+
+  // 🔄 Fetch products from backend with multiple category support
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true);
+      try {
+        const categoryIds = Array.from(selectedCategories).join(',');
+        const url =
+          selectedCategories.size > 0
+            ? `https://cosmaticadmin.twilightparadox.com/product?categoryIds=${categoryIds}`
+            : `https://cosmaticadmin.twilightparadox.com/product`;
+
+        const res = await fetch(url);
+        const data = await res.json();
+        setProducts(data.products || []);
+      } catch (err) {
+        console.error('Error fetching products:', err);
+        setProducts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, [selectedCategories]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, selectedCategory, priceRange, sortOrder]);
+  }, [selectedCategories, priceRange, sortOrder, searchQuery]);
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
-      const matchesSearch =
-        !searchQuery || product.name.toLowerCase().includes(searchQuery);
-
-      const inCategory =
-        selectedCategory === 'all' ||
-        String(product.categoryId) === selectedCategory;
-
+      const matchesSearch = !searchQuery || product.name.toLowerCase().includes(searchQuery);
       const price = Number(product.sellingPrice);
       const inPriceRange = price >= priceRange[0] && price <= priceRange[1];
-
-      return matchesSearch && inCategory && inPriceRange;
+      return matchesSearch && inPriceRange;
     });
-  }, [products, searchQuery, selectedCategory, priceRange]);
+  }, [products, searchQuery, priceRange]);
 
   const sortedProducts = useMemo(() => {
     return [...filteredProducts].sort((a, b) => {
       const priceA = Number(a.sellingPrice);
       const priceB = Number(b.sellingPrice);
-
-      if (sortOrder === 'price_asc') return priceA - priceB;
-      if (sortOrder === 'price_desc') return priceB - priceA;
-      return 0;
+      return sortOrder === 'price_asc' ? priceA - priceB : priceB - priceA;
     });
   }, [filteredProducts, sortOrder]);
 
@@ -429,29 +492,20 @@ export default function ShopPageClient({ categories, products }: Props) {
 
   return (
     <div className="min-h-screen">
-      {/* Banner */}
       <div className="w-full h-[250px] relative">
-        <Image
-          src="/shopPage2.jpg"
-          alt="Shop Banner"
-          fill
-          className="object-cover rounded"
-        />
+        <Image src="/shopPage2.jpg" alt="Shop Banner" fill className="object-cover rounded" />
       </div>
 
-      {/* Content */}
       <div className="mt-6 px-4 flex flex-col gap-4">
-        {/* Header */}
         <div className="flex justify-between items-center">
           <div className="bg-[#966ad7] border lg:w-1/5 w-full border-gray-300 rounded h-12 flex items-center px-4 shadow-sm">
-            <h1 className="text-base flex gap-0.5 font-semibold text-gray-800">
+            <h1 className="text-base flex gap-1 font-semibold text-gray-800">
               <Funnel /> Filter
             </h1>
           </div>
           <SortDropdown sortOrder={sortOrder} setSortOrder={setSortOrder} />
         </div>
 
-        {/* Search Info */}
         {searchQuery && (
           <div className="flex items-center justify-between mt-2">
             <p className="text-sm text-gray-600">
@@ -466,68 +520,60 @@ export default function ShopPageClient({ categories, products }: Props) {
           </div>
         )}
 
-        {/* Main Grid */}
         <div className="flex gap-3">
-          {/* Sidebar */}
           <SidebarFiltersClient
             categories={categories}
-            selectedCategory={selectedCategory}
-            onCategoryChange={setSelectedCategory}
+            selectedCategories={Array.from(selectedCategories)}
+            onCategoryChange={handleCategoryChange}
             priceRange={priceRange}
             onPriceChange={setPriceRange}
           />
 
-          {/* Product Grid */}
-{/* Product Grid + Pagination */}
-<div className="flex-1 flex flex-col min-h-[500px] justify-between">
-  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-    {paginatedProducts.length > 0 ? (
-      paginatedProducts.map((product) => (
-        <ProductCard key={product.id} product={product} />
-      ))
-    ) : (
-      <p className="col-span-full text-center text-gray-500">
-        No products found.
-      </p>
-    )}
-  </div>
+          <div className="flex-1 flex flex-col min-h-[500px] justify-between">
+            {loading ? (
+              <div className="text-center mt-10 text-gray-500">Loading products...</div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {paginatedProducts.length > 0 ? (
+                  paginatedProducts.map((product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))
+                ) : (
+                  <p className="col-span-full text-center text-gray-500">No products found.</p>
+                )}
+              </div>
+            )}
 
-  {/* Pagination */}
-  {totalPages > 1 && (
-    <div className="flex justify-center mt-6 gap-2 flex-wrap">
-      <button
-        onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-        disabled={currentPage === 1}
-        className="px-3 py-1 border rounded disabled:opacity-50"
-      >
-        Prev
-      </button>
-
-      {[...Array(totalPages)].map((_, index) => (
-        <button
-          key={index}
-          onClick={() => setCurrentPage(index + 1)}
-          className={`px-3 py-1 border rounded ${
-            currentPage === index + 1 ? 'bg-[#966ad7] text-white' : ''
-          }`}
-        >
-          {index + 1}
-        </button>
-      ))}
-
-      <button
-        onClick={() =>
-          setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-        }
-        disabled={currentPage === totalPages}
-        className="px-3 py-1 border rounded disabled:opacity-50"
-      >
-        Next
-      </button>
-    </div>
-  )}
-</div>
-
+            {totalPages > 1 && (
+              <div className="flex justify-center mt-6 gap-2 flex-wrap">
+                <button
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1 border rounded disabled:opacity-50"
+                >
+                  Prev
+                </button>
+                {[...Array(totalPages)].map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentPage(index + 1)}
+                    className={`px-3 py-1 border rounded ${
+                      currentPage === index + 1 ? 'bg-[#966ad7] text-white' : ''
+                    }`}
+                  >
+                    {index + 1}
+                  </button>
+                ))}
+                <button
+                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1 border rounded disabled:opacity-50"
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

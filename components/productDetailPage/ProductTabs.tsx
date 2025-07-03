@@ -6,7 +6,7 @@ type ProductTabProps = {
   productDetails: string;
   keyIngredients: string[];
   benefits: string[];
-  howToUse: string;
+
   reviews?: string[]; // Optional: Can be replaced with review components
   shippingInfo: string;
   returnPolicy: string;
@@ -16,7 +16,6 @@ export default function ProductTabs({
   productDetails,
   keyIngredients,
   benefits,
-  howToUse,
   reviews = [],
   shippingInfo,
   returnPolicy,
@@ -39,16 +38,7 @@ export default function ProductTabs({
         >
           PRODUCT DETAILS
         </button>
-        <button
-          className={`pb-2 ${
-            activeTab === 'reviews'
-              ? 'border-b-2 border-blue-600 text-blue-600'
-              : 'text-gray-600'
-          }`}
-          onClick={() => setActiveTab('reviews')}
-        >
-          REVIEWS
-        </button>
+
         <button
           className={`pb-2 ${
             activeTab === 'shipping'
@@ -89,10 +79,6 @@ export default function ProductTabs({
               </ul>
             </div>
 
-            <div className="mt-4">
-              <h4 className="font-semibold">How to Use</h4>
-              <p>{howToUse}</p>
-            </div>
           </div>
         )}
 

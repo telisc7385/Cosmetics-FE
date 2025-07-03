@@ -9,16 +9,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Product } from '@/types/product';
 
-// interface Product {
-//   id: number;
-//   name: string;
-//   sellingPrice: string;
-//   basePrice: string;
-//   stock: number;
-//   slug: string;
-//   images: { image: string }[];
-//   category: { name: string };
-// }
+
 
 export default function FeaturedSlider({ products }: { products: Product[] }) {
   return (
@@ -51,9 +42,9 @@ export default function FeaturedSlider({ products }: { products: Product[] }) {
                   <p className="text-sm text-gray-500">{product.category?.name}</p>
                   <h3 className="text-xl sm:text-2xl font-bold mt-1">{product.name}</h3>
                   <p className="text-[#e60076] font-semibold text-lg sm:text-xl mt-2">
-                    ₹{product.sellingPrice}
+                    ₹{product.basePrice}
                     <span className="line-through text-gray-500 text-sm ml-2">
-                      ₹{product.basePrice}
+                      ₹{product.sellingPrice}
                     </span>
                   </p>
                  
@@ -65,9 +56,9 @@ export default function FeaturedSlider({ products }: { products: Product[] }) {
                     ● In Stock ({product.stock} available)
                   </p>
                   <div className="mt-4 flex flex-col sm:flex-row gap-2 justify-center lg:justify-start">
-                    <button className="px-4 py-2 border text-gray-600 rounded hover:bg-gray-100">
+                    {/* <button className="px-4 py-2 border text-gray-600 rounded hover:bg-gray-100">
                       Wishlist
-                    </button>
+                    </button> */}
                     <Link
                       href={`/product/${product.slug}`}
                       className="px-4 py-2 border text-gray-600 rounded hover:bg-gray-100 text-center"

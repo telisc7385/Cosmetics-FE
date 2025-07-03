@@ -39,7 +39,7 @@
 
 'use server';
 
-export async function subscribeToNewsletter(formData: FormData, token: string) {
+export async function subscribeToNewsletter(formData: FormData, token?: string) {
   const email = formData.get('email');
 
   if (!email || typeof email !== 'string') {

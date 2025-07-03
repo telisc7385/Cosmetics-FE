@@ -6,7 +6,7 @@ export default async function WhyChooseUs () {
   const items = await getWhyChooseUs();
 
   return (
-    <div className="w-full  py-5 px-[40px]">
+    <div className="w-full  py-5 px-[40px] container mx-auto">
      
 <SectionHeader 
   title="Why Choose Us" 
