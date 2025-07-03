@@ -2,6 +2,7 @@ import Image from "next/image";
 import ProductCard from "@/components/CommonComponents/ProductCard/ProductCard";
 import { Category } from "@/types/category";
 import { Product } from "@/types/product";
+import Link from "next/link";
 
 interface Props {
   category: Category;
@@ -35,17 +36,25 @@ export default function CategoryInfo({ category, products }: Props) {
           <div className="absolute top-0 left-0 w-24 h-24 bg-orange-100 rounded-full opacity-30 -translate-x-1/2 -translate-y-1/2" />
           <div className="absolute bottom-0 right-0 w-24 h-24 bg-orange-100 rounded-full opacity-30 translate-x-1/2 translate-y-1/2" />
 
-          <h2 className="text-2xl font-semibold text-orange-600 mb-4">{category.name}</h2>
-          <p className="text-gray-700 leading-relaxed">
-            {category.description || "Browse high-quality products in this category."}
-          </p>
+          <h2 className="text-2xl font-semibold  mb-4">{category.name}</h2>
+          <p className="text-gray-700 text-lg leading-relaxed">
+  Discover premium, handpicked products tailored to your needs in this category.
+</p>
         </div>
       </div>
 
       {/* Products Heading */}
-      <h3 className="px-4 py-6 text-xl font-semibold">
-        All Products / {category.name}
-      </h3>
+
+      <h3 className="px-4 py-6 text-xl font-semibold text-gray-800 flex items-center gap-2">
+  <Link
+    href="/shop"
+    className=" hover:text-blue-800 underline underline-offset-4 transition-colors duration-200"
+  >
+    All Products
+  </Link>
+  <span className="text-gray-500">/</span>
+  <span className="text-gray-700">{category.name}</span>
+</h3>
 
       {/* Product Grid */}
       <div className="px-4 pb-12">

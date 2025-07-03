@@ -1,3 +1,4 @@
+import SectionHeader from "../CommonComponents/SectionHeader";
 import TestimonialSlider from "./TestimonialSlider";
  
 export default async function TestimonialSection() {
@@ -13,14 +14,11 @@ export default async function TestimonialSection() {
  
   return (
     <section className="py-7 bg-gray-50 ">
-      <div className="mb-10">
-        <h2 className="text-3xl font-bold mb-2 px-10">
-          What our happy clients say
-        </h2>
-        <p className="text-gray-600 mb-2 px-10">
-          Hear from our satisfied customers and why they love our brand.
-        </p>
-        <hr className="mb-6 mt-3" />
+      <div className="mb-10 px-[40px]">
+        <SectionHeader
+        title="What our happy clients say"
+        subtitle="Hear from our satisfied customers and why they love our brand."
+      />
       </div>
       <TestimonialSlider testimonials={testimonials} />
     </section>

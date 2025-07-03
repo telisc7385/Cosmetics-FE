@@ -85,7 +85,7 @@ export interface Product {
   seoTitle: string;
   seoKeyword: string;
   seoDescription: string;
-  productDetails: any; // Or specific type
+  productDetails: string; 
   images: ProductImage[]; // General product images
   variants?: ProductVariant[]; // Optional variants array
   specifications: any[]; // Or specific type

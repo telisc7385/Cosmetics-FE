@@ -29,3 +29,7 @@ const Gallery = ({ images }: { images: GalleryImage[] }) => {
 };
 
 export default Gallery;
+
+
+
+
