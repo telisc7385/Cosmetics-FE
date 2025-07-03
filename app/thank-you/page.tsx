@@ -39,6 +39,7 @@ interface PaymentInfo {
 }
 
 interface RawOrderItemFromApi {
+  image: string;
   // This matches the 'items' array in your API response
   id: number; // This is product ID or similar, not necessarily order_item_id
   variant_id: number | null;
@@ -368,7 +369,7 @@ const ThankYouPage = () => {
                 className="flex items-center gap-4 border p-4 rounded-md bg-gray-50"
               >
                 <Image
-                  src={getProductImageUrl(item.id, item.variant_id)} // Use helper function for image
+                  src={item.image} // Use helper function for image
                   alt={item.name}
                   width={80}
                   height={80}

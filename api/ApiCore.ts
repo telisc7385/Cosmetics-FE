@@ -40,7 +40,7 @@ export const apiCore = async <T>(
   // Changed from `Token ${token}` to `Bearer ${token}` based on your screenshot's evidence.
   // If your backend specifically requires "Token", revert this line.
   if (token && typeof token === 'string' && token.trim() !== '') {
-    headers["Authorization"] = `Bearer ${token}`; // IMPORTANT CHANGE HERE
+    headers["Authorization"] = `Token ${token}`; // IMPORTANT CHANGE HERE
   }
 
   const requestOptions: RequestInit = {
@@ -187,36 +187,36 @@ export interface Address {
 
 export type AddressInput = Omit<Address, "id">; // For creating/updating, ID is not needed in input
 
-
-// UPDATED: Response Interfaces using the new Address type
+// *** FIX: ADDED LocalAddressItem interface here ***
 export interface LocalAddressItem extends Address {
-    addressType?: "HOME" | "WORK" | "BOTH" | "BILLING" | "SHIPPING"; // Changed address_type to camelCase
-    isDefault?: boolean; // Changed is_default to camelCase
+  addressType?: "HOME" | "WORK" | "BOTH" | "BILLING" | "SHIPPING"; // Changed address_type to camelCase
+  isDefault?: boolean; // Changed is_default to camelCase
 }
 
 
+// UPDATED: Response Interfaces using the new Address type
 export interface SingleAddressResponse {
-    address: LocalAddressItem; // The address object itself
-    message?: string;
-    updated:any;
+  address: LocalAddressItem; // The address object itself
+  message?: string;
+  updated: any;
 }
 
 export interface FetchAddressesResponse {
-    address: LocalAddressItem[]; // Array of addresses
-    message?: string;
+  address: LocalAddressItem[]; // Array of addresses
+  message?: string;
 }
 
 // NEWLY ADDED: OrderResponse interface
 export interface OrderResponse {
-    id: string; // The ID of the newly placed order
-    message?: string; // A success message from the backend
-    // You can add other fields here that your backend returns after creating an order, e.g.:
-    // totalAmount: number;
-    // status: string;
-    // orderNumber?: string;
+  id: string; // The ID of the newly placed order
+  message?: string; // A success message from the backend
+  // You can add other fields here that your backend returns after creating an order, e.g.:
+  // totalAmount: number;
+  // status: string;
+  // orderNumber?: string;
 }
 
-// Interfaces for fetching order details (used in thank-you page)
+// Interfaces for fetching order details (used in thank-ou page)
 export interface OrderItemDetail {
   id: string; // Product ID or Variant ID from the order detail
   name: string;
@@ -236,4 +236,53 @@ export interface OrderDetailResponse {
   shipping_address: Address; // Now uses the new Address interface
   items: OrderItemDetail[]; // Array of items in the order
   // Add other order-specific fields like status, delivery_date etc.
+}
+
+export interface CartItemFromAPI {
+  id: number; // This is the cart item ID
+  cartId: number;
+  productId: number | null; // Can be null if it's purely a variant
+  variantId: number | null; // This can be null from the API
+  quantity: number;
+  createdAt: string;
+  product: { // This would be populated if it's a direct product (no variant)
+    id: number;
+    name: string;
+    description: string;
+    sellingPrice: number;
+    basePrice: number;
+    images: { image: string }[]; // Assuming image structure for direct products
+  } | null;
+  variant: { // This would be populated if it's a product variant
+    id: number;
+    productId: number;
+    name: string | null; // This is the variant's specific name (e.g., "Red")
+    SKU: string;
+    description: string | null;
+    specification: Record<string, any>; // Or a more specific type if known
+    selling_price: number;
+    base_and_selling_price_difference_in_percent: number;
+    stock: number;
+    colour_code: string;
+    is_selected: boolean;
+    is_active: boolean;
+    is_new_arrival: boolean;
+    created_by: number;
+    low_stock_threshold: number;
+    createdAt: string;
+    isDeleted: boolean;
+    images: {
+      id: number;
+      url: string;
+      publicId: string;
+      createdAt: string;
+      variantId: number;
+      sequence_number: number;
+      is_active: boolean;
+    }[];
+    product: { // The parent product information for the variant
+      name: string;
+      description: string;
+    };
+  } | null;
 }

@@ -22,7 +22,7 @@ const getInitialState = (): CartState => {
             const cartItemId = typeof item.cartItemId === 'number' && !isNaN(item.cartItemId)
                                ? item.cartItemId
                                : Date.now() * -1 - Math.random(); // Generate a unique negative ID for guest
-            
+
             // Ensure product ID and name are present
             if (typeof item.id !== 'number' || typeof item.name !== 'string') {
               console.warn("cartSlice: Skipping malformed item from localStorage:", item);
@@ -86,7 +86,7 @@ const cartSlice = createSlice({
         state.items.push(action.payload);
         console.log("cartSlice: Added new item. New state.items:", state.items);
       }
-      
+
       if (typeof window !== 'undefined') {
         localStorage.setItem('guestCart', JSON.stringify(state.items));
         console.log("cartSlice: Guest cart saved to localStorage.");
