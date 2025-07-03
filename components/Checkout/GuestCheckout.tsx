@@ -1,8 +1,9 @@
+// components/GuestCheckout.tsx
 "use client";
 
 import React, { useState } from "react";
-import { useAppSelector } from "@/store/hooks/hooks";
-import { selectCartItems } from "@/store/slices/cartSlice";
+import { useAppSelector, useAppDispatch } from "@/store/hooks/hooks"; // Import useAppDispatch
+import { selectCartItems, clearCart } from "@/store/slices/cartSlice"; // Import clearCart action
 import { CartItem } from "@/types/cart";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
@@ -10,6 +11,7 @@ import PincodeVerifier from "./PincodeVerifier";
 
 const GuestCheckout = () => {
   const cartItems = useAppSelector(selectCartItems);
+  const dispatch = useAppDispatch(); // Initialize dispatch
   const router = useRouter();
 
   const subtotal = cartItems.reduce(
@@ -29,7 +31,9 @@ const GuestCheckout = () => {
     paymentMethod: "COD",
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -45,8 +49,32 @@ const GuestCheckout = () => {
   };
 
   const handlePlaceOrder = async () => {
+    // Basic validation
     if (!formData.email) {
-      toast.error("Email is required");
+      toast.error("Email is required.");
+      return;
+    }
+    if (
+      !formData.fullName ||
+      !formData.phone ||
+      !formData.addressLine ||
+      !formData.pincode ||
+      !formData.city ||
+      !formData.state
+    ) {
+      toast.error("Please fill all required address fields.");
+      return;
+    }
+    if (!/^\d{10}$/.test(formData.phone)) {
+      toast.error("Please enter a valid 10-digit phone number.");
+      return;
+    }
+    if (!/^\d{6}$/.test(formData.pincode)) {
+      toast.error("Please enter a valid 6-digit pincode.");
+      return;
+    }
+    if (cartItems.length === 0) {
+      toast.error("Your cart is empty. Please add items to place an order.");
       return;
     }
 
@@ -90,15 +118,21 @@ const GuestCheckout = () => {
       }
 
       const data = await response.json();
-      router.push(`/thank-you/${data.order.id}`);
+      // Clear the cart after successful order placement
+      dispatch(clearCart()); // <-- Add this line
       toast.success("Order placed successfully!");
+      // Redirect to the /thank-you page with orderId as a query parameter
+      router.push(`/thank-you?orderId=${data.order.id}`);
     } catch (error: any) {
-      toast.error(error.message || "Error placing order");
+      console.error("Guest order placement error:", error);
+      toast.error(error.message || "Error placing guest order");
     }
   };
 
   if (cartItems.length === 0) {
-    return <div className="text-center text-gray-500 py-10">Your cart is empty</div>;
+    return (
+      <div className="text-center text-gray-500 py-10">Your cart is empty</div>
+    );
   }
 
   return (
@@ -123,7 +157,8 @@ const GuestCheckout = () => {
           <input
             type="text"
             name="fullName"
-            placeholder="Full Name"
+            placeholder="Full Name *"
+            required
             className="border border-pink-300 rounded-md px-4 py-2 focus:outline-pink-500 bg-white"
             value={formData.fullName}
             onChange={handleChange}
@@ -131,23 +166,27 @@ const GuestCheckout = () => {
           <input
             type="text"
             name="phone"
-            placeholder="Phone"
+            placeholder="Phone *"
+            required
             className="border border-pink-300 rounded-md px-4 py-2 focus:outline-pink-500 bg-white"
             value={formData.phone}
             onChange={handleChange}
+            maxLength={10}
           />
           <input
             type="text"
             name="pincode"
-            placeholder="Pincode"
+            placeholder="Pincode *"
             readOnly
+            required
             className="border border-green-400 rounded-md px-4 py-2 bg-gray-100 text-gray-700 cursor-not-allowed"
             value={formData.pincode}
           />
           <input
             type="text"
             name="state"
-            placeholder="State"
+            placeholder="State *"
+            required
             className="border border-pink-300 rounded-md px-4 py-2 focus:outline-pink-500 bg-white"
             value={formData.state}
             onChange={handleChange}
@@ -155,15 +194,17 @@ const GuestCheckout = () => {
           <input
             type="text"
             name="city"
-            placeholder="City"
+            placeholder="City *"
+            required
             className="border border-pink-300 rounded-md px-4 py-2 focus:outline-pink-500 bg-white"
             value={formData.city}
             onChange={handleChange}
           />
-          <input
-            type="text"
+          <textarea
             name="addressLine"
-            placeholder="Address Line"
+            placeholder="Address Line *"
+            rows={3}
+            required
             className="col-span-1 sm:col-span-2 border border-pink-300 rounded-md px-4 py-2 bg-white"
             value={formData.addressLine}
             onChange={handleChange}
@@ -171,7 +212,7 @@ const GuestCheckout = () => {
           <input
             type="text"
             name="landmark"
-            placeholder="Landmark"
+            placeholder="Landmark (Optional)"
             className="col-span-1 sm:col-span-2 border border-pink-300 rounded-md px-4 py-2 bg-white"
             value={formData.landmark}
             onChange={handleChange}
@@ -201,7 +242,10 @@ const GuestCheckout = () => {
       <div className="bg-white p-6 rounded shadow">
         <h2 className="text-xl font-semibold mb-4">Cart Items</h2>
         {cartItems.map((item: CartItem) => (
-          <div key={item.cartItemId} className="flex gap-4 items-center border-b py-4">
+          <div
+            key={item.cartItemId}
+            className="flex gap-4 items-center border-b py-4"
+          >
             <img
               src={item.image}
               alt={item.name}
@@ -209,6 +253,11 @@ const GuestCheckout = () => {
             />
             <div>
               <p className="font-medium text-gray-800">{item.name}</p>
+              {item.variantId && item.variant && (
+                <p className="text-sm text-gray-600">
+                  Variant: {item.variant.name}
+                </p>
+              )}
               <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
               <p className="text-sm text-gray-900 font-semibold">
                 ₹{(item.quantity * item.sellingPrice).toFixed(2)}

@@ -2,13 +2,33 @@
 
 // 1. Make apiCore generic to expect a specific return type
 export const apiCore = async <T>(
-  url: string,
+  url: string, // This parameter is still named 'url' as in your provided code
   method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE', // PATCH included
   body?: unknown,
   token?: string | null // FIX: Allow token to be string | null | undefined
 ): Promise<T> => {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://cosmaticadmin.twilightparadox.com";
-  const fullUrl = `${baseUrl}${url}`;
+  let baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+
+  // Provide a fallback if NEXT_PUBLIC_BASE_URL is not set, but strongly recommend setting it
+  if (!baseUrl) {
+    console.warn("NEXT_PUBLIC_BASE_URL is not set. Falling back to default: https://cosmaticadmin.twilightparadox.com");
+    baseUrl = "https://cosmaticadmin.twilightparadox.com";
+  }
+
+  // --- START: URL Construction Logic ---
+  // Ensure baseUrl does not end with a slash
+  if (baseUrl.endsWith('/')) {
+    baseUrl = baseUrl.slice(0, -1);
+  }
+
+  // Ensure the 'url' parameter (which should be a path) starts with a slash
+  // If 'url' already contains the full base URL, this logic needs to adapt,
+  // but based on your previous examples, 'url' should be something like '/order/detail/47'
+  const finalUrlPath = url.startsWith('/') ? url : `/${url}`;
+
+  const fullUrl = `${baseUrl}${finalUrlPath}`; // Correctly form the full URL
+  // --- END: URL Construction Logic ---
+
 
   const headers: Record<string, string> = {};
 
@@ -17,8 +37,10 @@ export const apiCore = async <T>(
   }
 
   // Only add Authorization header if token is a non-empty string
+  // Changed from `Token ${token}` to `Bearer ${token}` based on your screenshot's evidence.
+  // If your backend specifically requires "Token", revert this line.
   if (token && typeof token === 'string' && token.trim() !== '') {
-    headers["Authorization"] = `Token ${token}`;
+    headers["Authorization"] = `Bearer ${token}`; // IMPORTANT CHANGE HERE
   }
 
   const requestOptions: RequestInit = {
@@ -32,6 +54,7 @@ export const apiCore = async <T>(
   }
 
   try {
+    console.log(`[API Call] ${method} ${fullUrl}`); // Log the full URL for debugging
     const res = await fetch(fullUrl, requestOptions);
 
     const contentType = res.headers.get("Content-Type");
@@ -45,11 +68,11 @@ export const apiCore = async <T>(
           errorData.message = await res.text();
         }
       } catch (e) {
-        errorData.message = res.statusText;
+        errorData.message = res.statusText; // Fallback if parsing fails
       }
 
       console.error(
-        `[ Server ] API error: ${res.status} "${errorData.message?.slice(0, 200) || res.statusText}"`
+        `[ Server ] API error: ${res.status} "${errorData.message?.slice(0, 200) || res.statusText}" for ${fullUrl}`
       );
       throw new Error(
         `API error ${res.status}: ${fullUrl} - ${errorData.message?.slice(0, 100) || res.statusText}`
@@ -60,7 +83,7 @@ export const apiCore = async <T>(
       return await res.json() as T;
     } else {
       console.warn(`[ Server ] Non-JSON response for ${fullUrl}: ${res.status}. Returning null.`);
-      return null as T;
+      return null as T; // Be cautious if T is not nullable
     }
   } catch (error) {
     console.error(`[ Server ] Fetch failed for ${fullUrl}:`, error);
