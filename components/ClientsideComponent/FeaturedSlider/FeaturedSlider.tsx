@@ -60,9 +60,9 @@ export default function FeaturedSlider({ products }: { products: Product[] }) {
                   <p className="text-sm text-gray-500">{product.category?.name}</p>
                   <h3 className="text-2xl font-bold">{product.name}</h3>
                   <p className="text-[#e60076] font-semibold text-xl mt-2">
-                    ₹{product.sellingPrice}
+                    ₹{product.basePrice}
                     <span className="line-through text-gray-500 text-sm ml-2">
-                      ₹{product.basePrice}
+                      ₹{product.sellingPrice}
                     </span>
                   </p>
                   <p className="text-sm text-green-700 mt-1">

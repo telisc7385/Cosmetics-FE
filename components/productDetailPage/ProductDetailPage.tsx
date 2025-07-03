@@ -106,13 +106,13 @@ export default function ProductDetailClient({ product,relatedProducts }: Props) 
 
           {/* Price */}
           <div className="space-x-4 flex items-center">
-            <div className="text-2xl font-bold text-gray-800">₹{sellingPrice}</div>
+            <div className="text-2xl font-bold text-gray-800">₹{basePrice}</div>
             {discount > 0 && (
               <div className="text-green-600 font-semibold">{discount}% Off</div>
             )}
             {basePrice && (
               <div className="text-sm text-gray-500">
-                MRP <s>₹{basePrice}</s> Inclusive of all taxes
+                MRP <s>₹{sellingPrice}</s> Inclusive of all taxes
               </div>
             )}
           </div>
@@ -157,7 +157,7 @@ export default function ProductDetailClient({ product,relatedProducts }: Props) 
           </div>
 
           {/* Delivery Section */}
-          <hr className="my-4" />
+          {/* <hr className="my-4" />
           <div>
             <h4 className="font-semibold mb-2">Select Delivery Location</h4>
             <p className="text-sm text-gray-500 mb-3">
@@ -173,7 +173,7 @@ export default function ProductDetailClient({ product,relatedProducts }: Props) 
                 Apply
               </button>
             </div>
-          </div>
+          </div> */}
 
           {/* Icons */}
           <div className="flex gap-6 mt-6 text-sm text-gray-700">

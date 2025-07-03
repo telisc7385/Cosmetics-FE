@@ -5,7 +5,7 @@ import { GalleryImage } from "@/types/gallery";
 
 const Gallery = ({ images }: { images: GalleryImage[] }) => {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 p-4 h-[500px]">
+    <div className="container mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 p-4 h-[500px]">
       {images.map((img, index) => {
         const isLarge = index === 0 || index === 3;
         return (

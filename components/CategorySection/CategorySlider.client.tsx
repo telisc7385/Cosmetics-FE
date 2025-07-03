@@ -19,7 +19,7 @@ const bgColors = ["#e6ffe6", "#cce0ff", "#ffb3b3", "#CCE6FF", "#FFCCCC"];
 
 export default function CategorySlider({ categories }: Props) {
   return (
-    <div className="px-4 pb-6">
+    <div className="container mx-auto  px-4 pb-6">
       <Swiper
         spaceBetween={24}
         slidesPerView={1}

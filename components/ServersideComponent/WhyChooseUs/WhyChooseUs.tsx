@@ -12,7 +12,7 @@ export default async function WhyChooseUs () {
   title="Why Choose Us" 
         subtitle="Trusted by Thousands, Loved for a Reason." 
 />
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="container mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
         {items.map(item => (
           <div key={item.id} className="bg-[#f9fafb]  rounded-xl shadow ">
             <div className="p-3">

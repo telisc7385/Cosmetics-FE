@@ -23,7 +23,7 @@ export default async function HotListWrapper() {
   subtitle="Out the most popular and trending products." 
 />
 
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-4">
+                <div className=" container mx-auto  grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-4">
       {products.map((product: Product) => (
         <ProductCard key={product.id} product={product} />
       ))}

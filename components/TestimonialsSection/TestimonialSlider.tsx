@@ -108,7 +108,7 @@ export default function TestimonialSlider({ testimonials }: Props) {
   const swiperRef = useRef<SwiperType | null>(null);
  
   return (
-    <div className="w-full bg-[#b0c9e8] py-12 overflow-hidden px-0 mx-0">
+    <div className="container mx-auto  w-full bg-[#b0c9e8] py-4 overflow-hidden px-0 ">
       <Swiper
         modules={[Autoplay]}
         spaceBetween={30}

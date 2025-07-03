@@ -12,7 +12,7 @@ export default async function TestimonialSection() {
   const testimonials = data.testimonials;
  
   return (
-    <section className="py-[60px] bg-gray-50 ">
+    <section className="py-7 bg-gray-50 ">
       <div className="mb-10">
         <h2 className="text-3xl font-bold mb-2 px-10">
           What our happy clients say
