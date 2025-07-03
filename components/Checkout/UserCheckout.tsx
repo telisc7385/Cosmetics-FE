@@ -18,6 +18,7 @@ import {
   Address,
 } from "@/api/ApiCore";
 import { CartItem } from "@/types/cart";
+import { Minus, Plus, Trash2 } from "lucide-react";
 
 const UserCheckout = () => {
   const { items, error: cartError, loading: cartLoading, incrementItemQuantity, decrementItemQuantity, removeCartItem } = useLoggedInCart();
@@ -292,26 +293,58 @@ const UserCheckout = () => {
           <h2 className="text-xl font-semibold mb-4">Product Summary</h2>
           {cartLoading ? <p>Loading cart...</p> : cartError ? <p className="text-red-600">{cartError}</p> : items.length === 0 ? <p>Your cart is empty</p> : (
             <ul className="space-y-4">
-              {items.map(item => (
-                <li key={item.cartItemId} className="flex items-start gap-4 border p-4 rounded">
-                  <Image src={item.image} alt={item.name} width={64} height={64} className="w-16 h-16 object-cover rounded" />
-                  <div className="flex-grow">
-                    <p className="font-medium">{item.name}</p>
-                    {item.variant?.name && <p className="text-xs text-gray-500">Variant: {item.variant.name}</p>}
-                    <p className="text-sm font-semibold text-gray-900">₹{(item.quantity * item.sellingPrice).toFixed(2)}</p>
-                    <div className="flex items-center mt-2 space-x-2">
-                      <button onClick={() => decrementItemQuantity(item.cartItemId)} disabled={item.quantity <= 1} className="px-2 py-1 border rounded bg-gray-100">-</button>
-                      <span className="font-medium">{item.quantity}</span>
-                      <button onClick={() => incrementItemQuantity(item.cartItemId)} className="px-2 py-1 border rounded bg-gray-100">+</button>
-                      <button onClick={() => removeCartItem(item.cartItemId)} className="ml-auto text-red-600">
-                        {/* delete icon */}
-                        X
-                      </button>
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
+  {items.map(item => (
+    <li
+      key={item.cartItemId}
+      className="flex items-start gap-4 p-4 border border-gray-400 rounded shadow-sm hover:shadow-md transition-shadow bg-white"
+    >
+      <Image
+        src={item.image}
+        alt={item.name}
+        width={64}
+        height={64}
+        className="w-20 h-20 object-cover rounded-md border"
+      />
+      <div className="flex flex-col flex-grow">
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-base font-semibold text-gray-900">{item.name}</p>
+            {item.variant?.name && (
+              <p className="text-sm text-gray-500 mt-1">Variant: {item.variant.name}</p>
+            )}
+          </div>
+          <p className="text-sm font-bold text-gray-900 whitespace-nowrap ml-4">
+            ₹{(item.quantity * item.sellingPrice).toFixed(2)}
+          </p>
+        </div>
+
+        <div className="flex items-center mt-4 space-x-2">
+          <button
+            onClick={() => decrementItemQuantity(item.cartItemId)}
+            disabled={item.quantity <= 1}
+            className="p-1.5 rounded border bg-gray-100 hover:bg-gray-200 disabled:opacity-50"
+          >
+            <Minus size={18} />
+          </button>
+          <span className="px-2 font-medium text-gray-800">{item.quantity}</span>
+          <button
+            onClick={() => incrementItemQuantity(item.cartItemId)}
+            className="p-1.5 rounded border bg-gray-100 hover:bg-gray-200"
+          >
+            <Plus size={18} />
+          </button>
+
+          <button
+            onClick={() => removeCartItem(item.cartItemId)}
+            className="ml-auto text-red-600 hover:text-red-700 transition-colors"
+          >
+            <Trash2 size={18} />
+          </button>
+        </div>
+      </div>
+    </li>
+  ))}
+</ul>
           )}
         </div>
 
@@ -326,7 +359,7 @@ const UserCheckout = () => {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+        <div className="fixed inset-0 bg-[#edf3f8] bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded w-full max-w-lg">
             <h3 className="text-lg font-semibold mb-4">{editingAddress ? "Edit Address" : `Add ${isAddingShippingAddress ? "Shipping" : "Billing"} Address`}</h3>
             <form onSubmit={handleFormSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
