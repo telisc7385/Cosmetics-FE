@@ -12,7 +12,7 @@ export default async function FeaturedSliderComponent() {
     <>
       <div className=' px-[40px]'>
       <SectionHeader 
-  title="Feature Collection" 
+  title="Shop Our Best Sellers" 
   subtitle="Trusted by Thousands, Loved for a Reason." 
 />
       </div>

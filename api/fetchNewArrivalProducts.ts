@@ -16,7 +16,7 @@ export async function getNewArrivalProducts() {
     }
     // Filter only new arrival products
     // const newArrivals = products.filter((p) => p.isNewArrival === true);
-    const newArrivals = products.slice(0, 4)
+    const newArrivals = products.slice(0, 5)
     return newArrivals;
   } catch (error) {
     return [];

@@ -15,7 +15,7 @@ const GalleryPage = async () => {
   const images = allImages.filter((img) => img.is_active);
 
   return (
-    <div className="min-h-screen bg-white px-[40px]">
+    <div className="h-auto bg-white px-[40px]">
       <SectionHeader
         title="Our Gallery"
         subtitle="A glimpse into beauty, confidence, and satisfaction."
