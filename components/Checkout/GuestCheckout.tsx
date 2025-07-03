@@ -1,4 +1,3 @@
-// GuestCheckout.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -7,6 +6,7 @@ import { selectCartItems } from "@/store/slices/cartSlice";
 import { CartItem } from "@/types/cart";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import PincodeVerifier from "./PincodeVerifier";
 
 const GuestCheckout = () => {
   const cartItems = useAppSelector(selectCartItems);
@@ -17,7 +17,6 @@ const GuestCheckout = () => {
     0
   );
 
-  // Form state
   const [formData, setFormData] = useState({
     email: "",
     fullName: "",
@@ -27,10 +26,22 @@ const GuestCheckout = () => {
     city: "",
     addressLine: "",
     landmark: "",
+    paymentMethod: "COD",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handlePincodeVerified = (data: {
+    pincode: string;
+    city: string;
+    state: string;
+  }) => {
+    setFormData((prev) => ({
+      ...prev,
+      ...data,
+    }));
   };
 
   const handlePlaceOrder = async () => {
@@ -39,29 +50,13 @@ const GuestCheckout = () => {
       return;
     }
 
-    // --- START OF MODIFICATION ---
-    // Transform cartItems to match the backend's expectation (either productId OR variantId)
-    const itemsForPayload = cartItems.map((item: CartItem) => {
-      const itemPayload: {
-        productId?: number;
-        variantId?: number;
-        quantity: number;
-        price: number;
-      } = {
-        quantity: item.quantity,
-        price: item.sellingPrice,
-      };
-
-      if (item.variantId !== null && item.variantId !== undefined) {
-        // If it's a variant, pass only variantId
-        itemPayload.variantId = item.variantId;
-      } else {
-        // If no variant, pass only productId (which is item.id from our CartItem structure)
-        itemPayload.productId = item.id;
-      }
-      return itemPayload;
-    });
-    // --- END OF MODIFICATION ---
+    const itemsForPayload = cartItems.map((item: CartItem) => ({
+      quantity: item.quantity,
+      price: item.sellingPrice,
+      ...(item.variantId !== null && item.variantId !== undefined
+        ? { variantId: item.variantId }
+        : { productId: item.id }),
+    }));
 
     const payload = {
       email: formData.email,
@@ -74,9 +69,9 @@ const GuestCheckout = () => {
         addressLine: formData.addressLine,
         landmark: formData.landmark,
       },
-      items: itemsForPayload, // Use the transformed items array
+      items: itemsForPayload,
       totalAmount: subtotal,
-      paymentMethod: "COD",
+      paymentMethod: formData.paymentMethod,
     };
 
     try {
@@ -84,9 +79,7 @@ const GuestCheckout = () => {
         `${process.env.NEXT_PUBLIC_BASE_URL}/guest/checkout`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         }
       );
@@ -97,34 +90,33 @@ const GuestCheckout = () => {
       }
 
       const data = await response.json();
-      const orderId = data.order.id;
-      console.log(orderId, "orderid");
-      router.push(`/thank-you/${orderId}`);
+      router.push(`/thank-you/${data.order.id}`);
       toast.success("Order placed successfully!");
     } catch (error: any) {
-      console.error("Order error:", error);
       toast.error(error.message || "Error placing order");
     }
   };
 
   if (cartItems.length === 0) {
-    return (
-      <div className="text-center text-gray-500 py-10">Your cart is empty</div>
-    );
+    return <div className="text-center text-gray-500 py-10">Your cart is empty</div>;
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl mx-auto">
-      {/* Billing/Shipping Form */}
-      <div className="bg-white p-6 rounded shadow">
-        <h2 className="text-xl font-semibold mb-4">Billing & Shipping</h2>
-        <form className="grid grid-cols-1 gap-4">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full mx-auto px-4 py-10">
+      <div className="w-full bg-white/80 backdrop-blur-md p-6 sm:p-10 rounded-2xl shadow-2xl border border-pink-200">
+        <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
+          Billing & Shipping
+        </h2>
+
+        <PincodeVerifier onVerified={handlePincodeVerified} />
+
+        <form className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <input
             type="email"
             name="email"
             placeholder="Email *"
             required
-            className="border px-3 py-2"
+            className="border border-pink-300 rounded-md px-4 py-2 focus:outline-pink-500 bg-white"
             value={formData.email}
             onChange={handleChange}
           />
@@ -132,7 +124,7 @@ const GuestCheckout = () => {
             type="text"
             name="fullName"
             placeholder="Full Name"
-            className="border px-3 py-2"
+            className="border border-pink-300 rounded-md px-4 py-2 focus:outline-pink-500 bg-white"
             value={formData.fullName}
             onChange={handleChange}
           />
@@ -140,7 +132,7 @@ const GuestCheckout = () => {
             type="text"
             name="phone"
             placeholder="Phone"
-            className="border px-3 py-2"
+            className="border border-pink-300 rounded-md px-4 py-2 focus:outline-pink-500 bg-white"
             value={formData.phone}
             onChange={handleChange}
           />
@@ -148,15 +140,15 @@ const GuestCheckout = () => {
             type="text"
             name="pincode"
             placeholder="Pincode"
-            className="border px-3 py-2"
+            readOnly
+            className="border border-green-400 rounded-md px-4 py-2 bg-gray-100 text-gray-700 cursor-not-allowed"
             value={formData.pincode}
-            onChange={handleChange}
           />
           <input
             type="text"
             name="state"
             placeholder="State"
-            className="border px-3 py-2"
+            className="border border-pink-300 rounded-md px-4 py-2 focus:outline-pink-500 bg-white"
             value={formData.state}
             onChange={handleChange}
           />
@@ -164,7 +156,7 @@ const GuestCheckout = () => {
             type="text"
             name="city"
             placeholder="City"
-            className="border px-3 py-2"
+            className="border border-pink-300 rounded-md px-4 py-2 focus:outline-pink-500 bg-white"
             value={formData.city}
             onChange={handleChange}
           />
@@ -172,7 +164,7 @@ const GuestCheckout = () => {
             type="text"
             name="addressLine"
             placeholder="Address Line"
-            className="border px-3 py-2"
+            className="col-span-1 sm:col-span-2 border border-pink-300 rounded-md px-4 py-2 bg-white"
             value={formData.addressLine}
             onChange={handleChange}
           />
@@ -180,14 +172,25 @@ const GuestCheckout = () => {
             type="text"
             name="landmark"
             placeholder="Landmark"
-            className="border px-3 py-2"
+            className="col-span-1 sm:col-span-2 border border-pink-300 rounded-md px-4 py-2 bg-white"
             value={formData.landmark}
             onChange={handleChange}
           />
+          <select
+            name="paymentMethod"
+            value={formData.paymentMethod}
+            onChange={(e) =>
+              setFormData({ ...formData, paymentMethod: e.target.value })
+            }
+            className="col-span-1 sm:col-span-2 border border-pink-300 rounded-md px-4 py-2 text-gray-600 bg-white"
+          >
+            <option value="COD">Cash on Delivery</option>
+            <option value="Razorpay">Razorpay</option>
+          </select>
           <button
             type="button"
             onClick={handlePlaceOrder}
-            className="bg-blue-600 text-white py-2 rounded mt-4 hover:bg-blue-700"
+            className="col-span-1 sm:col-span-2 mt-2 bg-pink-600 text-white font-semibold py-2 rounded hover:bg-pink-700 transition-all"
           >
             Place Order
           </button>
@@ -198,10 +201,7 @@ const GuestCheckout = () => {
       <div className="bg-white p-6 rounded shadow">
         <h2 className="text-xl font-semibold mb-4">Cart Items</h2>
         {cartItems.map((item: CartItem) => (
-          <div
-            key={item.cartItemId}
-            className="flex gap-4 items-center border-b py-4"
-          >
+          <div key={item.cartItemId} className="flex gap-4 items-center border-b py-4">
             <img
               src={item.image}
               alt={item.name}
