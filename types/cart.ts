@@ -96,3 +96,40 @@ export interface ProductVariant {
     // Add other relevant product fields if they exist here
   };
 }
+
+// Assuming ProductVariant is defined elsewhere or directly in this file
+// If ProductVariant needs to allow 'null' for properties like 'name' or 'description',
+// ensure those are also updated as 'string | null'. Your current Postman implies this.
+export interface ProductVariant {
+  id: number;
+  productId: number;
+  name: string | null;
+  SKU: string;
+  description: string | null;
+  specification: Record<string, any>;
+  selling_price: number;
+  base_and_selling_price_difference_in_percent: number;
+  stock: number;
+  colour_code: string;
+  is_selected: boolean;
+  is_active: boolean;
+  is_new_arrival: boolean;
+  created_by: number;
+  low_stock_threshold: number;
+  createdAt: string;
+  isDeleted: boolean;
+  images: {
+    id: number;
+    url: string;
+    publicId: string;
+    createdAt: string;
+    variantId: number;
+    sequence_number: number;
+    is_active: boolean;
+  }[];
+  product: {
+    name: string;
+    description: string;
+    // Add other relevant product fields if they exist here
+  };
+}

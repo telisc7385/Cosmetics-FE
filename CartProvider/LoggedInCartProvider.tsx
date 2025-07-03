@@ -68,9 +68,6 @@ const parseCartResponse = (response: any): CartItem[] => {
         (item.product &&
           item.product.id !== undefined &&
           item.product.id !== null) ||
-        (item.product &&
-          item.product.productId !== undefined &&
-          item.product.productId !== null) ||
         (item.variant &&
           item.variant.productId !== undefined &&
           item.variant.productId !== null);
@@ -88,30 +85,51 @@ const parseCartResponse = (response: any): CartItem[] => {
 
     const items: CartItem[] = filteredRawCartItems.map(
       (item: CartItemFromAPI) => {
-        // 'item' is correctly defined here
         console.log(
           "LoggedInCartProvider: Processing valid raw cart item:",
           item
         );
 
-        const cartItemId = item.id;
+        // Ensure cartItemId is parsed as a number
+        const cartItemId =
+          item.id !== undefined && item.id !== null ? Number(item.id) : 0;
+
+        // Check for NaN for cartItemId as well
+        if (isNaN(cartItemId)) {
+          console.error(
+            "LoggedInCartProvider: Parsed cartItemId is NaN, setting to 0.",
+            { rawItem: item }
+          );
+          // Decide on appropriate error handling: throw, set to 0, or filter out item.
+          // For now, continuing with 0, but this might indicate a backend issue.
+        }
+
         const productId =
-          item.productId || item.product?.id || item.variant?.productId;
+          item.productId !== undefined && item.productId !== null
+            ? Number(item.productId)
+            : item.product?.id !== undefined && item.product?.id !== null
+            ? Number(item.product.id)
+            : item.variant?.productId !== undefined &&
+              item.variant?.productId !== null
+            ? Number(item.variant.productId)
+            : 0;
 
         console.log(
           `Extracted: cartItemId = ${cartItemId}, productId = ${productId}`
         );
 
-        if (!cartItemId || !productId) {
+        if (!cartItemId || isNaN(productId)) {
           console.error(
-            "LoggedInCartProvider: Critical ID still missing after filter. This indicates an issue with filter logic.",
+            "LoggedInCartProvider: Critical ID still missing or not a number.",
             {
               rawItem: item,
               extractedCartItemId: cartItemId,
               extractedProductId: productId,
             }
           );
-          throw new Error("Backend response missing cartItemId or productId.");
+          throw new Error(
+            "Backend response missing cartItemId or productId, or productId not a number."
+          );
         }
 
         const quantity = item.quantity;
@@ -121,11 +139,9 @@ const parseCartResponse = (response: any): CartItem[] => {
         if (item.variant && item.variant.product?.name) {
           displayName = item.variant.product.name;
           if (item.variant.name) {
-            // Only append variant name if it's not null
             displayName += ` - ${item.variant.name}`;
           }
         } else if (item.product?.name) {
-          // Fallback for direct product items
           displayName = item.product.name;
         }
 
@@ -144,33 +160,62 @@ const parseCartResponse = (response: any): CartItem[] => {
           item.product?.basePrice?.toString() || "0"
         );
 
-        const variantId = item.variant?.id || item.variantId;
+        // Ensure variantId is number or null
+        const variantId =
+          item.variant?.id !== undefined && item.variant?.id !== null
+            ? Number(item.variant.id)
+            : item.variantId !== undefined && item.variantId !== null
+            ? Number(item.variantId)
+            : null;
+
+        // If variantId is not null but becomes NaN, set it to null for robustness
+        const finalVariantId =
+          variantId !== null && isNaN(variantId) ? null : variantId;
 
         console.log("LoggedInCartProvider: Mapped cart item (after parsing):", {
           cartItemId,
-          id: productId,
+          id: productId, // This is the product ID, now ensured as number
           name: displayName,
           quantity,
           sellingPrice,
           basePrice,
           image,
-          variantId,
+          variantId: finalVariantId, // Now ensured as number or null
           variant: item.variant,
           product: item.product,
           rawItem: item,
         });
 
         return {
-          cartItemId: cartItemId,
-          id: productId,
+          cartItemId: cartItemId, // Now a number
+          id: productId, // Product ID (number)
           name: displayName,
           quantity: quantity,
           sellingPrice: sellingPrice,
           basePrice: basePrice,
           image: image,
-          variantId: variantId,
-          variant: item.variant,
-          product: item.product,
+          variantId: finalVariantId, // Variant ID (number or null)
+          variant: item.variant
+            ? {
+                ...item.variant,
+                // FIX: Safely access item.variant.id to prevent 'undefined' error if API sends null/undefined
+                id:
+                  item.variant.id !== undefined && item.variant.id !== null
+                    ? Number(item.variant.id)
+                    : 0,
+                product: item.variant.product,
+              }
+            : undefined, // variant itself can be undefined or null in CartItem
+          product: item.product
+            ? {
+                ...item.product,
+                // FIX: Safely access item.product.id to prevent 'undefined' error if API sends null/undefined
+                id:
+                  item.product.id !== undefined && item.product.id !== null
+                    ? Number(item.product.id)
+                    : 0,
+              }
+            : undefined,
         };
       }
     );
@@ -267,19 +312,18 @@ export function LoggedInCartProvider({
               : item
           );
         } else {
-          const tempCartItemId = Date.now() * -1;
-          // When adding, prioritize variant.product.name for the display name if variant.name is null
-          let newItemName = itemToAdd.name; // This will be the initial product.name from ProductCard
+          // tempCartItemId should be a number now
+          const tempCartItemId = Date.now(); // Generate a temporary number ID
+
+          let newItemName = itemToAdd.name;
           if (itemToAdd.variant?.product?.name) {
-            // Check if variant.product.name exists
-            newItemName = itemToAdd.variant.product.name; // Corrected: was 'item.variant.product.name'
+            newItemName = itemToAdd.variant.product.name;
             if (itemToAdd.variant.name) {
-              // Corrected: was 'item.variant.name'
-              // Append variant name ONLY if it exists
-              newItemName += ` - ${itemToAdd.variant.name}`; // Corrected: was 'item.variant.name'
+              newItemName += ` - ${itemToAdd.variant.name}`;
             }
           }
 
+          // Ensure cartItemId is passed as number for the new item
           return [
             ...currentItems,
             { ...itemToAdd, cartItemId: tempCartItemId, name: newItemName },
@@ -295,15 +339,13 @@ export function LoggedInCartProvider({
         };
 
         if (itemToAdd.variantId !== null && itemToAdd.variantId !== undefined) {
-          // If a variant is selected, send only variantId and quantity
           payload = {
-            variantId: itemToAdd.variantId,
+            variantId: itemToAdd.variantId, // Already a number
             quantity: itemToAdd.quantity,
           };
         } else {
-          // If no variant, send productId (which is itemToAdd.id) and quantity
           payload = {
-            productId: itemToAdd.id, // This is the product ID
+            productId: itemToAdd.id, // Already a number
             quantity: itemToAdd.quantity,
           };
         }
@@ -325,6 +367,7 @@ export function LoggedInCartProvider({
   );
 
   const removeCartItem = useCallback(
+    // Change cartItemId type from string to number
     async (cartItemId: number) => {
       if (!token) return;
       setError(null);
@@ -339,7 +382,13 @@ export function LoggedInCartProvider({
           "LoggedInCartProvider: Calling API for /cart/remove/",
           cartItemId
         );
-        await apiCore(`/cart/remove/${cartItemId}`, "DELETE", undefined, token);
+        // Ensure cartItemId is converted to string for the URL path
+        await apiCore(
+          `/cart/remove/${String(cartItemId)}`,
+          "DELETE",
+          undefined,
+          token
+        );
         console.log("LoggedInCartProvider: /cart/remove successful.");
       } catch (err: any) {
         console.error("LoggedInCartProvider: Failed to remove cart item:", err);
@@ -351,6 +400,7 @@ export function LoggedInCartProvider({
   );
 
   const incrementItemQuantity = useCallback(
+    // Change cartItemId type from string to number
     async (cartItemId: number) => {
       if (!token) return;
       setError(null);
@@ -377,8 +427,9 @@ export function LoggedInCartProvider({
           "LoggedInCartProvider: Calling API for /cart/update with payload:",
           { cartItemId: currentItem.cartItemId, quantity: newQuantity }
         );
+        // Ensure cartItemId is converted to string for the URL path
         await apiCore(
-          `/cart/update/${currentItem.cartItemId}`,
+          `/cart/update/${String(currentItem.cartItemId)}`,
           "PUT",
           { quantity: newQuantity },
           token
@@ -397,6 +448,7 @@ export function LoggedInCartProvider({
   );
 
   const decrementItemQuantity = useCallback(
+    // Change cartItemId type from string to number
     async (cartItemId: number) => {
       if (!token) return;
       setError(null);
@@ -430,8 +482,9 @@ export function LoggedInCartProvider({
             "LoggedInCartProvider: Decrementing to 0 or less, removing item by cartItemId:",
             currentItem.cartItemId
           );
+          // Ensure cartItemId is converted to string for the URL path
           await apiCore(
-            `/cart/remove/${currentItem.cartItemId}`,
+            `/cart/remove/${String(currentItem.cartItemId)}`,
             "DELETE",
             undefined,
             token
@@ -441,8 +494,9 @@ export function LoggedInCartProvider({
             "LoggedInCartProvider: Calling API for /cart/update (decrement) with payload:",
             { cartItemId: currentItem.cartItemId, quantity: newQuantity }
           );
+          // Ensure cartItemId is converted to string for the URL path
           await apiCore(
-            `/cart/update/${currentItem.cartItemId}`,
+            `/cart/update/${String(currentItem.cartItemId)}`,
             "PUT",
             { quantity: newQuantity },
             token
@@ -507,3 +561,4 @@ export const useLoggedInCart = () => {
   }
   return context;
 };
+
