@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
-import NavbarIconsWrapper from "./NavbarIconsWrapper";
 import Link from "next/link";
 import Image from "next/image";
 import { getNavbarData, NavbarItem } from "@/api/NavbarApi";
@@ -47,7 +46,7 @@ const MobileMenu = () => {
       </button>
 
       <div
-        className={`fixed top-0 left-0 w-full h-screen bg-white z-50 transform transition-transform duration-500 ease-in-out ${
+        className={`fixed top-0 left-0 w-full h-screen bg-[#f3f6f7] z-50 transform transition-transform duration-500 ease-in-out ${
           open ? "translate-y-0" : "-translate-y-full"
         }`}
       >
@@ -65,7 +64,7 @@ const MobileMenu = () => {
             </button>
           </div>
 
-          <ul className="flex flex-col gap-4 mt-6">
+          <ul className="flex flex-col gap-4">
             {navItems.map((item: NavbarItem) => (
               <li key={item.id}>
                 <Link
@@ -79,9 +78,7 @@ const MobileMenu = () => {
             ))}
           </ul>
 
-          <div className="mt-8">
-            <NavbarIconsWrapper />
-          </div>
+  
         </div>
       </div>
     </div>
@@ -89,3 +86,10 @@ const MobileMenu = () => {
 };
 
 export default MobileMenu;
+
+
+
+
+
+
+

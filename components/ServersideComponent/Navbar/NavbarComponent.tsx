@@ -11,7 +11,7 @@ const Navbar = async () => {
   const logoUrl = settingsRes?.result?.[0]?.logo || "/logo1.png";
 
   return (
-    <nav className="w-full bg-[#f3f6f7] shadow p-2 sticky top-0 z-50">
+    <nav className="w-full bg-[#f3f6f7] shadow p-2 sticky top-0 z-50 px-6">
       <div className="max-w-7xl mx-auto w-full flex flex-col gap-4">
         {/* Desktop View */}
         <div className="hidden lg:flex justify-between items-center w-full">

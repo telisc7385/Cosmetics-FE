@@ -24,7 +24,7 @@ export default function ProductTabs({
   const [activeTab, setActiveTab] = useState('details');
 
   return (
-    <div className=" mb-5 rounded bg-white p-4 ">
+    <div className="  mb-5 rounded bg-white p-4 ">
 
 
       {/* Tabs */}
@@ -67,7 +67,7 @@ export default function ProductTabs({
           <div>
             {/* <p>{productDetails}</p> */}
             <div
-  className="prose max-w-none"
+  className="prose max-w-none "
   dangerouslySetInnerHTML={{ __html: productDetails || '' }}
 />
 
@@ -109,12 +109,12 @@ export default function ProductTabs({
         {activeTab === 'shipping' && (
           <div className="space-y-2">
             <div>
-              <h4 className="font-semibold">Shipping Information</h4>
-              <p dangerouslySetInnerHTML={{ __html: shippingInfo }} />
+              <h4 className="font-semibold text-xl">Shipping Information</h4>
+              <p className='text-md' dangerouslySetInnerHTML={{ __html: shippingInfo }} />
             </div>
             <div>
-              <h4 className="font-semibold">Return Policy</h4>
-              <p dangerouslySetInnerHTML={{ __html: returnPolicy }} />
+              <h4 className="font-semibold text-xl">Return Policy</h4>
+              <p className='text-md' dangerouslySetInnerHTML={{ __html: returnPolicy }} />
             </div>
           </div>
         )}

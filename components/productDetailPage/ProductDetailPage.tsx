@@ -293,6 +293,7 @@ import { selectIsLoggedIn } from "@/store/slices/authSlice";
 import { addToCart as addGuestCartItem } from "@/store/slices/cartSlice";
 import { useLoggedInCart } from "@/CartProvider/LoggedInCartProvider";
 import { CartItem } from "@/types/cart";
+import ProductTabs from "./ProductTabs";
 
 type Props = {
   product: Product;
@@ -388,7 +389,7 @@ export default function ProductDetailClient({
 
   return (
     <section className="bg-[#f3f4f6] py-10 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 mb-5" >
         {/* Left - Image Gallery */}
         <div className="flex flex-col md:flex-row gap-4 w-full">
           {/* Thumbnails */}
@@ -427,10 +428,10 @@ export default function ProductDetailClient({
 
         {/* Right - Product Info */}
         <div className="space-y-4">
-          <h1 className="text-2xl font-semibold">{product.name}</h1>
+          <h1 className="text-2xl font-semibold">{product.name} | {product.category.name}</h1>
 
           <div
-            className="text-gray-600 prose max-w-none"
+            className="text-gray-600 text-xl prose max-w-none"
             dangerouslySetInnerHTML={{ __html: product.description || "" }}
           />
 
@@ -504,10 +505,22 @@ export default function ProductDetailClient({
           </div>
         </div>
       </div>
+  
+      <ProductTabs productDetails={product.productDetails} keyIngredients={[]} benefits={[]} howToUse={""} shippingInfo={`Shipping Information
+- Free standard shipping on orders over $50
+- Standard shipping (5-7 business days)
+- Express shipping (2-3 business days) available
+- International shipping available to select countries`}
+   returnPolicy={`Returns Policy
+- 30-day return window
+- Items must be unworn with original tags attached
+- Free returns on US orders
+- See our full returns policy for more details`}/>
+
 
       {relatedProducts && relatedProducts.length > 0 && (
         <div className="mx-auto max-w-7xl px-4 py-10">
-          <h2 className="text-xl font-semibold mb-4">You may also like</h2>
+          <h2 className="text-2xl font-semibold mb-4">You may also like product from {product.category.name }</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {relatedProducts.slice(0, 5).map((item) => (
               <ProductCard key={item.id} product={item} />
