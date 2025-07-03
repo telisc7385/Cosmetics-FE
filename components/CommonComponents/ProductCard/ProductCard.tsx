@@ -1,15 +1,14 @@
-// components/ProductCard.tsx
 "use client";
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useAppDispatch, useAppSelector } from "@/store/hooks/hooks"; // Import useAppSelector
+import { useAppDispatch, useAppSelector } from "@/store/hooks/hooks";
 import { addToCart } from "@/store/slices/cartSlice";
-import { selectIsLoggedIn } from "@/store/slices/authSlice"; // Import selectIsLoggedIn to check login status
-import { useLoggedInCart } from "@/CartProvider/LoggedInCartProvider"; // Import useLoggedInCart hook
-import { Product, ProductVariant } from "@/types/product"; // Assuming Product and ProductVariant types are defined elsewhere
-import { useRouter } from "next/navigation"; // Import useRouter
+import { selectIsLoggedIn } from "@/store/slices/authSlice";
+import { useLoggedInCart } from "@/CartProvider/LoggedInCartProvider";
+import { Product, ProductVariant } from "@/types/product";
+import { useRouter } from "next/navigation";
 
 interface Props {
   product: Product;
@@ -18,8 +17,8 @@ interface Props {
 const ProductCard = ({ product }: Props) => {
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const isLoggedIn = useAppSelector(selectIsLoggedIn); // <--- Get login status
-  const { addCartItem } = useLoggedInCart(); // <--- Get the addCartItem function from the logged-in cart context
+  const isLoggedIn = useAppSelector(selectIsLoggedIn);
+  const { addCartItem } = useLoggedInCart();
 
   const firstGeneralImage = product.images.find(
     (img) => img.sequence === 1
@@ -63,8 +62,6 @@ const ProductCard = ({ product }: Props) => {
       : firstGeneralImage || "/placeholder.jpg";
 
   const handleAddToCart = async () => {
-    // Make this function async
-    // Prepare the item payload common to both guest and logged-in scenarios
     const itemPayload = {
       id: product.id,
       name: product.name,
@@ -72,39 +69,30 @@ const ProductCard = ({ product }: Props) => {
       sellingPrice: parseFloat(product.sellingPrice),
       basePrice: parseFloat(product.basePrice),
       image: firstGeneralImage || "/placeholder.jpg",
-      variantId: null, // This ProductCard handles simple products, not variants, for direct add to cart
+      variantId: null,
       variant: null,
       product: product,
     };
 
     if (isLoggedIn) {
-      // For logged-in users, use the LoggedInCartProvider's addCartItem
-      console.log(
-        "ProductCard: User is logged in. Calling addCartItem via LoggedInCartProvider."
-      );
       try {
-        await addCartItem(itemPayload); // Call the addCartItem from context
-        router.push("/cart"); // Redirect only after successful API call
+        await addCartItem(itemPayload);
+        // ✅ Redirect removed
       } catch (error) {
         console.error(
           "ProductCard: Failed to add item to logged-in cart:",
           error
         );
-        // You might want to show a more user-friendly error message here (e.g., a toast notification)
         alert("Failed to add product to cart. Please try again.");
       }
     } else {
-      // For guest users, dispatch the Redux action (existing logic)
-      console.log(
-        "ProductCard: User is guest. Dispatching addToCart Redux action."
-      );
       dispatch(
         addToCart({
           ...itemPayload,
-          cartItemId: Date.now() * -1 - Math.floor(Math.random() * 1000), // Temporary ID for guest cart
+          cartItemId: Date.now() * -1 - Math.floor(Math.random() * 1000),
         })
       );
-      router.push("/cart"); // Redirect immediately for guest users as it's a local update
+      // ✅ Redirect removed for guest as well
     }
   };
 
@@ -124,7 +112,7 @@ const ProductCard = ({ product }: Props) => {
         </div>
       )}
 
-      {/* 👉 Wrap top area with Link ONLY if no variants */}
+      {/* Wrap entire upper part if no variants */}
       {!product.variants || product.variants.length === 0 ? (
         <Link href={`/product/${product.slug}`}>
           <div>
