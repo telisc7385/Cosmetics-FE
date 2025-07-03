@@ -1,5 +1,3 @@
-// types/cart.ts
-
 export interface CartItemFromAPI {
   id: number; // This is the cart item ID
   cartId: number;

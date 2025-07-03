@@ -38,7 +38,7 @@ const getInitialState = (): CartState => {
               sellingPrice: typeof item.sellingPrice === 'number' && !isNaN(item.sellingPrice) ? item.sellingPrice : 0,
               basePrice: typeof item.basePrice === 'number' && !isNaN(item.basePrice) ? item.basePrice : 0,
               image: typeof item.image === 'string' ? item.image : "/placeholder.jpg",
-              variantId: typeof item.variantId === 'number' ? item.variantId : undefined,
+              variantId: typeof item.variantId === 'number' || item.variantId === null ? item.variantId : undefined,
             };
           }).filter(Boolean) as CartItem[]; // Filter out nulls
 
@@ -69,7 +69,9 @@ const cartSlice = createSlice({
       // This is for combining quantities of the same product for guests
       const existing = state.items.find((item) => {
         return item.id === action.payload.id &&
-               (action.payload.variantId ? item.variantId === action.payload.variantId : true);
+               (action.payload.variantId !== undefined && action.payload.variantId !== null
+                 ? item.variantId === action.payload.variantId
+                 : item.variantId === undefined || item.variantId === null);
       });
 
       if (existing) {

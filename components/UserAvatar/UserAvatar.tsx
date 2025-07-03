@@ -24,7 +24,7 @@
  
 //   const username =
 //     customer?.firstName && customer?.lastName
-//       ? `${customer.firstName} ${customer.lastName}`
+      // ? `${customer.firstName} ${customer.lastName}`
 //       : customer?.firstName ||
 //         customer?.username ||
 //         (customer?.email ? customer.email.split("@")[0] : "") ||

@@ -1,5 +1,3 @@
-
-
 // Providers/LoggedInCartProvider.tsx
 "use client";
 
@@ -9,11 +7,12 @@ import { selectToken } from "@/store/slices/authSlice";
 import { apiCore } from "@/api/ApiCore";
 import LoggedInCartContext from "./LoggedInCartContext";
 
+// Import types from their new files
 import { CartItem, CartItemFromAPI } from "@/types/cart";
-
+import { Product, ProductVariant } from "@/types/product"; // Ensure Product and ProductVariant are imported if used in CartItem
 
 const parseCartResponse = (response: any): CartItem[] => {
-  console.log( 
+  console.log(
     "LoggedInCartProvider: Raw response to parse (GET /cart):",
     response
   );
@@ -89,6 +88,7 @@ const parseCartResponse = (response: any): CartItem[] => {
 
     const items: CartItem[] = filteredRawCartItems.map(
       (item: CartItemFromAPI) => {
+        // 'item' is correctly defined here
         console.log(
           "LoggedInCartProvider: Processing valid raw cart item:",
           item
@@ -116,7 +116,6 @@ const parseCartResponse = (response: any): CartItem[] => {
 
         const quantity = item.quantity;
 
-  
         let displayName = "Unknown Product";
 
         if (item.variant && item.variant.product?.name) {
@@ -273,10 +272,11 @@ export function LoggedInCartProvider({
           let newItemName = itemToAdd.name; // This will be the initial product.name from ProductCard
           if (itemToAdd.variant?.product?.name) {
             // Check if variant.product.name exists
-            newItemName = itemToAdd.variant.product.name;
+            newItemName = itemToAdd.variant.product.name; // Corrected: was 'item.variant.product.name'
             if (itemToAdd.variant.name) {
+              // Corrected: was 'item.variant.name'
               // Append variant name ONLY if it exists
-              newItemName += ` - ${itemToAdd.variant.name}`;
+              newItemName += ` - ${itemToAdd.variant.name}`; // Corrected: was 'item.variant.name'
             }
           }
 
@@ -288,11 +288,26 @@ export function LoggedInCartProvider({
       });
 
       try {
-        const payload = {
-          productId: itemToAdd.id,
-          quantity: itemToAdd.quantity,
-          ...(itemToAdd.variantId && { variantId: itemToAdd.variantId }),
+        let payload: {
+          productId?: number;
+          variantId?: number | null;
+          quantity: number;
         };
+
+        if (itemToAdd.variantId !== null && itemToAdd.variantId !== undefined) {
+          // If a variant is selected, send only variantId and quantity
+          payload = {
+            variantId: itemToAdd.variantId,
+            quantity: itemToAdd.quantity,
+          };
+        } else {
+          // If no variant, send productId (which is itemToAdd.id) and quantity
+          payload = {
+            productId: itemToAdd.id, // This is the product ID
+            quantity: itemToAdd.quantity,
+          };
+        }
+
         console.log(
           "LoggedInCartProvider: Calling API for /cart/add with payload:",
           payload
