@@ -1,38 +1,36 @@
-
-
-
-
 "use client";
- 
+
 import { useState, useEffect } from "react";
 import Image from "next/image";
-
-import { Product, ProductVariant } from "@/types/product";
 import Link from "next/link";
- 
+import { useAppDispatch } from "@/store/hooks/hooks";
+import { addToCart } from "@/store/slices/cartSlice";
+import { Product, ProductVariant } from "@/types/product";
+
 interface Props {
   product: Product;
 }
- 
+
 const ProductCard = ({ product }: Props) => {
+  const dispatch = useAppDispatch();
+
   const firstGeneralImage = product.images.find(
     (img) => img.sequence === 1
   )?.image;
   const secondGeneralImage = product.images.find(
     (img) => img.sequence === 2
   )?.image;
- 
+
   const [hovered, setHovered] = useState(false);
   const [mainDisplayImage, setMainDisplayImage] = useState<string>("");
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(
     null
   );
- 
 
   useEffect(() => {
     let initialImage = firstGeneralImage || "/placeholder.jpg";
     let initialVariant: ProductVariant | null = null;
- 
+
     if (product.variants && product.variants.length > 0) {
       const defaultSelectedVariant = product.variants.find(
         (v) => v.is_selected
@@ -45,36 +43,84 @@ const ProductCard = ({ product }: Props) => {
         initialVariant = product.variants[0];
       }
     }
- 
+
     setMainDisplayImage(initialImage);
     setSelectedVariant(initialVariant);
   }, [product, firstGeneralImage]);
- 
 
- 
-
- 
   const currentMainImageSrc =
     selectedVariant && selectedVariant.images.length > 0
       ? mainDisplayImage
       : hovered && secondGeneralImage
       ? secondGeneralImage
       : firstGeneralImage || "/placeholder.jpg";
- 
+
+  const handleAddToCart = () => {
+    dispatch(
+      addToCart({
+        cartItemId: Date.now() * -1 - Math.floor(Math.random() * 1000),
+        id: product.id,
+        name: product.name,
+        quantity: 1,
+        sellingPrice: parseFloat(product.sellingPrice),
+        basePrice: parseFloat(product.basePrice),
+        image: firstGeneralImage || "/placeholder.jpg",
+        variantId: null,
+        variant: null,
+        product: product,
+      })
+    );
+  };
+
   return (
     <div
-      className="relative group shadow-xl hover:shadow-2xl transition-all duration-300 rounded-3xl p-3 overflow-hidden w-[220px] sm:w-[240px] mx-auto"
+      className="relative group shadow-md hover:shadow-xl transition-all duration-300 rounded-md p-3 overflow-hidden w-[220px] sm:w-[240px] mx-auto"
       style={{
         background: "linear-gradient(to bottom right, #dae6f1, #ffffff)",
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      {/* Wrap all clickable parts in Link */}
-    
+      {/* Discount Badge */}
+      {product.priceDifferencePercent > 0 && (
+        <div className="absolute top-2 left-2 bg-red-600 text-white text-xs font-semibold px-2 py-1 rounded-md shadow-md z-10">
+          {product.priceDifferencePercent}% OFF
+        </div>
+      )}
+
+      {/* 👉 Wrap top area with Link ONLY if no variants */}
+      {!product.variants || product.variants.length === 0 ? (
+        <Link href={`/product/${product.slug}`}>
+          <div>
+            <div className="relative w-full h-44 rounded-md overflow-hidden bg-white shadow-inner">
+              <Image
+                src={currentMainImageSrc}
+                alt={product.name}
+                fill
+                className="object-contain transition-transform duration-300 ease-in-out group-hover:scale-105"
+              />
+            </div>
+
+            <h3 className="mt-2 text-center text-base font-semibold text-rose-800 line-clamp-2 min-h-[48px]">
+              {product.name}
+            </h3>
+
+            <div className="mt-1 flex justify-center items-center gap-2">
+              <span
+                className="font-bold text-base"
+                style={{ color: "#213E5A" }}
+              >
+                ₹{parseFloat(product.sellingPrice).toFixed(2)}
+              </span>
+              <span className="text-sm text-gray-400 line-through">
+                ₹{parseFloat(product.basePrice).toFixed(2)}
+              </span>
+            </div>
+          </div>
+        </Link>
+      ) : (
         <div>
-     
-          <div className="relative w-full h-44 rounded-2xl overflow-hidden bg-white shadow-inner">
+          <div className="relative w-full h-44 rounded-md overflow-hidden bg-white shadow-inner">
             <Image
               src={currentMainImageSrc}
               alt={product.name}
@@ -82,13 +128,11 @@ const ProductCard = ({ product }: Props) => {
               className="object-contain transition-transform duration-300 ease-in-out group-hover:scale-105"
             />
           </div>
- 
-          {/* Product Name */}
-          <h3 className="mt-2 text-center text-sm font-semibold text-rose-800 line-clamp-2">
+
+          <h3 className="mt-2 text-center text-base font-semibold text-rose-800 line-clamp-2 min-h-[48px]">
             {product.name}
           </h3>
- 
-          {/* Price Section */}
+
           <div className="mt-1 flex justify-center items-center gap-2">
             <span className="font-bold text-base" style={{ color: "#213E5A" }}>
               ₹
@@ -101,24 +145,33 @@ const ProductCard = ({ product }: Props) => {
             </span>
           </div>
         </div>
+      )}
 
- 
-      {/* Select Variant Button - outside Link */}
+      {/* CTA Button */}
       <div className="mt-2 flex justify-center">
+        {product.variants && product.variants.length > 0 ? (
           <Link href={`/product/${product.slug}`} className="block">
-        <button
-          type="button"
-           className="text-white text-sm px-4 py-1.5 rounded-full transition cursor-pointer"
-          style={{ backgroundColor: "#213E5A" }}
-        >
-          Select Variant
-        </button>
-        </Link>
+            <button
+              type="button"
+              className="text-white text-sm px-4 py-1.5 rounded-full transition cursor-pointer"
+              style={{ backgroundColor: "#213E5A" }}
+            >
+              Select Variant
+            </button>
+          </Link>
+        ) : (
+          <button
+            type="button"
+            className="text-white text-sm px-4 py-1.5 rounded-full transition cursor-pointer"
+            style={{ backgroundColor: "#213E5A" }}
+            onClick={handleAddToCart}
+          >
+            Add to Bag
+          </button>
+        )}
       </div>
     </div>
   );
 };
- 
+
 export default ProductCard;
- 
- 
