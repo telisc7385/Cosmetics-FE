@@ -175,10 +175,11 @@ export interface LocalAddressItem extends Address {
 export interface SingleAddressResponse {
     address: LocalAddressItem; // The address object itself
     message?: string;
+    updated:any;
 }
 
 export interface FetchAddressesResponse {
-    addresses: LocalAddressItem[]; // Array of addresses
+    address: LocalAddressItem[]; // Array of addresses
     message?: string;
 }
 
