@@ -4,11 +4,14 @@ import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import NavbarIconsWrapper from "./NavbarIconsWrapper";
 import Link from "next/link";
+import Image from "next/image";
 import { getNavbarData, NavbarItem } from "@/api/NavbarApi";
+import { getCompanySettings } from "@/api/CompanyApi";
 
 const MobileMenu = () => {
   const [open, setOpen] = useState(false);
   const [navItems, setNavItems] = useState<NavbarItem[]>([]);
+  const [logo, setLogo] = useState<string>("/logo1.png");
 
   useEffect(() => {
     const fetchNav = async () => {
@@ -22,7 +25,19 @@ const MobileMenu = () => {
       }
     };
 
+    const fetchLogo = async () => {
+      try {
+        const settings = await getCompanySettings();
+        if (settings?.result?.[0]?.logo) {
+          setLogo(settings.result[0].logo);
+        }
+      } catch (err) {
+        console.error("❌ Failed to load logo:", err);
+      }
+    };
+
     fetchNav();
+    fetchLogo();
   }, []);
 
   return (
@@ -37,7 +52,10 @@ const MobileMenu = () => {
         }`}
       >
         <div className="p-4">
-          <div className="flex justify-end">
+          <div className="flex justify-between items-center">
+            <Link href="/" onClick={() => setOpen(false)}>
+              <Image src={logo} alt="Logo" width={120} height={40} />
+            </Link>
             <button
               onClick={() => setOpen(false)}
               aria-label="Close Menu"
@@ -48,7 +66,7 @@ const MobileMenu = () => {
           </div>
 
           <ul className="flex flex-col gap-4 mt-6">
-            {navItems.map((item) => (
+            {navItems.map((item: NavbarItem) => (
               <li key={item.id}>
                 <Link
                   href={item.link || "#"}

@@ -19,3 +19,6 @@ interface NavbarApiResponse {
 export const getNavbarData = async (): Promise<NavbarApiResponse> => {
   return await apiCore("/header", "GET");
 };
+
+// ✅ Correct way to re-export a type with isolatedModules enabled
+export type { NavbarApiResponse };
