@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic"; // ensures fresh data, disables caching
 
 
 const GalleryPage = async () => {
-  const res = await fetch("https://ecom-ahj1.onrender.com/gallery", {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/gallery`, {
     cache: "no-store",
   });
 

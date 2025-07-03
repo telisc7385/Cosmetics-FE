@@ -22,8 +22,9 @@ export default function HotListWrapper() {
 
   const [sliderRef] = useKeenSlider<HTMLDivElement>({
     loop: false,
+    mode: "free",
     slides: {
-      perView: 2,
+      perView: 1,
       spacing: 15,
     },
     breakpoints: {
@@ -49,27 +50,19 @@ export default function HotListWrapper() {
   }
 
   return (
-    <div className="py-5 px-[40px]">
+    <div className="py-5 px-4 md:px-10">
       <SectionHeader
         title="Hot List"
         subtitle="Out the most popular and trending products."
       />
 
-      {products.length > 5 ? (
-        <div ref={sliderRef} className="keen-slider">
-          {products.map((product) => (
-            <div key={product.id} className="keen-slider__slide">
-              <ProductCard product={product} />
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="container mx-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 p-4">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-      )}
+      <div ref={sliderRef} className="keen-slider container mx-auto">
+        {products.map((product) => (
+          <div key={product.id} className="keen-slider__slide">
+            <ProductCard product={product} />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

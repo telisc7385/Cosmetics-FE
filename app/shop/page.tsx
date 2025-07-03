@@ -1,5 +1,4 @@
 export const dynamic = 'force-dynamic';
-
 import React from 'react';
 import ShopPageClient from '@/components/ClientsideComponent/shopPageClient/shopPageClient';
 import { fetchCategories } from '@/api/fetchCategories';
@@ -9,7 +8,7 @@ export default async function ShopPage() {
   const { categories } = await fetchCategories();
   const { products } = await fetchProducts(); 
   return (
-    <div className="">
+    <div className=" mb-5">
    <ShopPageClient categories={categories} products={products}/>
     </div>
   );
