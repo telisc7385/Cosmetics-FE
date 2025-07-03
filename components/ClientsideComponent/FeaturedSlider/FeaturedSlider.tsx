@@ -22,7 +22,7 @@ interface Product {
 export default function FeaturedSlider({ products }: { products: Product[] }) {
   return (
     <div className="bg-[#e3e9f1] py-3 px-6">
-
+       <div className="container mx-auto px-4">
       <Swiper
         modules={[Navigation, Autoplay]}
         spaceBetween={30}
@@ -41,11 +41,7 @@ export default function FeaturedSlider({ products }: { products: Product[] }) {
               <div className="flex items-center gap-10 h-[350px] px-[40px]">
                 {/* Product Image */}
                 <div className="relative w-1/2 flex items-center justify-center">
-                  {/* {discount > 0 && (
-                    <span className="absolute top-2 left-2 bg-orange-500 text-white text-xs px-2 py-1 rounded">
-                      -{discount}% off
-                    </span>
-                  )} */}
+        
                   <Image
                     src={product.images[0]?.image || '/placeholder.jpg'}
                     alt={product.name}
@@ -60,9 +56,9 @@ export default function FeaturedSlider({ products }: { products: Product[] }) {
                   <p className="text-sm text-gray-500">{product.category?.name}</p>
                   <h3 className="text-2xl font-bold">{product.name}</h3>
                   <p className="text-[#e60076] font-semibold text-xl mt-2">
-                    ₹{product.basePrice}
+                    ₹{product.sellingPrice}
                     <span className="line-through text-gray-500 text-sm ml-2">
-                      ₹{product.sellingPrice}
+                      ₹{product.basePrice}
                     </span>
                   </p>
                   <p className="text-sm text-green-700 mt-1">
@@ -89,7 +85,8 @@ export default function FeaturedSlider({ products }: { products: Product[] }) {
             </SwiperSlide>
           );
         })}
-      </Swiper>
+        </Swiper>
+        </div>
     </div>
   );
 }

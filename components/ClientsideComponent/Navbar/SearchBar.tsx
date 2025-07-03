@@ -25,7 +25,7 @@ const SearchBar = () => {
       try {
         setLoading(true);
         const res = await fetch(
-          `https://cosmaticadmin.twilightparadox.com/product/?search=${encodeURIComponent(term)}`
+          `https://cosmaticadmin.twilightparadox.com/product/filter/?search=${encodeURIComponent(term)}`
         );
         const data = await res.json();
         console.log('🔍 API search results:', data.products); // Debug log
