@@ -59,3 +59,29 @@ body {
 .group:hover .image-rotate-once {
   animation: spin-y-once 0.7s ease-in-out 1;
 }
+
+/* ---------------------------------------- */
+/* ✅ Added: Outline Text and Slide Banner  */
+/* ---------------------------------------- */
+
+/* Outline text like the 'Frontend' image */
+.outline-text {
+  color: transparent;
+  -webkit-text-stroke: 1px #999;
+  text-stroke: 1px #999;
+}
+
+/* Scroll animation for banner */
+@keyframes scroll {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+/* Tailwind utility class to trigger scroll animation */
+.animate-scroll {
+  animation: scroll 15s linear infinite;
+}
