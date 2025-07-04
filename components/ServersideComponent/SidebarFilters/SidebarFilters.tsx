@@ -5,66 +5,58 @@ import PriceRangeSlider from '@/components/ClientsideComponent/PriceRangeSlider/
 
 interface Props {
   categories: Category[];
-  selectedCategory: string;
-  onCategoryChange: (id: string) => void;
+  selectedCategories: number[];
+  onCategoryChange: (id: number) => void;
   priceRange: [number, number];
   onPriceChange: (values: [number, number]) => void;
 }
 
 export default function SidebarFiltersClient({
   categories,
-  selectedCategory,
+  selectedCategories,
   onCategoryChange,
   priceRange,
   onPriceChange,
 }: Props) {
   return (
+    <div className="lg:w-1/5 w-full">
+      <aside className="sticky top-20 space-y-8">
 
-    <div className='lg:w-1/5 w-full' >
-  
-    <aside className=" sticky top-20 space-y-6">
-
-
-      <div className="bg-white border border-gray-300 shadow p-5 rounded">
-        <h2 className="text-lg font-semibold text-gray-800 mb-4">Categories</h2>
-        <div className="space-y-2">
-          <button
-            onClick={() => onCategoryChange('all')}
-            className={`block w-full text-left text-sm font-medium rounded px-4 py-2 transition cursor-pointer ${
-              selectedCategory === 'all'
-                ? 'bg-[#b0c9e8] text-neutral-900'
-                : 'hover:bg-gray-100 text-gray-800'
-            }`}
-          >
-            All
-          </button>
-          {categories.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => onCategoryChange(String(cat.id))}
-              className={`block w-full text-left text-sm font-medium rounded px-4 py-2 transition cursor-pointer ${
-                selectedCategory === String(cat.id)
-                  ? 'bg-[#b0c9e8] text-neutral-900'
-                  : 'hover:bg-gray-100 text-gray-800'
-              }`}
-            >
-              {cat.name}
-            </button>
-          ))}
+        {/* 🗂 Category Filter */}
+        <div className="bg-white border border-gray-200 shadow-sm p-3 rounded-xl">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4 border-b pb-2"> Categories</h2>
+          <div className="space-y-3">
+            {categories.map((cat) => (
+              <label
+                key={cat.id}
+                className="flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition p-2 my-3 rounded-lg cursor-pointer"
+              >
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={selectedCategories.includes(cat.id)}
+                    onChange={() => onCategoryChange(cat.id)}
+                    className="form-checkbox h-4 w-4 text-indigo-600 transition duration-200"
+                  />
+                  <span className="text-sm font-medium text-gray-700">{cat.name}</span>
+                </div>
+              </label>
+            ))}
+          </div>
         </div>
-      </div>
 
-      <PriceRangeSlider
-        min={10}
-        max={3999}
-        values={priceRange}
-        onChange={onPriceChange}
-      />
+        {/* 💰 Price Range Slider */}
+        <div className="bg-white border border-gray-200 shadow-sm p-2 rounded-xl">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4 border-b pb-1">💰 Price Range</h2>
+          <PriceRangeSlider
+            min={10}
+            max={3999}
+            values={priceRange}
+            onChange={onPriceChange}
+          />
+        </div>
+
       </aside>
-      </div>
+    </div>
   );
 }
-
-
-
-

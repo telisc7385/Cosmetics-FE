@@ -13,7 +13,7 @@ export default async function TestimonialSection() {
   const testimonials = data.testimonials;
  
   return (
-    <section className="py-7 bg-gray-50 ">
+    <section className="py-7 bg-gray-50 container mx-auto ">
       <div className="mb-10 px-[40px]">
         <SectionHeader
         title="What our happy clients say"

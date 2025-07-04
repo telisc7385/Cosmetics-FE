@@ -123,7 +123,7 @@ export default function ProductDetailClient({
                   width={80}
                   height={80}
                   loading="lazy"
-                  className="object-contain w-full h-full"
+                  className="object-cover w-full h-full"
                 />
               </div>
             ))}
@@ -210,13 +210,13 @@ export default function ProductDetailClient({
           <div className="flex gap-4 mt-4 flex-wrap">
             <button
               onClick={handleAddToCart}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-md font-semibold"
+              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-md font-semibold cursor-pointer"
             >
               Add to Bag
             </button>
-            <button className="border border-gray-300 px-6 py-2 rounded-md font-semibold">
+            {/* <button className="border border-gray-300 px-6 py-2 rounded-md font-semibold">
               ❤️ Wishlist
-            </button>
+            </button> */}
           </div>
 
           <div className="flex flex-wrap gap-6 mt-6 text-sm text-gray-700">

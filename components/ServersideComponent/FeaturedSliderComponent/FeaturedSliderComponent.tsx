@@ -10,7 +10,7 @@ export default async function FeaturedSliderComponent() {
 
   return (
     <>
-      <div className=' px-[40px]'>
+      <div className=' px-[40px] container mx-auto'>
       <SectionHeader 
   title="Shop Our Best Sellers" 
   subtitle="Trusted by Thousands, Loved for a Reason." 

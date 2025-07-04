@@ -47,8 +47,8 @@ export default function TopCategoriesClient({ categories }: Props) {
   }, [selectedId]);
 
   return (
-    <section className="py-8 px-4 md:px-10 bg-gray-50">
-      <div className="container mx-auto">
+    <section className="py-8 px-4 md:px-10 bg-gray-50 container mx-auto">
+      <div className="">
         <div className="mb-5">
           <h2 className="text-3xl font-bold mb-2">Top Category Picks</h2>
           <p className="text-gray-600">

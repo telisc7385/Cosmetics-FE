@@ -50,7 +50,7 @@ export default function HotListWrapper() {
   }
 
   return (
-    <div className="py-5 px-4 md:px-10">
+    <div className="py-5 px-4 md:px-10 container mx-auto">
       <SectionHeader
         title="Hot List"
         subtitle="Out the most popular and trending products."

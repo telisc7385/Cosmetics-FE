@@ -1,26 +1,3 @@
- 
-// import { createContext } from "react";
-// // Import CartItem from its dedicated types file
-// import { CartItem } from "@/types/cart"; // Ensure this path is correct
- 
-// interface LoggedInCartContextType {
-//   items: CartItem[];
-//   loading: boolean;
-//   error: string | null;
-//   addCartItem: (item: Omit<CartItem, "cartItemId">) => Promise<void>;
-//   incrementItemQuantity: (cartItemId: number) => Promise<void>;
-//   decrementItemQuantity: (cartItemId: number) => Promise<void>;
-//   removeCartItem: (cartItemId: number) => Promise<void>;
-//   clearCart: () => Promise<void>;
-//   refetchCart: () => Promise<void>;
-// }
- 
-// const LoggedInCartContext = createContext<LoggedInCartContextType | undefined>(
-//   undefined
-// );
- 
-// export default LoggedInCartContext;
- 
 import { fetchCategoryById } from "@/api/fetchCategoryById";
 import { fetchProductBySlug } from "@/api/fetchProductBySlug";
 import ProductDetailClient from "@/components/productDetailPage/ProductDetailPage";

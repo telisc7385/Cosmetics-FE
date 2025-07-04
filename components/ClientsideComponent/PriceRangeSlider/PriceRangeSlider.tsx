@@ -29,16 +29,7 @@ const PriceRangeSlider = ({ min, max, values, onChange }: Props) => {
           <div
             {...props}
             className="w-full h-[6px] rounded bg-gray-200"
-            // style={{
-            //   ...props.style,
-            //   background: getTrackBackground({
-            //     values,
-            //     colors: ["#ccc", "#f97316", "#ccc"],
-            //     min,
-            //     max,
-            //   }),
-            // }}
-
+       
             style={{
               ...props.style,
               background: `linear-gradient(to right, #e0d4f7 ${((values[0] - min) / (max - min)) * 100}%, #966ad7 ${((values[0] - min) / (max - min)) * 100}% ${((values[1] - min) / (max - min)) * 100}%, #e0d4f7 ${((values[1] - min) / (max - min)) * 100}%)`,

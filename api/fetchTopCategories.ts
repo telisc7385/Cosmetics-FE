@@ -38,7 +38,7 @@ export async function fetchTopCategories(): Promise<Category[]> {
       throw new Error("NEXT_PUBLIC_BASE_URL environment variable is not defined");
     }
 
-    const response = await fetch(`${BASE_URL}/category`, {
+    const response = await fetch(`${BASE_URL}/category/frontend`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
