@@ -9,7 +9,7 @@ import { selectIsLoggedIn } from "@/store/slices/authSlice";
 import { useLoggedInCart } from "@/CartProvider/LoggedInCartProvider";
 import { Product, ProductVariant } from "@/types/product";
 import { useRouter } from "next/navigation";
-import toast from "react-hot-toast"; // <--- Added this import
+import toast from "react-hot-toast";
 
 interface Props {
   product: Product;
@@ -78,14 +78,13 @@ const ProductCard = ({ product }: Props) => {
     if (isLoggedIn) {
       try {
         await addCartItem(itemPayload);
-        // ✅ Redirect removed
-        toast.success(`${product.name} added to cart!`); // <--- Added toast for logged-in user
+        toast.success(`${product.name} added to cart!`);
       } catch (error) {
         console.error(
           "ProductCard: Failed to add item to logged-in cart:",
           error
         );
-        toast.error(`Failed to add ${product.name} to cart. Please try again.`); // Changed alert to toast.error
+        toast.error(`Failed to add ${product.name} to cart. Please try again.`);
       }
     } else {
       dispatch(
@@ -94,8 +93,7 @@ const ProductCard = ({ product }: Props) => {
           cartItemId: Date.now() * -1 - Math.floor(Math.random() * 1000),
         })
       );
-      // ✅ Redirect removed for guest as well
-      toast.success(`${product.name} added to cart!`); // <--- Added toast for guest user
+      toast.success(`${product.name} added to cart!`);
     }
   };
 
@@ -115,7 +113,7 @@ const ProductCard = ({ product }: Props) => {
         </div>
       )}
 
-      {/* Wrap entire upper part if no variants */}
+      {/* No Variant */}
       {!product.variants || product.variants.length === 0 ? (
         <Link href={`/product/${product.slug}`}>
           <div>
@@ -137,10 +135,10 @@ const ProductCard = ({ product }: Props) => {
                 className="font-bold text-base"
                 style={{ color: "#213E5A" }}
               >
-                ₹{parseFloat(product.sellingPrice).toFixed(2)}
+                ₹{parseFloat(product.basePrice).toFixed(2)}
               </span>
               <span className="text-sm text-gray-400 line-through">
-                ₹{parseFloat(product.basePrice).toFixed(2)}
+                ₹{parseFloat(product.sellingPrice).toFixed(2)}
               </span>
             </div>
           </div>
@@ -164,11 +162,14 @@ const ProductCard = ({ product }: Props) => {
             <span className="font-bold text-base" style={{ color: "#213E5A" }}>
               ₹
               {selectedVariant
-                ? selectedVariant.selling_price.toFixed(2)
+                ? selectedVariant.base_price.toFixed(2)
                 : parseFloat(product.basePrice).toFixed(2)}
             </span>
             <span className="text-sm text-gray-400 line-through">
-              ₹{parseFloat(product.sellingPrice).toFixed(2)}
+              ₹
+              {selectedVariant
+                ? selectedVariant.selling_price.toFixed(2)
+                : parseFloat(product.sellingPrice).toFixed(2)}
             </span>
           </div>
         </div>

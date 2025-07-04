@@ -18,6 +18,7 @@ export interface ProductVariantImage {
 }
  
 export interface ProductVariant {
+  base_price: any;
   id: number;
   productId: number;
   name: string | null;
