@@ -22,7 +22,7 @@ const animation: KeenSliderPlugin = (slider) => {
 };
 
 interface HotListClientProps {
-  products: Product[]; // ✅ Updated type here too
+  products: Product[];
 }
 
 const HotListClient = ({ products }: HotListClientProps) => {
@@ -63,34 +63,36 @@ const HotListClient = ({ products }: HotListClientProps) => {
 
   return (
     <section className="my-4 px-4 sm:px-10">
-      <h2 className="text-xl font-bold mb-2">Hot List</h2>
-      <p className="text-sm text-gray-500 mb-4">
-        Check out the most popular and trending products right now.
-      </p>
+      <div className="container mx-auto">
+        {" "}
+        {/* ✅ Container added here */}
+        <h2 className="text-xl font-bold mb-2">Hot List</h2>
+        <p className="text-sm text-gray-500 mb-4">
+          Check out the most popular and trending products right now.
+        </p>
+        <div className="relative">
+          {/* Arrows */}
+          <button
+            onClick={handlePrev}
+            className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 shadow p-2 rounded-full bg-white hover:bg-gray-100"
+          >
+            <CircleChevronLeft size={30} />
+          </button>
+          <button
+            onClick={handleNext}
+            className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 shadow p-2 rounded-full bg-white hover:bg-gray-100"
+          >
+            <CircleChevronRight size={30} />
+          </button>
 
-      <div className="relative">
-        {/* Arrows */}
-        <button
-          onClick={handlePrev}
-          className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 shadow p-2 rounded-full bg-white hover:bg-gray-100"
-        >
-          <CircleChevronLeft size={30} />
-        </button>
-        <button
-          onClick={handleNext}
-          className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 shadow p-2 rounded-full bg-white hover:bg-gray-100"
-        >
-          <CircleChevronRight size={30} />
-        </button>
-
-        {/* Slider */}
-        <div ref={sliderRef} className="keen-slider">
-          {products.map((product) => (
-            <div key={product.id} className="keen-slider__slide">
-              <ProductCard product={product} />
-              
-            </div>
-          ))}
+          {/* Slider */}
+          <div ref={sliderRef} className="keen-slider">
+            {products.map((product) => (
+              <div key={product.id} className="keen-slider__slide">
+                <ProductCard product={product} />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>
@@ -98,7 +100,3 @@ const HotListClient = ({ products }: HotListClientProps) => {
 };
 
 export default HotListClient;
-
-
-
-

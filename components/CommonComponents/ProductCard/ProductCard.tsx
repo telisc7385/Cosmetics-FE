@@ -9,6 +9,7 @@ import { selectIsLoggedIn } from "@/store/slices/authSlice";
 import { useLoggedInCart } from "@/CartProvider/LoggedInCartProvider";
 import { Product, ProductVariant } from "@/types/product";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast"; // <--- Added this import
 
 interface Props {
   product: Product;
@@ -78,12 +79,13 @@ const ProductCard = ({ product }: Props) => {
       try {
         await addCartItem(itemPayload);
         // ✅ Redirect removed
+        toast.success(`${product.name} added to cart!`); // <--- Added toast for logged-in user
       } catch (error) {
         console.error(
           "ProductCard: Failed to add item to logged-in cart:",
           error
         );
-        alert("Failed to add product to cart. Please try again.");
+        toast.error(`Failed to add ${product.name} to cart. Please try again.`); // Changed alert to toast.error
       }
     } else {
       dispatch(
@@ -93,6 +95,7 @@ const ProductCard = ({ product }: Props) => {
         })
       );
       // ✅ Redirect removed for guest as well
+      toast.success(`${product.name} added to cart!`); // <--- Added toast for guest user
     }
   };
 

@@ -10,7 +10,6 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  /* Add Josefin Sans to the theme variables if you plan to use it in Tailwind */
   --font-josefin-sans: var(--font-josefin-sans);
 }
 
@@ -24,11 +23,10 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  /* Apply Josefin Sans using its CSS variable, with fallbacks */
   font-family: var(--font-josefin-sans), Arial, Helvetica, sans-serif;
 }
 
-/* Navigation arrows of */
+/* Navigation arrows of Swiper */
 .swiper-button-next,
 .swiper-button-prev {
   width: 16px !important;
@@ -39,4 +37,25 @@ body {
 .swiper-button-next::after,
 .swiper-button-prev::after {
   font-size: 12px !important;
+}
+
+/* -------------------------------- */
+/* ✅ Custom Animation: Spin Once  */
+/* -------------------------------- */
+@keyframes spin-y-once {
+  0% {
+    transform: rotateY(0deg);
+  }
+  100% {
+    transform: rotateY(360deg);
+  }
+}
+
+.image-rotate-once {
+  transition: transform 0.7s ease-in-out;
+  transform-style: preserve-3d;
+}
+
+.group:hover .image-rotate-once {
+  animation: spin-y-once 0.7s ease-in-out 1;
 }

@@ -56,6 +56,8 @@ export interface ProductCategory {
 }
  
 export interface Product {
+  ratingCount: any;
+  rating: any;
   imageUrl: string
   productId:number
   id: number;

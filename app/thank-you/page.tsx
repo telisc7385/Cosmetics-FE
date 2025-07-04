@@ -40,7 +40,6 @@ interface PaymentInfo {
 
 interface RawOrderItemFromApi {
   image: string;
-  // This matches the 'items' array in your API response
   id: number; // This is product ID or similar, not necessarily order_item_id
   variant_id: number | null;
   name: string;
@@ -49,12 +48,8 @@ interface RawOrderItemFromApi {
   quantity: number;
   category: string;
   specification: string;
-  // IMPORTANT: Your API response for items *doesn't* include an 'image' directly.
-  // You'll need a way to get the image, either from a product/variant data store
-  // or a generic placeholder. For now, I'll add a placeholder function.
 }
 
-// The DetailedOrder now reflects the structure of an item within the 'results' array
 interface DetailedOrder {
   id: string; // e.g., "COM-48-Guest"
   purchased_item_count: number;
@@ -64,7 +59,6 @@ interface DetailedOrder {
   items: RawOrderItemFromApi[]; // Array of items as returned by your API
 }
 
-// The overall API response shape
 interface OrderListApiResponse {
   message: string;
   total_pages: number;
@@ -74,17 +68,12 @@ interface OrderListApiResponse {
 }
 
 // Helper function to get product image (you'll need to implement this properly)
-// For now, it returns a placeholder. You might need to fetch product details separately
-// or have a mapping of product IDs to image URLs.
 const getProductImageUrl = (
   productId: number,
   variantId: number | null
 ): string => {
-  // In a real application, you might:
-  // 1. Have a map/cache of product images.
-  // 2. Make another API call to get product details (less efficient).
-  // 3. Assume a consistent URL structure for product images based on ID.
-  // For now, let's use a generic placeholder:
+  // In a real application, you might fetch real images.
+  // For now, it returns a generic placeholder.
   return `https://via.placeholder.com/80?text=P${productId}`; // Placeholder
 };
 
@@ -96,6 +85,7 @@ const ThankYouPage = () => {
   const [order, setOrder] = useState<DetailedOrder | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showCelebration, setShowCelebration] = useState(false); // State for celebration effect
 
   const shippingCharges = 0; // Assuming 0 for now
 
@@ -110,27 +100,17 @@ const ThankYouPage = () => {
       try {
         setLoading(true);
         setError(null);
-        // Using the updated apiCore which now handles its own base URL prepending
-        // and uses the correct response type (OrderListApiResponse)
         const responseData = await apiCore<OrderListApiResponse>(
-          `/order/detail/${orderId}`, // This is now a relative path
+          `/order/detail/${orderId}`,
           "GET",
           undefined,
           token
         );
 
         if (responseData.results && responseData.results.length > 0) {
-          const fetchedOrder = responseData.results[0]; // Access the first item in the results array
-
-          // Re-evaluating the authentication logic:
-          // If a token exists, it's a logged-in user. We trust the API to return the correct order.
-          // If no token exists, it's a guest user. We assume guest orders can be viewed by anyone with the orderId.
-          // The API response *doesn't* directly have `user_id` on the `DetailedOrder` anymore.
-          // So the previous `data.order.user_id === null` check is no longer directly applicable.
-          // The API itself should enforce if a guest order (no token) can view a logged-in user's order.
-          // For now, the successful fetch means the API allowed the access.
-
+          const fetchedOrder = responseData.results[0];
           setOrder(fetchedOrder);
+          setShowCelebration(true); // Trigger celebration effect on successful load
         } else {
           setError("Order not found or no results returned for this ID.");
           toast.error("Order not found.");
@@ -161,11 +141,10 @@ const ThankYouPage = () => {
     };
 
     fetchOrderDetails();
-  }, [orderId, token]); // Dependencies for useEffect
+  }, [orderId, token]);
 
   const handleDownloadInvoice = () => {
     if (order?.order_info.invoice_url) {
-      // Assuming invoice_url is also a relative path and needs base URL
       const invoiceFullUrl = `${process.env.NEXT_PUBLIC_BASE_URL}${order.order_info.invoice_url}`;
       window.open(invoiceFullUrl, "_blank");
       toast.success("Downloading invoice...");
@@ -258,8 +237,66 @@ const ThankYouPage = () => {
 
   // Main Thank You Page content with order details
   return (
-    <div className="container mx-auto p-6 bg-gray-50 min-h-screen">
-      <div className="bg-gradient-to-r from-green-400 to-green-600 text-white p-6 rounded-lg shadow-md mb-8 text-center">
+    <div className="relative container mx-auto p-4 sm:p-6 bg-gray-50 min-h-screen">
+      {/* Celebration Effect Overlay */}
+      {showCelebration && (
+        <div className="celebration-effect">
+          {/* Confetti Burst */}
+          {Array.from({ length: 150 }).map((_, i) => (
+            <div
+              key={`confetti-${i}`}
+              className="confetti"
+              style={{
+                left: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 2}s`,
+                backgroundColor: `hsl(${Math.random() * 360}, 70%, 50%)`,
+                width: `${Math.random() * 8 + 4}px`,
+                height: `${Math.random() * 8 + 4}px`,
+                transform: `rotate(${Math.random() * 360}deg)`,
+              }}
+            ></div>
+          ))}
+        </div>
+      )}
+
+      {/* Global CSS for the celebration effect (add this to your global.css or equivalent) */}
+      <style jsx global>{`
+        .celebration-effect {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          pointer-events: none;
+          overflow: hidden;
+          z-index: 1000;
+        }
+
+        .confetti {
+          position: absolute;
+          background-color: #f0f; /* Fallback color */
+          opacity: 0;
+          transform: translateY(0) rotate(0deg);
+          animation: confetti-fall 3s ease-out forwards;
+        }
+
+        @keyframes confetti-fall {
+          0% {
+            opacity: 0;
+            transform: translateY(-100px) rotate(0deg);
+          }
+          10% {
+            opacity: 1;
+          }
+          100% {
+            opacity: 0;
+            transform: translateY(100vh) rotate(720deg);
+          }
+        }
+      `}</style>
+
+      {/* Green Container (Now with max-w-4xl for consistent width) */}
+      <div className="max-w-4xl mx-auto bg-gradient-to-r from-green-400 to-green-600 text-white p-6 rounded-lg shadow-md mb-8 text-center sm:p-8">
         <svg
           className="w-20 h-20 text-white mx-auto mb-4 animate-bounce"
           fill="none"
@@ -285,7 +322,8 @@ const ThankYouPage = () => {
         </p>
       </div>
 
-      <div className="bg-white p-8 rounded-lg shadow-lg max-w-4xl mx-auto">
+      <div className="bg-white p-6 rounded-lg shadow-lg max-w-4xl mx-auto sm:p-8">
+        {/* Responsive grid for summary and customer info */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8 mb-6 border-b pb-4">
           <div>
             <h2 className="text-xl font-semibold text-gray-700 mb-2">
@@ -341,6 +379,7 @@ const ThankYouPage = () => {
           </div>
         </div>
 
+        {/* Responsive grid for addresses */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8 mb-6 border-b pb-4">
           <div>
             <h3 className="text-xl font-semibold text-gray-700 mb-2">
@@ -366,14 +405,14 @@ const ThankYouPage = () => {
             order.items.map((item) => (
               <li
                 key={item.id}
-                className="flex items-center gap-4 border p-4 rounded-md bg-gray-50"
+                className="flex flex-col sm:flex-row items-start sm:items-center gap-4 border p-4 rounded-md bg-gray-50"
               >
                 <Image
                   src={item.image} // Use helper function for image
                   alt={item.name}
                   width={80}
                   height={80}
-                  className="w-20 h-20 object-cover rounded"
+                  className="w-20 h-20 object-cover rounded flex-shrink-0"
                 />
                 <div className="flex-grow">
                   <p className="font-medium text-gray-900">{item.name}</p>
@@ -387,7 +426,7 @@ const ThankYouPage = () => {
                     ₹{item.unit_price.toFixed(2)} each
                   </p>
                 </div>
-                <div className="text-lg font-bold text-gray-900">
+                <div className="text-lg font-bold text-gray-900 mt-2 sm:mt-0 sm:ml-auto">
                   ₹{(item.quantity * item.unit_price).toFixed(2)}
                 </div>
               </li>
@@ -422,11 +461,11 @@ const ThankYouPage = () => {
           </div>
         </div>
 
-        {/* Invoice Download Button */}
-        <div className="mt-8 text-center">
+        {/* Invoice Download Button and Continue Shopping */}
+        <div className="mt-8 text-center space-y-4 sm:space-y-0 sm:flex sm:justify-center sm:space-x-4">
           <button
             onClick={handleDownloadInvoice}
-            className="inline-flex items-center bg-blue-600 text-white font-semibold py-3 px-8 rounded-lg hover:bg-blue-700 transition-colors duration-300 text-lg shadow-md"
+            className="inline-flex items-center bg-blue-600 text-white font-semibold py-3 px-8 rounded-lg hover:bg-blue-700 transition-colors duration-300 text-lg shadow-md w-full sm:w-auto"
             disabled={!order.order_info.invoice_url}
           >
             <svg
@@ -450,7 +489,7 @@ const ThankYouPage = () => {
           )}
           <Link
             href="/"
-            className="block bg-pink-600 text-white py-3 px-6 rounded-lg text-lg font-semibold hover:bg-pink-700 transition-colors duration-300 mt-8"
+            className="block bg-pink-600 text-white py-3 px-6 rounded-lg text-lg font-semibold hover:bg-pink-700 transition-colors duration-300 w-full sm:w-auto"
           >
             Continue Shopping
           </Link>

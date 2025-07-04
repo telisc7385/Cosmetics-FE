@@ -1,10 +1,4 @@
 import Image from "next/image";
-import {
-  FaFacebookF,
-  FaInstagram,
-  FaXTwitter,
-  FaPinterestP,
-} from "react-icons/fa6";
 
 interface Feature {
   src: string;
@@ -30,6 +24,12 @@ const features: Feature[] = [
   },
 ];
 
+const extraSection = {
+  title: "Secure Payments",
+  desc: "100% Payment Protection | Multiple Payment Modes",
+  icon: "/secure3.png", // Add your own icon here
+};
+
 const FeaturesBanner = () => {
   return (
     <div className="bg-gradient-to-r from-[#1d3b60] to-purple-400 text-white py-6 px-4">
@@ -49,42 +49,19 @@ const FeaturesBanner = () => {
           </div>
         ))}
 
-        {/* Social Section */}
-        {/* Social Section */}
-        <div className="text-center mt-4 md:mt-0 md:text-left">
-          <p className="font-semibold mb-2">Follow us on social media</p>
-          <div className="flex justify-center md:justify-start gap-3">
-            {/* Facebook */}
-            <div className="group rounded-full bg-white p-2 transition duration-300 hover:bg-blue cursor-pointer">
-              <FaFacebookF
-                size={14}
-                className="text-black group-hover:text-white transition"
-              />
-            </div>
-
-            {/* Instagram */}
-            <div className="group rounded-full bg-white p-2 transition duration-300 hover:bg-pink-500 cursor-pointer">
-              <FaInstagram
-                size={14}
-                className="text-black group-hover:text-white transition"
-              />
-            </div>
-
-            {/* Twitter/X */}
-            <div className="group rounded-full bg-white p-2 transition duration-300 hover:bg-black cursor-pointer">
-              <FaXTwitter
-                size={14}
-                className="text-black group-hover:text-white transition"
-              />
-            </div>
-
-            {/* Pinterest */}
-            <div className="group rounded-full bg-white p-2 transition duration-300 hover:bg-red-600 cursor-pointer">
-              <FaPinterestP
-                size={14}
-                className="text-black group-hover:text-white transition"
-              />
-            </div>
+        {/* ✅ Replaced Social Icons Section with New Section */}
+        <div className="flex items-center space-x-3 w-full md:w-auto">
+          <div className="bg-white rounded-full p-2">
+            <Image
+              src={extraSection.icon}
+              alt={extraSection.title}
+              width={30}
+              height={30}
+            />
+          </div>
+          <div>
+            <h4 className="font-semibold">{extraSection.title}</h4>
+            <p className="text-sm">{extraSection.desc}</p>
           </div>
         </div>
       </div>

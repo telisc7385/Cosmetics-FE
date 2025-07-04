@@ -2,15 +2,13 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Josefin_Sans } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/ServersideComponent/Navbar/NavbarComponent"; 
+import Navbar from "@/components/ServersideComponent/Navbar/NavbarComponent";
 
 import { Toaster } from "react-hot-toast";
 import Footer from "@/components/ServersideComponent/Footer/Footer";
 import { fetchTopCategories } from "@/api/fetchTopCategories";
 import { getNewArrivalProducts } from "@/api/fetchNewArrivalProducts";
 import ReduxProviderWrapper from "@/CartProvider/ReduxProviderWrapper";
-
-
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,7 +36,6 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
   const topCategories = await fetchTopCategories();
   const newArrivals = await getNewArrivalProducts();
   return (
@@ -47,10 +44,10 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${josefinSans.variable} antialiased`}
       >
         <ReduxProviderWrapper>
-          <Toaster position="top-right" />
+          <Toaster position="top-center" />
           <Navbar />
           <main className="pt-0">{children}</main>
-          <Footer topCategories={topCategories}  newArrivals={newArrivals}  />
+          <Footer topCategories={topCategories} newArrivals={newArrivals} />
         </ReduxProviderWrapper>
       </body>
     </html>

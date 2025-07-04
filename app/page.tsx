@@ -9,22 +9,20 @@ import GalleryPage from "@/components/ServersideComponent/GalleryPage/GalleryPag
 import HotListWrapper from "@/components/HotList/HotListWrapper";
 import NewsletterSignup from "@/components/ClientsideComponent/NewsletterSignup/NewsletterSignup";
 
-
 export default async function HomePage() {
-
   return (
     <div>
       <HeroBanner />
       <CategorySection />
+      <FeaturesBanner />
       <TopCategories />
       <HotListWrapper></HotListWrapper>
-      <WhyChooseUs /> 
+      <WhyChooseUs />
       <FeaturedSliderComponent />
       <TestimonialsSection />
       <GalleryPage />
-      <FeaturesBanner />
-      <NewsletterSignup />
 
+      <NewsletterSignup />
     </div>
   );
 }

@@ -1,9 +1,11 @@
-// components/Footer.tsx
 import { Category } from "@/types/category";
 import { Product } from "@/types/product";
 import Image from "next/image";
 import Link from "next/link";
 import { getCompanySettings } from "@/api/CompanyApi";
+import { getNavbarData } from "@/api/NavbarApi"; // <-- Import for nav items
+import { NavItem } from "@/types/nav"; // <-- Import types
+import { Comfortaa } from "next/font/google";
 
 const Footer = async ({
   topCategories,
@@ -14,6 +16,17 @@ const Footer = async ({
 }) => {
   const settingsRes = await getCompanySettings();
   const company = settingsRes?.result?.[0];
+
+  // 🚀 Fetch dynamic nav items
+  let navItems: NavItem[] = [];
+  try {
+    const navResponse = await getNavbarData();
+    if (Array.isArray(navResponse.result)) {
+      navItems = navResponse.result.filter((item) => item.is_active);
+    }
+  } catch (error) {
+    console.error("Footer: Failed to fetch nav items:", error);
+  }
 
   return (
     <footer className="bg-white border-t text-gray-700">
@@ -28,23 +41,27 @@ const Footer = async ({
             className="mx-auto"
           />
           <p className="text-sm text-gray-500 leading-relaxed max-w-sm mx-auto">
-            Skincare that soothes, makeup that empowers. Designed to bring out
-            your best.
+            {company.description}
           </p>
         </div>
 
         {/* Wrapper for remaining columns */}
         <div className="grid grid-cols-2 sm:grid-cols-2 gap-6 col-span-full lg:contents">
-          {/* Column 2: Quick Links (from navItems) */}
+          {/* Column 2: Quick Links (now dynamic) */}
           <div className="text-center lg:text-left">
             <h4 className="font-semibold text-base mb-4 text-black">
               Quick Links
             </h4>
             <ul className="space-y-2 text-gray-600">
-              <li className="cursor-pointer hover:text-black">Home</li>
-              <li className="cursor-pointer hover:text-black">Shop</li>
-              <li className="cursor-pointer hover:text-black">Blog</li>
-              <li className="cursor-pointer hover:text-black">About</li>
+              {navItems.map((item) => (
+                <li key={item.id}>
+                  <Link href={item.link || "#"}>
+                    <span className="cursor-pointer hover:text-black">
+                      {item.name}
+                    </span>
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
@@ -95,34 +112,34 @@ const Footer = async ({
               <li className="flex items-center gap-4 justify-center lg:justify-start mt-2">
                 <Link href={company?.facebook_link || "#"} target="_blank">
                   <Image
-                    src="/icons/facebook.svg"
+                    src={company.facebook_icon}
                     alt="Facebook"
-                    width={20}
-                    height={20}
+                    width={60}
+                    height={60}
                   />
                 </Link>
                 <Link href={company?.instagram_link || "#"} target="_blank">
                   <Image
-                    src="/icons/instagram.svg"
+                    src={company.instagram_icon}
                     alt="Instagram"
-                    width={20}
-                    height={20}
+                    width={60}
+                    height={60}
                   />
                 </Link>
                 <Link href={company?.twitter_link || "#"} target="_blank">
                   <Image
-                    src="/icons/twitter.svg"
+                    src={company.twitter_icon}
                     alt="Twitter"
-                    width={20}
-                    height={20}
+                    width={60}
+                    height={60}
                   />
                 </Link>
                 <Link href={company?.linkedin_link || "#"} target="_blank">
                   <Image
-                    src="/icons/linkedin.svg"
+                    src={company.linkedin_icon}
                     alt="LinkedIn"
-                    width={20}
-                    height={20}
+                    width={60}
+                    height={60}
                   />
                 </Link>
               </li>

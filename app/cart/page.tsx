@@ -17,6 +17,8 @@ import { useLoggedInCart } from "@/CartProvider/LoggedInCartProvider";
 import { useRouter } from "next/navigation";
 import { apiCore } from "@/api/ApiCore"; // Assuming apiCore is available for checkout API calls
 import { selectToken } from "@/store/slices/authSlice"; // To get token for checkout API
+import toast from "react-hot-toast"; // <--- Import toast
+import { FiTrash2 } from "react-icons/fi"; // <--- Import trash icon
 
 // Import Lottie player and the animation JSON
 import Lottie from "react-lottie-player";
@@ -97,11 +99,21 @@ const CartPage = () => {
     }
   };
 
-  const handleRemove = (cartItemId: number) => {
+  const handleRemove = async (cartItemId: number) => {
+    const itemToRemove = items.find((item) => item.cartItemId === cartItemId);
+    if (!itemToRemove) return; // Should not happen
+
     if (isLoggedIn) {
-      removeLoggedInItem(cartItemId);
+      try {
+        await removeLoggedInItem(cartItemId); // Await the removal
+        toast.error(`${itemToRemove.name} removed from cart.`); // <--- Changed to toast.error for logged-in user
+      } catch (err) {
+        console.error("Failed to remove item from logged-in cart:", err);
+        toast.error(`Failed to remove ${itemToRemove.name}. Please try again.`);
+      }
     } else {
       dispatch(removeFromCart(cartItemId));
+      toast.error(`${itemToRemove.name} removed from cart.`); // <--- Changed to toast.error for guest user
     }
   };
 
@@ -111,6 +123,7 @@ const CartPage = () => {
     } else {
       dispatch(clearGuestCart());
     }
+    toast.success("All items removed from cart."); // Optional: Add toast for clear all
   };
 
   const prepareCartForCheckoutAPI = () => {
@@ -210,9 +223,10 @@ const CartPage = () => {
                   </div>
                   <button
                     onClick={() => handleRemove(item.cartItemId)}
-                    className="text-sm text-red-500 hover:text-red-700 font-medium mt-3 text-left"
+                    className="text-red-500 hover:text-red-700 font-medium mt-3 text-left p-1 rounded-full hover:bg-red-50 transition-colors"
+                    aria-label={`Remove ${item.name}`} // Good for accessibility
                   >
-                    REMOVE
+                    <FiTrash2 className="w-5 h-5" />
                   </button>
                 </div>
               </div>
