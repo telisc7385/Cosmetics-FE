@@ -39,12 +39,13 @@ export default function UserAvatar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Show Sign In / Sign Up if user not logged in
   if (!customer) {
     return (
       <Link href="/auth" aria-label="Login">
-        <div className="flex flex-col items-center text-xs text-gray-700">
+        <div className="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600">
           <FiUser size={20} />
-          <span>Profile</span>
+          <span className="whitespace-nowrap">Sign In / Sign Up</span>
         </div>
       </Link>
     );
