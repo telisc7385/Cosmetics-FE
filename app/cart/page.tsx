@@ -78,15 +78,21 @@ const CartPage = () => {
   const error = isLoggedIn ? loggedInError : null;
 
   const handleIncrement = (cartItemId: number) => {
-    isLoggedIn
-      ? incrementLoggedInItem(cartItemId)
-      : dispatch(incrementQuantity(cartItemId));
+    // Refactored to if/else to satisfy ESLint's no-unused-expressions
+    if (isLoggedIn) {
+      incrementLoggedInItem(cartItemId);
+    } else {
+      dispatch(incrementQuantity(cartItemId));
+    }
   };
 
   const handleDecrement = (cartItemId: number) => {
-    isLoggedIn
-      ? decrementLoggedInItem(cartItemId)
-      : dispatch(decrementQuantity(cartItemId));
+    // Refactored to if/else to satisfy ESLint's no-unused-expressions
+    if (isLoggedIn) {
+      decrementLoggedInItem(cartItemId);
+    } else {
+      dispatch(decrementQuantity(cartItemId));
+    }
   };
 
   const handleRemove = async (cartItemId: number) => {
@@ -108,7 +114,12 @@ const CartPage = () => {
   };
 
   const handleClearCart = () => {
-    isLoggedIn ? clearLoggedInCart() : dispatch(clearGuestCart());
+    // Refactored to if/else to satisfy ESLint's no-unused-expressions
+    if (isLoggedIn) {
+      clearLoggedInCart();
+    } else {
+      dispatch(clearGuestCart());
+    }
     toast.success("All items removed from cart.");
   };
 
