@@ -18,7 +18,7 @@ interface Props {
 
 type SortOrder = 'price_asc' | 'price_desc';
 
-const PRODUCTS_PER_PAGE = 10;
+const PRODUCTS_PER_PAGE = 8;
 
 const ShopPageClient: React.FC<Props> = ({ categories }) => {
   const [selectedCategories, setSelectedCategories] = useState<Set<number>>(new Set());
@@ -150,7 +150,7 @@ const ShopPageClient: React.FC<Props> = ({ categories }) => {
           )}
 
           {/* Pagination Controls */}
-          <div className="mt-6 flex gap-4 items-center">
+          {/* <div className="mt-6 flex gap-4 items-center">
             <button
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
@@ -168,7 +168,31 @@ const ShopPageClient: React.FC<Props> = ({ categories }) => {
             >
               Next
             </button>
-          </div>
+          </div> */}          
+{totalPages > 1 && (
+  <div className="mt-6 flex gap-4 items-center">
+    <button
+      onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+      disabled={currentPage === 1}
+      className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+    >
+      Previous
+    </button>
+    <span>
+      Page {currentPage} of {totalPages}
+    </span>
+    <button
+      onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+      disabled={currentPage === totalPages}
+      className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+    >
+      Next
+    </button>
+  </div>
+)}
+
+
+
         </div>
       </div>
     </div>
@@ -176,3 +200,4 @@ const ShopPageClient: React.FC<Props> = ({ categories }) => {
 };
 
 export default ShopPageClient; 
+
