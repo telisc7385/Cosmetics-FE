@@ -1,18 +1,17 @@
-'use client';
+"use client";
 
-import { subscribeToNewsletter } from '@/components/ServersideComponent/NewsletterAction/NewsletterAction';
-import { RootState } from '@/store/store';
-import { useState } from 'react';
-import toast from 'react-hot-toast';
-import { useSelector } from 'react-redux';
-
+import { subscribeToNewsletter } from "@/components/ServersideComponent/NewsletterAction/NewsletterAction";
+import { RootState } from "@/store/store";
+import { useState } from "react";
+import toast from "react-hot-toast";
+import { useSelector } from "react-redux";
 
 export default function NewsletterSignup() {
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // ✅ Extract token from Redux
-  const token = useSelector((state: RootState) => state.auth.token); // adjust `auth.token` based on your slice
+  // ✅ Extract token from Redux but unused intentionally
+  const token = useSelector((state: RootState) => state.auth.token); // eslint-disable-line @typescript-eslint/no-unused-vars
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -25,13 +24,13 @@ export default function NewsletterSignup() {
     // }
 
     const formData = new FormData();
-    formData.append('email', email);
+    formData.append("email", email);
 
     const res = await subscribeToNewsletter(formData);
 
     if (res.success) {
       toast.success(res.message);
-      setEmail('');
+      setEmail("");
     } else {
       toast.error(res.message);
     }
@@ -46,7 +45,10 @@ export default function NewsletterSignup() {
           Join Our <span className="text-[#9b59b6]">Newsletter</span> Now
         </h2>
 
-        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4 justify-center">
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col sm:flex-row gap-4 justify-center"
+        >
           <input
             type="email"
             name="email"
@@ -61,7 +63,7 @@ export default function NewsletterSignup() {
             className="bg-[#9b59b6] hover:bg-[#8e44ad] text-[#f3f6f7] px-6 py-2 rounded-md"
             disabled={isSubmitting}
           >
-            {isSubmitting ? 'Subscribing...' : 'Subscribe'}
+            {isSubmitting ? "Subscribing..." : "Subscribe"}
           </button>
         </form>
       </div>

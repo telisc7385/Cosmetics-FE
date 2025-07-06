@@ -1,18 +1,11 @@
 import { Category } from "@/types/category";
-import { Product } from "@/types/product";
 import Image from "next/image";
 import Link from "next/link";
 import { getCompanySettings } from "@/api/CompanyApi";
 import { getNavbarData } from "@/api/NavbarApi";
 import { NavItem } from "@/types/nav";
 
-const Footer = async ({
-  topCategories,
-  newArrivals,
-}: {
-  topCategories: Category[];
-  newArrivals: Product[];
-}) => {
+const Footer = async ({ topCategories }: { topCategories: Category[] }) => {
   const settingsRes = await getCompanySettings();
   const company = settingsRes?.result?.[0];
 
@@ -39,9 +32,9 @@ const Footer = async ({
               height={70}
               className="mx-auto lg:mx-0"
             />
-            <p className="text-sm text-gray-500 leading-relaxed max-w-sm mx-auto lg:mx-0 mt-2">
+            {/* <p className="text-sm text-gray-500 leading-relaxed max-w-sm mx-auto lg:mx-0 mt-2">
               {company.description}
-            </p>
+            </p> */}
           </div>
 
           {/* Columns 2 to 5: All aligned in laptop view */}

@@ -38,14 +38,14 @@ const ProductCard = ({ product }: Props) => {
     let initialImage = firstGeneralImage || "/placeholder.jpg";
     let initialVariant: ProductVariant | null = null;
 
-    if (product.variants && product.variants.length > 0) {
+    if (product.variants?.length) {
       const defaultSelectedVariant = product.variants.find(
         (v) => v.is_selected
       );
-      if (defaultSelectedVariant && defaultSelectedVariant.images.length > 0) {
+      if (defaultSelectedVariant?.images?.length) {
         initialImage = defaultSelectedVariant.images[0].url;
         initialVariant = defaultSelectedVariant;
-      } else if (product.variants[0].images.length > 0) {
+      } else if (product.variants[0]?.images?.length) {
         initialImage = product.variants[0].images[0].url;
         initialVariant = product.variants[0];
       }
@@ -56,19 +56,18 @@ const ProductCard = ({ product }: Props) => {
   }, [product, firstGeneralImage]);
 
   const currentMainImageSrc =
-    selectedVariant && selectedVariant.images.length > 0
-      ? mainDisplayImage
-      : hovered && secondGeneralImage
-      ? secondGeneralImage
-      : firstGeneralImage || "/placeholder.jpg";
+    selectedVariant?.images?.[0]?.url ||
+    (hovered && secondGeneralImage) ||
+    firstGeneralImage ||
+    "/placeholder.jpg";
 
   const handleAddToCart = async () => {
     const itemPayload = {
       id: product.id,
       name: product.name,
       quantity: 1,
-      sellingPrice: parseFloat(product.sellingPrice),
-      basePrice: parseFloat(product.basePrice),
+      sellingPrice: parseFloat(product.sellingPrice ?? "0"),
+      basePrice: parseFloat(product.basePrice ?? "0"),
       image: firstGeneralImage || "/placeholder.jpg",
       variantId: null,
       variant: null,
@@ -114,7 +113,7 @@ const ProductCard = ({ product }: Props) => {
       )}
 
       {/* No Variant */}
-      {!product.variants || product.variants.length === 0 ? (
+      {!product.variants?.length ? (
         <Link href={`/product/${product.slug}`}>
           <div>
             <div className="relative w-full h-44 rounded-md overflow-hidden bg-white shadow-inner">
@@ -135,10 +134,10 @@ const ProductCard = ({ product }: Props) => {
                 className="font-bold text-base"
                 style={{ color: "#213E5A" }}
               >
-                ₹{parseFloat(product.basePrice).toFixed(2)}
+                ₹{parseFloat(product.basePrice ?? "0").toFixed(2)}
               </span>
               <span className="text-sm text-gray-400 line-through">
-                ₹{parseFloat(product.sellingPrice).toFixed(2)}
+                ₹{parseFloat(product.sellingPrice ?? "0").toFixed(2)}
               </span>
             </div>
           </div>
@@ -161,15 +160,15 @@ const ProductCard = ({ product }: Props) => {
           <div className="mt-1 flex justify-center items-center gap-2">
             <span className="font-bold text-base" style={{ color: "#213E5A" }}>
               ₹
-              {selectedVariant
+              {typeof selectedVariant?.base_price === "number"
                 ? selectedVariant.base_price.toFixed(2)
-                : parseFloat(product.basePrice).toFixed(2)}
+                : parseFloat(product.basePrice ?? "0").toFixed(2)}
             </span>
             <span className="text-sm text-gray-400 line-through">
               ₹
-              {selectedVariant
+              {typeof selectedVariant?.selling_price === "number"
                 ? selectedVariant.selling_price.toFixed(2)
-                : parseFloat(product.sellingPrice).toFixed(2)}
+                : parseFloat(product.sellingPrice ?? "0").toFixed(2)}
             </span>
           </div>
         </div>
@@ -177,7 +176,7 @@ const ProductCard = ({ product }: Props) => {
 
       {/* CTA Button */}
       <div className="mt-2 flex justify-center">
-        {product.variants && product.variants.length > 0 ? (
+        {product.variants?.length ? (
           <Link href={`/product/${product.slug}`} className="block">
             <button
               type="button"

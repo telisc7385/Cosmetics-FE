@@ -1,4 +1,3 @@
-// app/thank-you/page.tsx
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -6,19 +5,19 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { apiCore } from "@/api/ApiCore";
-import { useAppSelector } from "@/store/hooks/hooks";
+import { useAppSelector } from "@/store/hooks/hooks"; // CORRECTED LINE HERE
 import { selectToken } from "@/store/slices/authSlice";
 import Image from "next/image";
 
-// Define types based on the NEW API response structure you provided
+// Keep these interfaces as they were, matching your CURRENT API response
 interface CustomerInfo {
   first_name: string;
   last_name: string;
   country_code_for_phone_number: string | null;
-  phone_number: string;
+  phone_number: string; // This is the customer's primary phone
   email: string;
-  billing_address: string; // Full string address, might need parsing for display
-  delivery_address: string; // Full string address, might need parsing for display
+  billing_address: string; // Still a string as per your current API
+  delivery_address: string; // Still a string as per your current API
 }
 
 interface OrderInfo {
@@ -40,7 +39,7 @@ interface PaymentInfo {
 
 interface RawOrderItemFromApi {
   image: string;
-  id: number; // This is product ID or similar, not necessarily order_item_id
+  id: number;
   variant_id: number | null;
   name: string;
   SKU: string;
@@ -51,12 +50,12 @@ interface RawOrderItemFromApi {
 }
 
 interface DetailedOrder {
-  id: string; // e.g., "COM-48-Guest"
+  id: string;
   purchased_item_count: number;
   customer_info: CustomerInfo;
   order_info: OrderInfo;
   payment_info: PaymentInfo;
-  items: RawOrderItemFromApi[]; // Array of items as returned by your API
+  items: RawOrderItemFromApi[];
 }
 
 interface OrderListApiResponse {
@@ -64,18 +63,8 @@ interface OrderListApiResponse {
   total_pages: number;
   current_page: number;
   page_size: number;
-  results: DetailedOrder[]; // The array containing your order(s)
+  results: DetailedOrder[];
 }
-
-// Helper function to get product image (you'll need to implement this properly)
-const getProductImageUrl = (
-  productId: number,
-  variantId: number | null
-): string => {
-  // In a real application, you might fetch real images.
-  // For now, it returns a generic placeholder.
-  return `https://via.placeholder.com/80?text=P${productId}`; // Placeholder
-};
 
 const ThankYouPage = () => {
   const searchParams = useSearchParams();
@@ -85,9 +74,9 @@ const ThankYouPage = () => {
   const [order, setOrder] = useState<DetailedOrder | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showCelebration, setShowCelebration] = useState(false); // State for celebration effect
+  const [showCelebration, setShowCelebration] = useState(false);
 
-  const shippingCharges = 0; // Assuming 0 for now
+  const shippingCharges = 0; // Assuming shipping is 0
 
   useEffect(() => {
     const fetchOrderDetails = async () => {
@@ -110,27 +99,31 @@ const ThankYouPage = () => {
         if (responseData.results && responseData.results.length > 0) {
           const fetchedOrder = responseData.results[0];
           setOrder(fetchedOrder);
-          setShowCelebration(true); // Trigger celebration effect on successful load
+          setShowCelebration(true); // Trigger confetti
         } else {
           setError("Order not found or no results returned for this ID.");
           toast.error("Order not found.");
         }
-      } catch (err: any) {
-        console.error("Failed to fetch order details on thank you page:", err);
+      } catch (err: unknown) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Unknown error occurred";
+
+        console.error("Failed to fetch order details:", errorMessage);
+
         if (
-          err.message &&
-          (err.message.includes("401") || err.message.includes("Unauthorized"))
+          errorMessage.includes("401") ||
+          errorMessage.includes("Unauthorized")
         ) {
           setError(
             "You are not authorized to view this order. Please log in if you are the owner."
           );
           toast.error("Unauthorized access.");
-        } else if (err.message && err.message.includes("404")) {
+        } else if (errorMessage.includes("404")) {
           setError("The order you are looking for could not be found.");
           toast.error("Order not found.");
         } else {
           setError(
-            err.message ||
+            errorMessage ||
               "Failed to load order details for your recent purchase."
           );
           toast.error("Error loading order details.");
@@ -145,7 +138,18 @@ const ThankYouPage = () => {
 
   const handleDownloadInvoice = () => {
     if (order?.order_info.invoice_url) {
-      const invoiceFullUrl = `${process.env.NEXT_PUBLIC_BASE_URL}${order.order_info.invoice_url}`;
+      let baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+      if (!baseUrl) {
+        baseUrl = "https://cosmaticadmin.twilightparadox.com";
+      }
+      if (baseUrl.endsWith("/")) {
+        baseUrl = baseUrl.slice(0, -1);
+      }
+      const invoiceRelativePath = order.order_info.invoice_url.startsWith("/")
+        ? order.order_info.invoice_url
+        : `/${order.order_info.invoice_url}`;
+
+      const invoiceFullUrl = `${baseUrl}${invoiceRelativePath}`;
       window.open(invoiceFullUrl, "_blank");
       toast.success("Downloading invoice...");
     } else {
@@ -171,14 +175,13 @@ const ThankYouPage = () => {
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
         >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
             strokeWidth="2"
             d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2A9 9 0 111 10a9 9 0 0118 0z"
-          ></path>
+          />
         </svg>
         <h1 className="text-3xl font-bold mb-4">Error!</h1>
         <p className="text-lg text-center mb-6">{error}</p>
@@ -200,14 +203,13 @@ const ThankYouPage = () => {
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
         >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
             strokeWidth="2"
             d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-          ></path>
+          />
         </svg>
         <h1 className="text-3xl font-bold mb-4">Order Details Not Found</h1>
         <p className="text-lg text-center mb-6">
@@ -218,7 +220,7 @@ const ThankYouPage = () => {
         <div className="space-y-4">
           <Link
             href="/"
-            className="block bg-pink-600 text-white py-3 px-6 rounded-lg text-lg font-semibold hover:bg-pink-700 transition-colors duration-300"
+            className="block bg-[#213E5A] text-white py-1.5 px-3 rounded-lg text-base font-semibold transition-transform duration-300 transform hover:-translate-y-1 w-full sm:w-auto"
           >
             Continue Shopping
           </Link>
@@ -235,13 +237,10 @@ const ThankYouPage = () => {
     );
   }
 
-  // Main Thank You Page content with order details
   return (
     <div className="relative container mx-auto p-4 sm:p-6 bg-gray-50 min-h-screen">
-      {/* Celebration Effect Overlay */}
       {showCelebration && (
         <div className="celebration-effect">
-          {/* Confetti Burst */}
           {Array.from({ length: 150 }).map((_, i) => (
             <div
               key={`confetti-${i}`}
@@ -259,7 +258,6 @@ const ThankYouPage = () => {
         </div>
       )}
 
-      {/* Global CSS for the celebration effect (add this to your global.css or equivalent) */}
       <style jsx global>{`
         .celebration-effect {
           position: fixed;
@@ -274,7 +272,7 @@ const ThankYouPage = () => {
 
         .confetti {
           position: absolute;
-          background-color: #f0f; /* Fallback color */
+          background-color: #f0f;
           opacity: 0;
           transform: translateY(0) rotate(0deg);
           animation: confetti-fall 3s ease-out forwards;
@@ -295,21 +293,19 @@ const ThankYouPage = () => {
         }
       `}</style>
 
-      {/* Green Container (Now with max-w-4xl for consistent width) */}
       <div className="max-w-4xl mx-auto bg-gradient-to-r from-green-400 to-green-600 text-white p-6 rounded-lg shadow-md mb-8 text-center sm:p-8">
         <svg
           className="w-20 h-20 text-white mx-auto mb-4 animate-bounce"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
         >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
             strokeWidth="2"
             d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-          ></path>
+          />
         </svg>
         <h1 className="text-4xl font-extrabold mb-2">Thank You!</h1>
         <p className="text-xl">Your order has been placed successfully.</p>
@@ -317,13 +313,12 @@ const ThankYouPage = () => {
           Order ID: <span className="font-semibold">{order.id}</span>
         </p>
         <p className="text-md mt-2">
-          We've sent an order confirmation to your email:{" "}
+          We&apos;ve sent an order confirmation to your email:{" "}
           <span className="font-semibold">{order.customer_info.email}</span>
         </p>
       </div>
 
       <div className="bg-white p-6 rounded-lg shadow-lg max-w-4xl mx-auto sm:p-8">
-        {/* Responsive grid for summary and customer info */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8 mb-6 border-b pb-4">
           <div>
             <h2 className="text-xl font-semibold text-gray-700 mb-2">
@@ -356,6 +351,7 @@ const ThankYouPage = () => {
               </span>
             </p>
           </div>
+
           <div>
             <h2 className="text-xl font-semibold text-gray-700 mb-2">
               Customer Information
@@ -379,22 +375,47 @@ const ThankYouPage = () => {
           </div>
         </div>
 
-        {/* Responsive grid for addresses */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8 mb-6 border-b pb-4">
           <div>
             <h3 className="text-xl font-semibold text-gray-700 mb-2">
               Billing Address:
             </h3>
-            <p className="text-md text-gray-600 whitespace-pre-line">
-              {order.customer_info.billing_address}
+            {/* Displaying customer's name and phone number (from customer_info) 
+                along with the full address string */}
+            <p className="text-md text-gray-600">
+              <span className="font-semibold">
+                {order.customer_info.first_name} {order.customer_info.last_name}
+              </span>
+              <br />
+              <span className="font-semibold">
+                {order.customer_info.phone_number}
+              </span>
+              <br />
+              {/* This will render the entire address string from your backend */}
+              <span className="whitespace-pre-line">
+                {order.customer_info.billing_address}
+              </span>
             </p>
           </div>
           <div>
             <h3 className="text-xl font-semibold text-gray-700 mb-2">
               Shipping Address:
             </h3>
-            <p className="text-md text-gray-600 whitespace-pre-line">
-              {order.customer_info.delivery_address}
+            {/* Displaying customer's name and phone number (from customer_info) 
+                along with the full address string */}
+            <p className="text-md text-gray-600">
+              <span className="font-semibold">
+                {order.customer_info.first_name} {order.customer_info.last_name}
+              </span>
+              <br />
+              <span className="font-semibold">
+                {order.customer_info.phone_number}
+              </span>
+              <br />
+              {/* This will render the entire address string from your backend */}
+              <span className="whitespace-pre-line">
+                {order.customer_info.delivery_address}
+              </span>
             </p>
           </div>
         </div>
@@ -408,7 +429,7 @@ const ThankYouPage = () => {
                 className="flex flex-col sm:flex-row items-start sm:items-center gap-4 border p-4 rounded-md bg-gray-50"
               >
                 <Image
-                  src={item.image} // Use helper function for image
+                  src={item.image}
                   alt={item.name}
                   width={80}
                   height={80}
@@ -461,11 +482,10 @@ const ThankYouPage = () => {
           </div>
         </div>
 
-        {/* Invoice Download Button and Continue Shopping */}
         <div className="mt-8 text-center space-y-4 sm:space-y-0 sm:flex sm:justify-center sm:space-x-4">
           <button
             onClick={handleDownloadInvoice}
-            className="inline-flex items-center bg-blue-600 text-white font-semibold py-3 px-8 rounded-lg hover:bg-blue-700 transition-colors duration-300 text-lg shadow-md w-full sm:w-auto"
+            className="inline-flex items-center text-[#213E5A] border border-[#213E5A] bg-white font-semibold py-1.5 px-3 rounded-lg text-base transition-all duration-300 transform hover:-translate-y-1 hover:bg-[#213E5A] hover:text-white shadow-md w-full sm:w-auto"
             disabled={!order.order_info.invoice_url}
           >
             <svg
@@ -473,14 +493,13 @@ const ThankYouPage = () => {
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
             >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth="2"
                 d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-              ></path>
+              />
             </svg>
             Download Invoice
           </button>
@@ -489,7 +508,7 @@ const ThankYouPage = () => {
           )}
           <Link
             href="/"
-            className="block bg-pink-600 text-white py-3 px-6 rounded-lg text-lg font-semibold hover:bg-pink-700 transition-colors duration-300 w-full sm:w-auto"
+            className="block bg-[#213E5A] text-white py-1.5 px-3 rounded-lg text-base font-semibold transition-transform duration-300 transform hover:-translate-y-1 w-full sm:w-auto"
           >
             Continue Shopping
           </Link>

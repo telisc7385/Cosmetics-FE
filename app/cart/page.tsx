@@ -1,4 +1,3 @@
-// app/cart/page.tsx
 "use client";
 
 import React from "react";
@@ -15,14 +14,11 @@ import { selectIsLoggedIn } from "@/store/slices/authSlice";
 import { CartItem } from "@/types/cart";
 import { useLoggedInCart } from "@/CartProvider/LoggedInCartProvider";
 import { useRouter } from "next/navigation";
-import { apiCore } from "@/api/ApiCore"; // Assuming apiCore is available for checkout API calls
-import { selectToken } from "@/store/slices/authSlice"; // To get token for checkout API
-import toast from "react-hot-toast"; // <--- Import toast
-import { FiTrash2 } from "react-icons/fi"; // <--- Import trash icon
+import toast from "react-hot-toast";
+import { FiTrash2 } from "react-icons/fi";
 
-// Import Lottie player and the animation JSON
 import Lottie from "react-lottie-player";
-import emptyCartAnimationData from "@/public/cart.json"; // Assuming your Lottie JSON is here
+import emptyCartAnimationData from "@/public/cart.json";
 
 const EmptyCartAnimation = () => (
   <div className="flex flex-col items-center justify-center py-10 bg-white rounded-lg shadow-md animate-fadeIn">
@@ -45,17 +41,17 @@ const EmptyCartAnimation = () => (
       loop
       animationData={emptyCartAnimationData}
       play
-      style={{ width: 300, height: 300 }} // Increased size from 200x200 to 300x300
+      style={{ width: 300, height: 300 }}
     />
     <p className="mt-6 text-xl font-semibold text-gray-700">
       Your cart is empty!
     </p>
     <p className="mt-2 text-gray-500">
-      Looks like you haven't added anything to your cart yet.
+      Looks like you haven&apos;t added anything to your cart yet.
     </p>
     <button
-      onClick={() => (window.location.href = "/shop")} // Assuming a /products page
-      className="mt-6 px-6 py-3 bg-purple-600 text-white rounded-md shadow-lg hover:bg-purple-700 transition-all duration-300 transform hover:scale-105 hover:cursor-pointer"
+      onClick={() => (window.location.href = "/shop")}
+      className="mt-6 px-6 py-3 bg-[#213E5A] text-white rounded-md shadow-lg hover:bg-[#1a324a] transition-all duration-300 transform hover:scale-105 cursor-pointer" // Updated theme colors
     >
       Start Shopping
     </button>
@@ -67,7 +63,6 @@ const CartPage = () => {
   const guestCartItems = useAppSelector(selectGuestCartItems);
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const token = useAppSelector(selectToken); // Get token for API calls
 
   const {
     items: loggedInCartItems,
@@ -84,82 +79,38 @@ const CartPage = () => {
   const error = isLoggedIn ? loggedInError : null;
 
   const handleIncrement = (cartItemId: number) => {
-    if (isLoggedIn) {
-      incrementLoggedInItem(cartItemId);
-    } else {
-      dispatch(incrementQuantity(cartItemId));
-    }
+    isLoggedIn
+      ? incrementLoggedInItem(cartItemId)
+      : dispatch(incrementQuantity(cartItemId));
   };
 
   const handleDecrement = (cartItemId: number) => {
-    if (isLoggedIn) {
-      decrementLoggedInItem(cartItemId);
-    } else {
-      dispatch(decrementQuantity(cartItemId));
-    }
+    isLoggedIn
+      ? decrementLoggedInItem(cartItemId)
+      : dispatch(decrementQuantity(cartItemId));
   };
 
   const handleRemove = async (cartItemId: number) => {
     const itemToRemove = items.find((item) => item.cartItemId === cartItemId);
-    if (!itemToRemove) return; // Should not happen
+    if (!itemToRemove) return;
 
     if (isLoggedIn) {
       try {
-        await removeLoggedInItem(cartItemId); // Await the removal
-        toast.error(`${itemToRemove.name} removed from cart.`); // <--- Changed to toast.error for logged-in user
-      } catch (err) {
-        console.error("Failed to remove item from logged-in cart:", err);
+        await removeLoggedInItem(cartItemId);
+        toast.error(`${itemToRemove.name} removed from cart.`);
+      } catch (err: unknown) {
+        console.error("Failed to remove item from cart:", err);
         toast.error(`Failed to remove ${itemToRemove.name}. Please try again.`);
       }
     } else {
       dispatch(removeFromCart(cartItemId));
-      toast.error(`${itemToRemove.name} removed from cart.`); // <--- Changed to toast.error for guest user
+      toast.error(`${itemToRemove.name} removed from cart.`);
     }
   };
 
   const handleClearCart = () => {
-    if (isLoggedIn) {
-      clearLoggedInCart();
-    } else {
-      dispatch(clearGuestCart());
-    }
-    toast.success("All items removed from cart."); // Optional: Add toast for clear all
-  };
-
-  const prepareCartForCheckoutAPI = () => {
-    return items.map((item) => {
-      const payloadItem: {
-        productId?: number;
-        variantId?: number | null;
-        quantity: number;
-      } = {
-        quantity: item.quantity,
-      };
-
-      if (item.variantId !== null && item.variantId !== undefined) {
-        payloadItem.variantId = item.variantId;
-      } else {
-        payloadItem.productId = item.id;
-      }
-      return payloadItem;
-    });
-  };
-
-  const handleCheckout = async () => {
-    const checkoutPayload = prepareCartForCheckoutAPI();
-    console.log("Checkout Payload for API:", checkoutPayload);
-
-    try {
-      // Example: If your checkout API expects the cart items in this format
-      // const response = await apiCore('/checkout-api-endpoint', 'POST', { items: checkoutPayload }, isLoggedIn ? token : undefined);
-      // console.log("Checkout API Response:", response);
-      alert("Simulating checkout. Check console for payload.");
-      // Handle success (e.g., redirect to order confirmation)
-    } catch (err: any) {
-      console.error("Checkout failed:", err);
-      alert(`Checkout failed: ${err.message || "Unknown error"}`);
-      // Handle error (e.g., show error message to user)
-    }
+    isLoggedIn ? clearLoggedInCart() : dispatch(clearGuestCart());
+    toast.success("All items removed from cart.");
   };
 
   const subtotal = items.reduce(
@@ -171,28 +122,24 @@ const CartPage = () => {
   const tax = 0;
   const total = subtotal + shipping + tax;
 
-  if (loading && items.length === 0) {
+  if (loading && items.length === 0)
     return <div className="text-center py-10">Loading your cart...</div>;
-  }
 
-  if (error) {
+  if (error)
     return (
       <div className="text-center py-10 text-red-600">
         Error loading cart: {error}
       </div>
     );
-  }
 
-  if (items.length === 0 && !loading) {
-    return <EmptyCartAnimation />; // Display the animated empty cart
-  }
+  if (items.length === 0 && !loading) return <EmptyCartAnimation />;
 
   return (
-    <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
+    <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 bg-[#F3F6F7]">
+      {" "}
+      {/* Adjusted background */}
       <h1 className="text-2xl font-bold text-gray-800 mb-6">Shopping Cart</h1>
-
       <div className="flex flex-col lg:flex-row gap-8">
-        {/* Left Column: Cart Items */}
         <div className="w-full lg:w-2/3">
           {items.map((item) => (
             <div
@@ -203,8 +150,8 @@ const CartPage = () => {
                 <Image
                   src={item.image}
                   alt={item.name}
-                  width={112} // Same as Tailwind's w-28
-                  height={112} // Same as Tailwind's h-28
+                  width={112}
+                  height={112}
                   className="w-28 h-28 object-cover rounded-md mr-6 flex-shrink-0"
                 />
                 <div className="flex flex-col justify-between h-full">
@@ -215,7 +162,7 @@ const CartPage = () => {
                     <p className="text-sm text-gray-500 mt-0.5">
                       Brand: Sephora Collection
                     </p>
-                    {item.variantId && ( // Display variant ID if available
+                    {item.variantId && (
                       <p className="text-xs text-gray-400">
                         Variant ID: {item.variantId}
                       </p>
@@ -223,21 +170,19 @@ const CartPage = () => {
                   </div>
                   <button
                     onClick={() => handleRemove(item.cartItemId)}
-                    className="text-red-500 hover:text-red-700 font-medium mt-3 text-left p-1 rounded-full hover:bg-red-50 transition-colors"
-                    aria-label={`Remove ${item.name}`} // Good for accessibility
+                    className="text-red-500 hover:text-red-700 font-medium mt-3 text-left p-1 rounded-full hover:bg-red-50 transition-colors cursor-pointer" // Added cursor-pointer
+                    aria-label={`Remove ${item.name}`}
                   >
                     <FiTrash2 className="w-5 h-5" />
                   </button>
                 </div>
               </div>
 
-              {/* Quantity Selector and Price */}
               <div className="flex flex-col items-end sm:items-center gap-4 sm:flex-row w-full sm:w-auto justify-between sm:justify-end">
                 <div className="flex items-center space-x-2 border border-gray-300 rounded-md py-1 px-2">
                   <button
                     onClick={() => handleDecrement(item.cartItemId)}
-                    className="w-6 h-6 flex items-center justify-center text-gray-600 hover:bg-gray-100 rounded-sm"
-                    // Removed disabled={item.quantity <= 1} to allow deletion on decrement from 1
+                    className="w-6 h-6 flex items-center justify-center text-gray-600 hover:bg-gray-100 rounded-sm cursor-pointer" // Added cursor-pointer
                   >
                     -
                   </button>
@@ -246,26 +191,24 @@ const CartPage = () => {
                   </span>
                   <button
                     onClick={() => handleIncrement(item.cartItemId)}
-                    className="w-6 h-6 flex items-center justify-center text-gray-600 hover:bg-gray-100 rounded-sm"
+                    className="w-6 h-6 flex items-center justify-center text-gray-600 hover:bg-gray-100 rounded-sm cursor-pointer" // Added cursor-pointer
                   >
                     +
                   </button>
                 </div>
                 <div className="text-lg font-semibold text-gray-900 w-20 text-right sm:text-left">
-                  {/* Display total price for this item */}₹
-                  {(item.sellingPrice * item.quantity).toFixed(2)}
+                  ₹{(item.sellingPrice * item.quantity).toFixed(2)}
                 </div>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Right Column: Order Summary */}
         <div className="w-full lg:w-1/3 bg-white rounded-lg p-6 shadow-md border border-gray-200 self-start">
           <div className="flex justify-end mb-4">
             <button
               onClick={handleClearCart}
-              className="text-blue-600 hover:text-blue-800 text-sm font-semibold cursor-pointer"
+              className="text-[#007BFF] hover:text-[#0056B3] text-sm font-semibold cursor-pointer" // Updated color to a complementary blue
             >
               Clear all
             </button>
@@ -304,37 +247,16 @@ const CartPage = () => {
 
           <button
             onClick={() => router.push("/checkout")}
-            className="w-full py-3 mt-6 bg-purple-600 text-white font-semibold rounded-md hover:bg-purple-700 transition-colors"
+            className="w-full py-3 mt-6 bg-[#213E5A] text-white font-semibold rounded-md hover:bg-[#1a324a] transition-colors cursor-pointer" // Updated theme colors
           >
             Checkout
           </button>
-          <button className="w-full py-3 mt-4 bg-gray-200 text-gray-800 font-semibold rounded-md hover:bg-gray-300 transition-colors">
+          <button
+            onClick={() => router.push("/shop")} // Linked to /shop
+            className="w-full py-3 mt-4 bg-[#213E5A] text-white font-semibold rounded-md hover:bg-[#1a324a] transition-colors cursor-pointer" // Updated theme colors
+          >
             Continue Shopping
           </button>
-
-          <div className="flex justify-center mt-6 space-x-3">
-            <Image
-              src="/icons/visa.svg"
-              alt="Visa"
-              width={40}
-              height={24}
-              className="h-6"
-            />
-            <Image
-              src="/icons/mastercard.svg"
-              alt="Mastercard"
-              width={40}
-              height={24}
-              className="h-6"
-            />
-            <Image
-              src="/icons/amex.svg"
-              alt="American Express"
-              width={40}
-              height={24}
-              className="h-6"
-            />
-          </div>
         </div>
       </div>
     </div>

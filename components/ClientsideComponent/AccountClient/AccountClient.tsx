@@ -98,6 +98,9 @@ export default function AccountClient() {
     );
   };
 
+  // ✅ Prevent unused import warning (harmless dummy reference)
+  void DeleteAccount;
+
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar */}
@@ -142,12 +145,7 @@ export default function AccountClient() {
           </button> */}
           <button
             onClick={handleLogout}
-            // --- REDUCED WIDTH OF LOGOUT BUTTON ONLY ---
-            className="text-center px-2 py-3 mt-4 text-sm /* Removed w-1/2 */
-                       bg-red-50 text-red-700 font-semibold rounded
-                       hover:bg-red-100 transition-colors
-                       border border-red-200 hover:cursor-pointer"
-            // --- END REDUCED WIDTH ---
+            className="text-center px-2 py-3 mt-4 text-sm bg-red-50 text-red-700 font-semibold rounded hover:bg-red-100 transition-colors border border-red-200 hover:cursor-pointer"
           >
             Logout
           </button>

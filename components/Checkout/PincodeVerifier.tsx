@@ -46,8 +46,10 @@ const PincodeVerifier = ({ onVerified }: Props) => {
       setVerifiedData(pincodeInfo);
       onVerified(pincodeInfo);
       toast.success(`Delivery available in ${res.city}, ${res.state}`);
-    } catch (err: any) {
-      toast.error(err.message || "Verification failed");
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Verification failed";
+      toast.error(message);
       setVerifiedData(null);
     } finally {
       setVerifying(false);

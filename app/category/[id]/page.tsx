@@ -10,9 +10,12 @@ interface PageProps {
 const Page = async ({ params }: PageProps) => {
   const { id } = await params;
 
-  const categoryRes = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/category/${id}`, {
-    cache: "no-store",
-  });
+  const categoryRes = await fetch(
+    `${process.env.NEXT_PUBLIC_BASE_URL}/category/${id}`,
+    {
+      cache: "no-store",
+    }
+  );
 
   if (!categoryRes.ok) return notFound();
 
@@ -36,8 +39,6 @@ const Page = async ({ params }: PageProps) => {
   //   return String(productCategoryId) === String(id);
   // });
 
-
-
   const data = await categoryRes.json();
 
   if (!data.success || !data.category) return notFound();
@@ -53,4 +54,3 @@ const Page = async ({ params }: PageProps) => {
 };
 
 export default Page;
-

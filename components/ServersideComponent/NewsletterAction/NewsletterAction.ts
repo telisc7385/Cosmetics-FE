@@ -55,7 +55,8 @@ export async function subscribeToNewsletter(formData: FormData, token?: string) 
       },
       body: JSON.stringify({ email }),
     });
-
+    console.log("newsletter",res)
+    
     const result = await res.json().catch(() => null);
 
     if (!res.ok) {

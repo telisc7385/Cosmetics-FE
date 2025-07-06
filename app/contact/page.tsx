@@ -5,6 +5,7 @@ import { apiCore } from "@/api/ApiCore";
 import { useAppSelector } from "@/store/hooks/hooks";
 import { selectToken } from "@/store/slices/authSlice";
 import toast from "react-hot-toast";
+import Image from "next/image"; // ✅ Imported
 
 const countryStateMap: Record<string, string[]> = {
   India: [
@@ -114,10 +115,11 @@ export default function ContactFormSection() {
     <section className="min-h-screen flex flex-col lg:flex-row items-center justify-center bg-white px-4 sm:px-8 py-16 gap-10 relative">
       {/* Fallback Background for mobile */}
       <div className="lg:hidden absolute inset-0 -z-10">
-        <img
+        <Image
           src="/BG2.jpg"
           alt="Background"
-          className="w-full h-full object-cover opacity-20"
+          fill
+          className="object-cover opacity-20"
         />
         <div className="absolute inset-0 bg-white/30 backdrop-blur-sm" />
       </div>
@@ -230,11 +232,12 @@ export default function ContactFormSection() {
       </div>
 
       {/* Right: Image */}
-      <div className="w-full lg:w-1/2 h-[550px]">
-        <img
+      <div className="w-full lg:w-1/2 h-[550px] relative">
+        <Image
           src="/BG2.jpg"
           alt="Contact Visual"
-          className="w-full h-full object-cover rounded-2xl shadow-md"
+          fill
+          className="object-cover rounded-2xl shadow-md"
         />
       </div>
     </section>

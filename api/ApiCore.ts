@@ -157,20 +157,21 @@ export interface GuestOrderPayload {
   paymentMethod: "COD" | "RAZORPAY";
 }
 
-// Logged-in Checkout Types - CONFIRMED TO HAVE billingAddressId AND shippingAddressId
+// Logged-in Checkout Types - CORRECTED TO USE 'addressId'
 export interface LoggedInOrderPayload {
   items: {
     productId: number;
-    variantId?: number | null; // Allow null to match CartItem, can be converted to undefined if API strictly expects that
+    variantId?: number | null;
     quantity: number;
     price: number;
   }[];
   discountAmount: number;
   totalAmount: number;
   paymentMethod: string;
-  billingAddressId?: string; // ID of the billing address
-  shippingAddressId?: string; // ID of the shipping address
+  addressId: string; // This is the delivery address
+  billingAddressId: string; // <--- THIS IS THE ONLY CHANGE NEEDED FOR THE TYPE ERROR
 }
+
 
 // UPDATED: Address and AddressInput Interfaces to match your requested structure - REMOVED 'country'
 export interface Address {
