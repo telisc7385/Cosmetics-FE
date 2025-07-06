@@ -47,7 +47,6 @@ export default function ShopPageClient({ categories }: Props) {
 
         if (selectedCategories.size > 0) {
           const categoryParam = Array.from(selectedCategories).join(",");
-          // Append query parameter correctly based on whether it's the first one or not
           url += url.includes("?")
             ? `&category=${categoryParam}`
             : `?category=${categoryParam}`;
@@ -112,8 +111,8 @@ export default function ShopPageClient({ categories }: Props) {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
           <div className="bg-[#966ad7] border sm:w-1/5 w-full border-gray-300 rounded h-12 flex items-center px-4 shadow-sm">
             <h1 className="text-base flex gap-1 font-semibold text-white">
-              <Funnel /> <span>Filter</span>{" "}
-              {/* This is the line that was causing the error */}
+              <Funnel />
+              <span>Filter</span>
             </h1>
           </div>
           <SortDropdown sortOrder={sortOrder} setSortOrder={setSortOrder} />

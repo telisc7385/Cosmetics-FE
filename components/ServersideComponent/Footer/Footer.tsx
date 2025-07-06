@@ -22,9 +22,9 @@ const Footer = async ({ topCategories }: { topCategories: Category[] }) => {
   return (
     <footer className="bg-white border-t text-gray-700">
       <div className="max-w-7xl mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 text-[15px]">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 text-[15px]">
           {/* Column 1: Logo + Description */}
-          <div className="lg:col-span-1 text-center lg:text-left">
+          <div className="lg:col-span-1 text-center lg:text-left space-y-4">
             <Image
               src={company?.logo || "/logo1.png"}
               alt="Site Logo"
@@ -32,15 +32,15 @@ const Footer = async ({ topCategories }: { topCategories: Category[] }) => {
               height={70}
               className="mx-auto lg:mx-0"
             />
-            {/* <p className="text-sm text-gray-500 leading-relaxed max-w-sm mx-auto lg:mx-0 mt-2">
+            <p className="text-sm text-gray-500 leading-relaxed max-w-sm mx-auto lg:mx-0">
               {company.description}
-            </p> */}
+            </p>
           </div>
 
-          {/* Columns 2 to 5: All aligned in laptop view */}
-          <div className="lg:col-span-4 grid grid-cols-2 md:grid-cols-4 gap-6">
+          {/* Columns 2 to 5 */}
+          <div className="lg:col-span-4 grid grid-cols-2 md:grid-cols-4 gap-10">
             {/* Quick Links */}
-            <div className="text-center lg:text-left">
+            <div className="text-center lg:text-left space-y-2">
               <h4 className="font-semibold text-base mb-4 text-black">
                 Quick Links
               </h4>
@@ -58,7 +58,7 @@ const Footer = async ({ topCategories }: { topCategories: Category[] }) => {
             </div>
 
             {/* Help */}
-            <div className="text-center lg:text-left">
+            <div className="text-center lg:text-left space-y-2">
               <h4 className="font-semibold text-base mb-4 text-black">Help</h4>
               <ul className="space-y-2 text-gray-600">
                 <li className="cursor-pointer hover:text-black">Contact Us</li>
@@ -73,7 +73,7 @@ const Footer = async ({ topCategories }: { topCategories: Category[] }) => {
             </div>
 
             {/* Top Categories */}
-            <div className="text-center lg:text-left">
+            <div className="text-center lg:text-left space-y-2">
               <h4 className="font-semibold text-base mb-4 text-black">
                 Top Categories
               </h4>
@@ -92,7 +92,7 @@ const Footer = async ({ topCategories }: { topCategories: Category[] }) => {
             </div>
 
             {/* Social + Contact */}
-            <div className="text-center lg:text-left">
+            <div className="text-center lg:text-left space-y-3">
               <h4 className="font-semibold text-base mb-4 text-black">
                 Social
               </h4>
@@ -105,39 +105,41 @@ const Footer = async ({ topCategories }: { topCategories: Category[] }) => {
                   <span className="font-medium">Email:</span>{" "}
                   {company?.email || "N/A"}
                 </li>
-                <li className="flex items-center gap-4 justify-center lg:justify-start mt-2">
-                  <Link href={company?.facebook_link || "#"} target="_blank">
-                    <Image
-                      src={company.facebook_icon}
-                      alt="Facebook"
-                      width={60}
-                      height={60}
-                    />
-                  </Link>
-                  <Link href={company?.instagram_link || "#"} target="_blank">
-                    <Image
-                      src={company.instagram_icon}
-                      alt="Instagram"
-                      width={60}
-                      height={60}
-                    />
-                  </Link>
-                  <Link href={company?.twitter_link || "#"} target="_blank">
-                    <Image
-                      src={company.twitter_icon}
-                      alt="Twitter"
-                      width={60}
-                      height={60}
-                    />
-                  </Link>
-                  <Link href={company?.linkedin_link || "#"} target="_blank">
-                    <Image
-                      src={company.linkedin_icon}
-                      alt="LinkedIn"
-                      width={60}
-                      height={60}
-                    />
-                  </Link>
+                <li className="mt-2 ml-[-6px]">
+                  <div className="flex items-center gap-5 justify-start">
+                    <Link href={company?.facebook_link || "#"} target="_blank">
+                      <Image
+                        src={company.facebook_icon}
+                        alt="Facebook"
+                        width={40}
+                        height={40}
+                      />
+                    </Link>
+                    <Link href={company?.instagram_link || "#"} target="_blank">
+                      <Image
+                        src={company.instagram_icon}
+                        alt="Instagram"
+                        width={40}
+                        height={40}
+                      />
+                    </Link>
+                    <Link href={company?.twitter_link || "#"} target="_blank">
+                      <Image
+                        src={company.twitter_icon}
+                        alt="Twitter"
+                        width={40}
+                        height={40}
+                      />
+                    </Link>
+                    <Link href={company?.linkedin_link || "#"} target="_blank">
+                      <Image
+                        src={company.linkedin_icon}
+                        alt="LinkedIn"
+                        width={40}
+                        height={40}
+                      />
+                    </Link>
+                  </div>
                 </li>
               </ul>
             </div>
@@ -146,8 +148,8 @@ const Footer = async ({ topCategories }: { topCategories: Category[] }) => {
       </div>
 
       {/* Bottom Section */}
-      <div className="border-t py-4 text-center text-sm text-gray-600">
-        <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 mb-2">
+      <div className="border-t py-6 text-center text-sm text-gray-600">
+        <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 mb-3">
           <span className="hover:underline cursor-pointer">Privacy Policy</span>
           <span className="hover:underline cursor-pointer">
             Terms & Conditions
