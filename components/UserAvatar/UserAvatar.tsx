@@ -6,11 +6,12 @@ import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "@/store/slices/authSlice";
 import { RootState } from "@/store/store";
-import { FiUser } from "react-icons/fi";
+import { FiUser, FiLogOut } from "react-icons/fi";
 import { BsBoxSeam } from "react-icons/bs";
 import { MdLogout } from "react-icons/md";
 import { FaUserEdit } from "react-icons/fa";
 import Image from "next/image";
+import { toast } from "react-hot-toast";
 
 export default function UserAvatar() {
   const dispatch = useDispatch();
@@ -24,9 +25,52 @@ export default function UserAvatar() {
   const initials = username ? username[0].toUpperCase() : "US";
 
   const handleLogout = () => {
-    dispatch(logout());
-    router.push("/auth");
-    router.refresh();
+    toast.custom(
+      (t) => (
+        <div
+          className={`${
+            t.visible ? "animate-enter" : "animate-leave"
+          } max-w-md w-full bg-white shadow-xl rounded-lg pointer-events-auto flex flex-col overflow-hidden`}
+        >
+          <div className="flex-1 w-full p-4">
+            <div className="flex items-center">
+              <div className="flex-shrink-0 mr-3">
+                <FiLogOut className="h-6 w-6 text-red-500" aria-hidden="true" />
+              </div>
+              <div className="flex-1">
+                <p className="text-base font-semibold text-gray-800">
+                  Are you sure you want to log out?
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="flex w-full">
+            <button
+              onClick={() => {
+                toast.dismiss(t.id);
+                dispatch(logout());
+                router.push("/auth");
+                router.refresh();
+              }}
+              className="w-full px-4 py-3 flex items-center justify-center text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors duration-200"
+            >
+              Yes, Logout
+            </button>
+            <button
+              onClick={() => toast.dismiss(t.id)}
+              className="w-full px-4 py-3 flex items-center justify-center text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors duration-200 border-l border-gray-200"
+            >
+              No, Cancel
+            </button>
+          </div>
+        </div>
+      ),
+      {
+        duration: Infinity,
+        position: "top-center",
+        style: { top: "10px" },
+      }
+    );
   };
 
   useEffect(() => {
@@ -39,7 +83,6 @@ export default function UserAvatar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Show Sign In / Sign Up if user not logged in
   if (!customer) {
     return (
       <Link href="/auth" aria-label="Login">
