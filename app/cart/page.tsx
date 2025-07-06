@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useAppSelector, useAppDispatch } from "@/store/hooks/hooks";
 import Image from "next/image";
 import {
@@ -18,6 +18,7 @@ import toast from "react-hot-toast";
 import { FiTrash2 } from "react-icons/fi";
 import Lottie from "react-lottie-player";
 import emptyCartAnimationData from "@/public/cart.json";
+import PincodeVerifier from "@/components/Checkout/PincodeVerifier";
 
 const EmptyCartAnimation = () => (
   <div className="flex flex-col items-center justify-center py-10 bg-white rounded-lg shadow-md animate-fadeIn">
@@ -73,12 +74,13 @@ const CartPage = () => {
     clearCart: clearLoggedInCart,
   } = useLoggedInCart();
 
+  const [pincodeVerified, setPincodeVerified] = useState(false);
+
   const items = isLoggedIn ? loggedInCartItems : guestCartItems;
   const loading = isLoggedIn ? loggedInLoading : false;
   const error = isLoggedIn ? loggedInError : null;
 
   const handleIncrement = (cartItemId: number) => {
-    // Refactored to if/else to satisfy ESLint's no-unused-expressions
     if (isLoggedIn) {
       incrementLoggedInItem(cartItemId);
     } else {
@@ -87,7 +89,6 @@ const CartPage = () => {
   };
 
   const handleDecrement = (cartItemId: number) => {
-    // Refactored to if/else to satisfy ESLint's no-unused-expressions
     if (isLoggedIn) {
       decrementLoggedInItem(cartItemId);
     } else {
@@ -114,7 +115,6 @@ const CartPage = () => {
   };
 
   const handleClearCart = () => {
-    // Refactored to if/else to satisfy ESLint's no-unused-expressions
     if (isLoggedIn) {
       clearLoggedInCart();
     } else {
@@ -147,6 +147,7 @@ const CartPage = () => {
     <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 bg-[#F3F6F7]">
       <h1 className="text-2xl font-bold text-gray-800 mb-6">Shopping Cart</h1>
       <div className="flex flex-col lg:flex-row gap-8">
+        {/* Cart Items */}
         <div className="w-full lg:w-2/3">
           {items.map((item) => (
             <div
@@ -211,6 +212,7 @@ const CartPage = () => {
           ))}
         </div>
 
+        {/* Order Summary */}
         <div className="w-full lg:w-1/3 bg-white rounded-lg p-6 shadow-md border border-gray-200 self-start">
           <div className="flex justify-end mb-4">
             <button
@@ -224,6 +226,15 @@ const CartPage = () => {
           <h2 className="text-xl font-bold text-gray-800 mb-4">
             Order Summary
           </h2>
+
+          <div className="mb-4">
+            <PincodeVerifier
+              onVerified={() => {
+                // toast.success("Pincode verified!");
+                setPincodeVerified(true);
+              }}
+            />
+          </div>
 
           <div className="space-y-2">
             <div className="flex justify-between pb-2 border-b border-gray-200">
@@ -248,13 +259,19 @@ const CartPage = () => {
 
           <button
             onClick={() => router.push("/checkout")}
-            className="w-full py-3 mt-6 bg-[#213E5A] text-white font-semibold rounded-md hover:bg-[#1a324a] transition-colors cursor-pointer"
+            className={`w-full py-3 mt-6 text-white font-semibold rounded-md transition-colors ${
+              pincodeVerified
+                ? "bg-[#1A324A] hover:bg-[#142636] cursor-pointer"
+                : "bg-gray-300 cursor-not-allowed"
+            }`}
+            disabled={!pincodeVerified}
           >
             Checkout
           </button>
+
           <button
             onClick={() => router.push("/shop")}
-            className="w-full py-3 mt-4 bg-[#213E5A] text-white font-semibold rounded-md hover:bg-[#1a324a] transition-colors cursor-pointer"
+            className="w-full py-3 mt-4 bg-white text-[#1A324A] border border-[#1A324A] font-semibold rounded-md hover:bg-[#f9f9f9] transition-colors cursor-pointer"
           >
             Continue Shopping
           </button>
