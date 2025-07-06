@@ -76,8 +76,6 @@ const ThankYouPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [showCelebration, setShowCelebration] = useState(false);
 
-  const shippingCharges = 0; // Assuming shipping is 0
-
   useEffect(() => {
     const fetchOrderDetails = async () => {
       if (!orderId) {
@@ -472,10 +470,7 @@ const ThankYouPage = () => {
               </span>
             </div>
           )}
-          <div className="flex justify-between text-lg font-semibold text-gray-700">
-            <span>Shipping:</span>
-            <span>₹{shippingCharges.toFixed(2)}</span>
-          </div>
+
           <div className="flex justify-between text-2xl font-bold text-blue-700 border-t pt-4 mt-4">
             <span>Total Paid:</span>
             <span>₹{order.order_info.final_total.toFixed(2)}</span>

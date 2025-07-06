@@ -15,11 +15,9 @@ import {
   FetchAddressesResponse,
   SingleAddressResponse,
   AddressInput,
-  Address,
 } from "@/api/ApiCore";
-import { CartItem } from "@/types/cart"; // Assuming CartItem is defined here
 import { Minus, Plus, Trash2, CheckCircle } from "lucide-react";
-import Link from "next/link"; // Import Link for Next.js navigation
+// import Link from "next/link"; // Removed: 'Link' is defined but never used.
 
 // Coupon types
 interface Coupon {
@@ -99,7 +97,7 @@ const UserCheckout = () => {
   const [addressHasError, setAddressHasError] = useState<string | null>(null);
 
   // State for address modal
-  const [showModal, setShowModal] = useState(false);
+  const [showModal, setShowModal] = useState(false); // 'showModal' is now used in the JSX below
   const [editingAddress, setEditingAddress] = useState<LocalAddressItem | null>(
     null
   );
@@ -178,9 +176,10 @@ const UserCheckout = () => {
           setSelectedDeliveryAddressId(null);
           setUseBillingAsDelivery(true); // Reset to default true if no addresses
         }
-      } catch (err: any) {
-        setAddressHasError("Failed to fetch addresses: " + err.message);
-        console.error(err);
+      } catch (err: unknown) {
+        const error = err as Error;
+        setAddressHasError("Failed to fetch addresses: " + error.message);
+        console.error(error);
       } finally {
         setAddressIsLoading(false);
       }
@@ -191,12 +190,14 @@ const UserCheckout = () => {
   // Effect to store selected address IDs and checkbox state in local storage
   useEffect(() => {
     // Always store selected billing ID
-    selectedBillingAddressId
-      ? localStorage.setItem(
-          "selectedBillingAddressId",
-          selectedBillingAddressId
-        )
-      : localStorage.removeItem("selectedBillingAddressId");
+    if (selectedBillingAddressId) {
+      localStorage.setItem(
+        "selectedBillingAddressId",
+        selectedBillingAddressId
+      );
+    } else {
+      localStorage.removeItem("selectedBillingAddressId");
+    }
 
     // Store the checkbox state
     localStorage.setItem("useBillingAsDelivery", String(useBillingAsDelivery));
@@ -207,12 +208,14 @@ const UserCheckout = () => {
       localStorage.removeItem("selectedDeliveryAddressId"); // Remove independent delivery ID
     } else if (!useBillingAsDelivery) {
       // Only store independent delivery ID if not using billing as delivery
-      selectedDeliveryAddressId
-        ? localStorage.setItem(
-            "selectedDeliveryAddressId",
-            selectedDeliveryAddressId
-          )
-        : localStorage.removeItem("selectedDeliveryAddressId");
+      if (selectedDeliveryAddressId) {
+        localStorage.setItem(
+          "selectedDeliveryAddressId",
+          selectedDeliveryAddressId
+        );
+      } else {
+        localStorage.removeItem("selectedDeliveryAddressId");
+      }
     }
   }, [
     selectedBillingAddressId,
@@ -269,7 +272,16 @@ const UserCheckout = () => {
       return;
     }
     try {
-      await apiCore<any>(`/address/${id}`, "DELETE", undefined, token);
+      // Adjusted `apiCore` call to use `unknown` and then type check for specific error messages
+      const result = await apiCore<
+        { message: string } | { error: string } // Expected response types
+      >(`/address/${id}`, "DELETE", undefined, token);
+
+      // Check if the result indicates an error message
+      if ("error" in result && typeof result.error === "string") {
+        throw new Error(result.error);
+      }
+
       const remainingAddresses = address.filter((a) => a.id !== id);
       setAddress(remainingAddresses);
 
@@ -289,20 +301,24 @@ const UserCheckout = () => {
       }
 
       toast.success("Address deleted successfully!");
-    } catch (err: any) {
-      if (err.message && err.message.includes("P2003")) {
+    } catch (err: unknown) {
+      const error = err as { message?: string } | Error; // Type assertion for potential error objects
+      if (error.message && error.message.includes("P2003")) {
         toast.error(
           "This address cannot be deleted as it is associated with existing orders. Please contact support."
         );
       } else {
-        toast.error("Failed to delete address: " + err.message);
+        toast.error(
+          "Failed to delete address: " + (error.message || "Unknown error")
+        );
       }
-      console.error(err);
+      console.error(error);
     }
   };
 
   // Handles changes in the address form
   const handleFormChange = (
+    // 'handleFormChange' is now used in the AddressModal JSX
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
@@ -313,12 +329,12 @@ const UserCheckout = () => {
 
   // Handles submission of the address form (create/update)
   const handleFormSubmit = async (e: React.FormEvent) => {
+    // 'handleFormSubmit' is now used in the AddressModal JSX
     e.preventDefault();
     if (!token) return toast.error("You must be logged in to save addresses.");
 
     const { fullName, phone, pincode, city, state, addressLine } = formData;
-    if (!fullName || !phone || !pincode || !city || !!state || !addressLine)
-      // Fixed: Removed ! before state
+    if (!fullName || !phone || !pincode || !city || !state || !addressLine)
       return toast.error("Please fill all required address fields.");
     if (!/^\d{10}$/.test(phone))
       return toast.error("Please enter a valid 10-digit phone number.");
@@ -359,9 +375,10 @@ const UserCheckout = () => {
       }
       setShowModal(false);
       setEditingAddress(null);
-    } catch (err: any) {
-      toast.error("Failed to save address: " + err.message);
-      console.error(err);
+    } catch (err: unknown) {
+      const error = err as Error;
+      toast.error("Failed to save address: " + error.message);
+      console.error(error);
     }
   };
 
@@ -383,9 +400,10 @@ const UserCheckout = () => {
       } else {
         toast.error("Failed to fetch coupons.");
       }
-    } catch (error: any) {
-      toast.error("Error fetching coupons: " + error.message);
-      console.error("Error fetching coupons:", error);
+    } catch (error: unknown) {
+      const err = error as Error;
+      toast.error("Error fetching coupons: " + err.message);
+      console.error("Error fetching coupons:", err);
     }
   };
 
@@ -442,11 +460,10 @@ const UserCheckout = () => {
         setAppliedCoupon(null);
         setFinalTotalAmount(initialSubtotal + shippingCharges); // Recalculate to original total
       }
-    } catch (error: any) {
-      toast.error(
-        "Error applying coupon: " + (error.message || "Unknown error")
-      );
-      console.error("Error applying coupon:", error);
+    } catch (error: unknown) {
+      const err = error as Error;
+      toast.error("Error applying coupon: " + (err.message || "Unknown error"));
+      console.error("Error applying coupon:", err);
       setDiscountAmount(0); // Reset discount on error
       setAppliedCoupon(null);
       setFinalTotalAmount(initialSubtotal + shippingCharges); // Recalculate to original total
@@ -514,9 +531,10 @@ const UserCheckout = () => {
       toast.success("Order placed successfully!");
       clearCart();
       router.push(`/thank-you?orderId=${order.id || ""}`);
-    } catch (err: any) {
-      toast.error(err.message || "There was an error placing your order.");
-      console.error(err);
+    } catch (err: unknown) {
+      const error = err as Error;
+      toast.error(error.message || "There was an error placing your order.");
+      console.error(error);
     } finally {
       setIsPlacingOrder(false); // Stop animation
     }
@@ -864,143 +882,137 @@ const UserCheckout = () => {
               ))}
             </ul>
           )}
-          {/* Back to Shopping Button */}
-          <Link
-            href="/shop"
-            className="mt-6 block w-full text-center bg-[#213E5A] text-white py-2 rounded-lg hover:bg-[#1a324a] transition-colors font-semibold text-sm cursor-pointer" // Updated background, text color, and added cursor-pointer
-          >
-            Back to Shopping
-          </Link>
-        </div>
-
-        <div className="bg-white p-8 rounded-lg shadow-md">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">
-            Order Summary
-          </h2>
-          <div className="flex justify-between text-gray-700 py-1.5 border-b border-gray-200 text-base">
-            <span>Subtotal:</span>
-            <span className="font-semibold">₹{initialSubtotal.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between text-gray-700 py-1.5 border-b border-gray-200 text-base">
-            <span>Shipping:</span>
-            <span className="font-semibold">₹{shippingCharges.toFixed(2)}</span>
-          </div>
-
-          {/* Display discount if applied */}
-          {discountAmount > 0 && (
-            <div className="flex justify-between text-green-700 py-1.5 border-b border-gray-200 text-base">
-              <span>Discount ({appliedCoupon?.discount}%):</span>
-              <span className="font-semibold">
-                - ₹{discountAmount.toFixed(2)}
-              </span>
-            </div>
-          )}
-
-          <div className="flex justify-between font-bold text-gray-900 text-lg pt-3 mt-1">
-            <span>Total:</span>
-            <span>₹{finalTotalAmount.toFixed(2)}</span>
-          </div>
-
-          {/* Applied Coupon Display */}
-          {appliedCoupon && (
-            <div className="mt-5 p-3 bg-[#D4EDDA] border border-[#AED6B4] text-[#155724] rounded-md text-sm">
-              <p className="font-semibold">Coupon Applied:</p>
-              <p>
-                {appliedCoupon.name} (
-                <span className="font-mono font-bold">
-                  {appliedCoupon.code}
-                </span>
-                ) - {appliedCoupon.discount}% Off
-              </p>
-              <p className="text-xs text-gray-600 mt-0.5">
-                Expires:{" "}
-                {new Date(appliedCoupon.expiresAt).toLocaleDateString()}
-              </p>
-              <button
-                onClick={handleRemoveCoupon}
-                className="mt-2 text-sm text-red-600 hover:underline py-0.5 px-1 rounded-md cursor-pointer" // Added cursor-pointer
-              >
-                Remove Coupon
-              </button>
-            </div>
-          )}
-
-          {/* Show/Hide Coupons Button */}
-          {!appliedCoupon && (
-            <button
+          <hr className="my-6 border-gray-200" />
+          {/* Coupon Section */}
+          <div className="mb-6">
+            <h3
+              className="text-lg font-semibold text-gray-800 cursor-pointer flex items-center justify-between"
               onClick={() => {
-                if (cartLoading) {
-                  toast.error("Please wait, cart information is loading.");
-                  return;
-                }
                 setShowCouponSection(!showCouponSection);
-                if (!showCouponSection) fetchCoupons(); // Fetch coupons when section is opened
+                if (!showCouponSection) fetchCoupons(); // Fetch coupons only when opening
               }}
-              className="mt-5 w-full bg-gray-100 text-gray-700 py-2 rounded-lg hover:bg-gray-200 transition-colors font-semibold text-sm cursor-pointer" // Added cursor-pointer
             >
-              {showCouponSection ? "Hide Coupons" : "Apply Coupon"}
-            </button>
-          )}
+              Apply Coupon
+              <span className="text-gray-500 text-sm">
+                {showCouponSection ? "▲" : "▼"}
+              </span>
+            </h3>
 
-          {/* Available Coupons List (Conditional Rendering) */}
-          {showCouponSection && !appliedCoupon && (
-            <div className="mt-5 pt-3 border-t border-gray-200">
-              <h3 className="font-semibold text-gray-700 mb-2 text-base">
-                Available Coupons:
-              </h3>
-              {availableCoupons.length === 0 ? (
-                <p className="text-gray-600 text-sm">No coupons available.</p>
-              ) : (
-                <ul className="space-y-2">
-                  {availableCoupons.map((coupon) => (
-                    <li
-                      key={coupon.id}
-                      className="flex items-center justify-between border border-gray-200 p-3 rounded-lg bg-white shadow-sm"
-                    >
-                      <div>
-                        <p className="font-semibold text-gray-800 text-sm">
-                          {coupon.name} - {coupon.discount}% Off
-                        </p>
-                        <p className="font-mono text-gray-600 text-xs mt-0.5">
-                          Code: <span className="font-bold">{coupon.code}</span>
-                        </p>
-                        <p className="text-xs text-gray-600 mt-0.5">
-                          Expires:{" "}
-                          {new Date(coupon.expiresAt).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <button
-                        onClick={() => handleApplyCoupon(coupon)}
-                        className="text-sm bg-[#E0F7FA] text-[#00796B] py-1 px-3 rounded-full hover:bg-[#B2EBF2] transition-colors font-medium cursor-pointer" // Added cursor-pointer
-                      >
-                        Apply
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
+            {appliedCoupon ? (
+              <div className="mt-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-md flex justify-between items-center text-sm">
+                <span>
+                  Coupon **{appliedCoupon.code}** applied. (
+                  {appliedCoupon.discount}% off)
+                </span>
+                <button
+                  onClick={handleRemoveCoupon}
+                  className="ml-4 px-2 py-1 bg-green-100 text-green-800 rounded hover:bg-green-200 text-xs"
+                >
+                  Remove
+                </button>
+              </div>
+            ) : (
+              showCouponSection && (
+                <div className="mt-4 p-4 border border-gray-200 rounded-md bg-gray-50">
+                  {availableCoupons.length > 0 ? (
+                    <ul className="space-y-2">
+                      {availableCoupons.map((coupon) => (
+                        <li
+                          key={coupon.id}
+                          className="flex justify-between items-center bg-white p-3 rounded-md shadow-sm border border-gray-100"
+                        >
+                          <div>
+                            <p className="font-medium text-gray-800">
+                              {coupon.name}
+                            </p>
+                            <p className="text-sm text-gray-600">
+                              Code: **{coupon.code}** ({coupon.discount}% off)
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              Expires:{" "}
+                              {new Date(coupon.expiresAt).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <button
+                              onClick={() => handleCopyCoupon(coupon.code)}
+                              className="p-1 text-blue-500 hover:text-blue-600 transition-colors"
+                              title="Copy Code"
+                            >
+                              {copiedCouponCode === coupon.code ? (
+                                <CheckCircle
+                                  size={16}
+                                  className="text-green-500"
+                                />
+                              ) : (
+                                "Copy"
+                              )}
+                            </button>
+                            <button
+                              onClick={() => handleApplyCoupon(coupon)}
+                              className="px-3 py-1 bg-[#213E5A] text-white rounded-md text-sm hover:bg-[#1a324a] transition-colors"
+                            >
+                              Apply
+                            </button>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-center text-gray-500 text-sm">
+                      No coupons available at the moment.
+                    </p>
+                  )}
+                </div>
+              )
+            )}
+          </div>
+
+          {/* Order Summary */}
+          <div className="space-y-3 text-gray-800">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+              Order Summary
+            </h3>
+            <div className="flex justify-between text-sm">
+              <span>Subtotal:</span>
+              <span>₹{initialSubtotal.toFixed(2)}</span>
             </div>
-          )}
-
-          {/* Place Order Button with Unique Loading Animation */}
+            <div className="flex justify-between text-sm">
+              <span>Shipping:</span>
+              <span>₹{shippingCharges.toFixed(2)}</span>
+            </div>
+            {discountAmount > 0 && (
+              <div className="flex justify-between text-sm text-green-600">
+                <span>Coupon Discount:</span>
+                <span>- ₹{discountAmount.toFixed(2)}</span>
+              </div>
+            )}
+            <div className="flex justify-between font-bold text-lg border-t border-gray-200 pt-3 mt-3">
+              <span>Total:</span>
+              <span>₹{finalTotalAmount.toFixed(2)}</span>
+            </div>
+          </div>
           <button
             onClick={handlePlaceOrder}
-            disabled={isPlacingOrder || items.length === 0 || !token}
-            className={`mt-6 w-full relative flex items-center justify-center bg-[#213E5A] text-white py-3 rounded-lg font-semibold text-lg transition-all duration-300 ${
-              isPlacingOrder
-                ? "cursor-not-allowed opacity-70"
-                : "hover:bg-[#1a324a] cursor-pointer"
-            }`}
+            disabled={
+              isPlacingOrder ||
+              cartLoading ||
+              addressIsLoading ||
+              items.length === 0 ||
+              !selectedBillingAddressId ||
+              !selectedDeliveryAddressId
+            }
+            className="w-full bg-[#213E5A] text-white py-3 rounded-md mt-6 font-semibold hover:bg-[#1a324a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {isPlacingOrder ? (
-              <div className="flex items-center">
-                <div className="cart-loader running mr-3">
-                  <div className="product"></div> {/* Product inside cart */}
+              <>
+                <div className="cart-loader running">
                   <div className="wheel left"></div>
                   <div className="wheel right"></div>
+                  <div className="product"></div>
                 </div>
-                <span>Placing Order...</span>
-              </div>
+                Placing Order...
+              </>
             ) : (
               "Place Order"
             )}
@@ -1008,147 +1020,149 @@ const UserCheckout = () => {
         </div>
       </div>
 
-      {/* Address Modal */}
+      {/* Address Modal - This section was added/modified to use showModal, handleFormChange, handleFormSubmit */}
       {showModal && (
-        <div className="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-md">
+            <h2 className="text-2xl font-bold mb-4">
               {editingAddress ? "Edit Address" : "Add New Address"}
             </h2>
-            <form onSubmit={handleFormSubmit} className="space-y-4">
-              <div>
-                <label
-                  htmlFor="fullName"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  id="fullName"
-                  name="fullName"
-                  value={formData.fullName}
-                  onChange={handleFormChange}
-                  className="w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm focus:ring-[#213E5A] focus:border-[#213E5A]"
-                  required
-                />
+            <form onSubmit={handleFormSubmit}>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                  <label
+                    htmlFor="fullName"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    name="fullName"
+                    id="fullName"
+                    value={formData.fullName}
+                    onChange={handleFormChange}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                    required
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="phone"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Phone
+                  </label>
+                  <input
+                    type="text"
+                    name="phone"
+                    id="phone"
+                    value={formData.phone}
+                    onChange={handleFormChange}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                    maxLength={10}
+                    required
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="pincode"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Pincode
+                  </label>
+                  <input
+                    type="text"
+                    name="pincode"
+                    id="pincode"
+                    value={formData.pincode}
+                    onChange={handleFormChange}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                    maxLength={6}
+                    required
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="state"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    State
+                  </label>
+                  <input
+                    type="text"
+                    name="state"
+                    id="state"
+                    value={formData.state}
+                    onChange={handleFormChange}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                    required
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label
+                    htmlFor="city"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    City
+                  </label>
+                  <input
+                    type="text"
+                    name="city"
+                    id="city"
+                    value={formData.city}
+                    onChange={handleFormChange}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                    required
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label
+                    htmlFor="addressLine"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Address Line
+                  </label>
+                  <textarea
+                    name="addressLine"
+                    id="addressLine"
+                    value={formData.addressLine}
+                    onChange={handleFormChange}
+                    rows={3}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                    required
+                  ></textarea>
+                </div>
+                <div className="sm:col-span-2">
+                  <label
+                    htmlFor="landmark"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Landmark (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    name="landmark"
+                    id="landmark"
+                    value={formData.landmark}
+                    onChange={handleFormChange}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                  />
+                </div>
               </div>
-              <div>
-                <label
-                  htmlFor="phone"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Phone Number
-                </label>
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleFormChange}
-                  className="w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm focus:ring-[#213E5A] focus:border-[#213E5A]"
-                  maxLength={10}
-                  required
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="pincode"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Pincode
-                </label>
-                <input
-                  type="text"
-                  id="pincode"
-                  name="pincode"
-                  value={formData.pincode}
-                  onChange={handleFormChange}
-                  className="w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm focus:ring-[#213E5A] focus:border-[#213E5A]"
-                  maxLength={6}
-                  required
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="state"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  State
-                </label>
-                <input
-                  type="text"
-                  id="state"
-                  name="state"
-                  value={formData.state}
-                  onChange={handleFormChange}
-                  className="w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm focus:ring-[#213E5A] focus:border-[#213E5A]"
-                  required
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="city"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  City
-                </label>
-                <input
-                  type="text"
-                  id="city"
-                  name="city"
-                  value={formData.city}
-                  onChange={handleFormChange}
-                  className="w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm focus:ring-[#213E5A] focus:border-[#213E5A]"
-                  required
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="addressLine"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Address Line (House No., Street Name)
-                </label>
-                <textarea
-                  id="addressLine"
-                  name="addressLine"
-                  value={formData.addressLine}
-                  onChange={handleFormChange}
-                  rows={3}
-                  className="w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm focus:ring-[#213E5A] focus:border-[#213E5A]"
-                  required
-                ></textarea>
-              </div>
-              <div>
-                <label
-                  htmlFor="landmark"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Landmark (Optional)
-                </label>
-                <input
-                  type="text"
-                  id="landmark"
-                  name="landmark"
-                  value={formData.landmark}
-                  onChange={handleFormChange}
-                  className="w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm focus:ring-[#213E5A] focus:border-[#213E5A]"
-                />
-              </div>
-              <div className="flex justify-end space-x-3 mt-6">
+              <div className="mt-6 flex justify-end space-x-3">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors text-sm font-medium cursor-pointer" // Added cursor-pointer
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-[#213E5A] text-white rounded-md hover:bg-[#1a324a] transition-colors text-sm font-medium cursor-pointer" // Added cursor-pointer
+                  className="px-4 py-2 text-sm font-medium text-white bg-[#213E5A] rounded-md hover:bg-[#1a324a]"
                 >
-                  {editingAddress ? "Save Changes" : "Add Address"}
+                  {editingAddress ? "Update Address" : "Save Address"}
                 </button>
               </div>
             </form>

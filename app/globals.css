@@ -61,17 +61,17 @@ body {
 }
 
 /* ---------------------------------------- */
-/* ✅ Added: Outline Text and Slide Banner  */
+/* ✅ Outline Text for Heading              */
 /* ---------------------------------------- */
-
-/* Outline text like the 'Frontend' image */
 .outline-text {
   color: transparent;
   -webkit-text-stroke: 1px #999;
   text-stroke: 1px #999;
 }
 
-/* Scroll animation for banner */
+/* ---------------------------------------- */
+/* ✅ Scroll Animation (If You Need Both)   */
+/* ---------------------------------------- */
 @keyframes scroll {
   0% {
     transform: translateX(100%);
@@ -81,11 +81,13 @@ body {
   }
 }
 
-/* Tailwind utility class to trigger scroll animation */
 .animate-scroll {
   animation: scroll 15s linear infinite;
 }
-/* SlidingBanner.css */
+
+/* ---------------------------------------- */
+/* ✅ Sliding Banner Continuous Loop        */
+/* ---------------------------------------- */
 @keyframes infinite-scroll-left {
   0% {
     transform: translateX(0%);
@@ -97,4 +99,5 @@ body {
 
 .sliding-track {
   animation: infinite-scroll-left 20s linear infinite;
+  padding-right: 5rem; /* ✅ End spacing after last message */
 }

@@ -1,37 +1,50 @@
-export const dynamic = "force-dynamic";
+"use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { getNavbarData } from "@/api/NavbarApi";
+import { fetchCategories } from "@/api/fetchCategories";
 
 import { NavItem } from "@/types/nav";
 import { Category } from "@/types/category";
-import { fetchCategories } from "@/api/fetchCategories";
 
-const NavItems = async () => {
-  let navItems: NavItem[] = [];
-  let categories: Category[] = [];
+const NavItems = () => {
+  const pathname = usePathname();
+  const [navItems, setNavItems] = useState<NavItem[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
 
-  try {
-    const navResponse = await getNavbarData();
-    if (Array.isArray(navResponse.result)) {
-      navItems = navResponse.result;
-    }
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const navResponse = await getNavbarData();
+        if (Array.isArray(navResponse.result)) {
+          setNavItems(navResponse.result);
+        }
 
-    const catResponse = await fetchCategories();
-    if (catResponse.success && Array.isArray(catResponse.categories)) {
-      categories = catResponse.categories.filter((c) => !c.isDeleted);
-    }
-  } catch (error) {
-    console.error(" Navbar or Categories fetch failed:", error);
-  }
+        const catResponse = await fetchCategories();
+        if (catResponse.success && Array.isArray(catResponse.categories)) {
+          setCategories(catResponse.categories.filter((c) => !c.isDeleted));
+        }
+      } catch (error) {
+        console.error("Navbar or Categories fetch failed:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   return (
     <ul className="flex gap-10">
-      {navItems.map((item: NavItem) =>
+      {navItems.map((item) =>
         item.is_active ? (
           item.name.toLowerCase() === "categories" ? (
             <li key={item.id} className="relative group">
-              <span className="hover:text-blue-600 cursor-pointer">
+              <span
+                className={`hover:text-blue-600 cursor-pointer ${
+                  pathname.startsWith("/category") ? "underline" : ""
+                }`}
+              >
                 {item.name}
               </span>
 
@@ -40,7 +53,7 @@ const NavItems = async () => {
                 {categories.map((cat) => (
                   <li key={cat.id}>
                     <Link href={`/category/${cat.id}`}>
-                      <span className="block px-4 py-2 hover:bg-[#edf3f8] ">
+                      <span className="block px-4 py-2 hover:bg-[#edf3f8]">
                         {cat.name}
                       </span>
                     </Link>
@@ -51,7 +64,13 @@ const NavItems = async () => {
           ) : (
             <li key={item.id}>
               <Link href={item.link || "#"}>
-                <span className="hover:text-blue-600">{item.name}</span>
+                <span
+                  className={`hover:text-blue-600 ${
+                    pathname === item.link ? "underline" : ""
+                  }`}
+                >
+                  {item.name}
+                </span>
               </Link>
             </li>
           )
