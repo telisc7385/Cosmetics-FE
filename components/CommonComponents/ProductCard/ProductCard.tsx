@@ -297,7 +297,7 @@ const ProductCard = ({ product }: Props) => {
         toast.success(`${product.name} added to cart!`);
       } catch (error) {
         console.error("ProductCard: Failed to add item to logged-in cart:", error);
-        toast.error(`Failed to add ${product.name} to cart. Please try again.`);
+        toast.error(`Failed to add ${product.name} to cart. Please try again.`); 
       }
     } else {
       dispatch(
