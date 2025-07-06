@@ -1,17 +1,21 @@
-// Providers/LoggedInCartProvider.tsx
 "use client";
 
 import React, { useState, useEffect, useCallback, useContext } from "react";
 import { useAppSelector } from "@/store/hooks/hooks";
 import { selectToken } from "@/store/slices/authSlice";
 import { apiCore } from "@/api/ApiCore"; // Ensure this path is correct
-import LoggedInCartContext from "./LoggedInCartContext"; // Ensure this path is correct
 
-// Import types from their new files
-import { CartItem, CartItemFromAPI } from "@/types/cart"; // Ensure CartItem and CartItemFromAPI are correct
-import { Product, ProductVariant } from "@/types/product"; // Ensure Product and ProductVariant are imported if used in CartItem
+// Import all necessary types from your types file
+import {
+  CartItem,
+  CartItemFromAPI,
+  CartApiResponse, // This import will now work
+} from "@/types/product";
+import LoggedInCartContext, {
+  LoggedInCartContextType,
+} from "@/CartProvider/LoggedInCartContext"; // Ensure this path is correct
 
-const parseCartResponse = (response: any): CartItem[] => {
+const parseCartResponse = (response: CartApiResponse): CartItem[] => {
   console.log(
     "LoggedInCartProvider: Raw response to parse (GET /cart):",
     response
@@ -19,9 +23,11 @@ const parseCartResponse = (response: any): CartItem[] => {
   let rawCartItems: any[] = [];
 
   try {
+    // Type guards now work more effectively because response is typed
     if (
       response &&
       typeof response === "object" &&
+      "data" in response &&
       response.data &&
       typeof response.data === "object" &&
       Array.isArray(response.data.cart_items)
@@ -33,6 +39,7 @@ const parseCartResponse = (response: any): CartItem[] => {
     } else if (
       response &&
       typeof response === "object" &&
+      "cart" in response &&
       response.cart &&
       Array.isArray(response.cart.items)
     ) {
@@ -75,7 +82,7 @@ const parseCartResponse = (response: any): CartItem[] => {
 
       if (!cartItemIdExists || !productIdExists) {
         console.warn(
-          "LoggedInCartProvider: Skipping malformed cart item due to missing critical IDs (id or product/variant productId):",
+          "LoggedInCartProvider: Skipping malformed cart item due. to missing critical IDs (id or product/variant productId):",
           item
         );
         return false;
@@ -101,8 +108,6 @@ const parseCartResponse = (response: any): CartItem[] => {
             "LoggedInCartProvider: Parsed cartItemId is NaN, setting to 0. This might indicate a backend issue.",
             { rawItem: item }
           );
-          // Decided to set to 0 and continue for now, but a real app might throw or filter.
-          // For now, it will likely be caught by the later check `!cartItemId`
         }
 
         const productId =
@@ -128,8 +133,6 @@ const parseCartResponse = (response: any): CartItem[] => {
               extractedProductId: productId,
             }
           );
-          // Throwing an error here will prevent the entire cart from loading if one item is malformed.
-          // Depending on robustness needs, you might filter this item out instead.
           throw new Error(
             "Backend response missing cartItemId or productId, or productId not a number for a cart item."
           );
@@ -162,6 +165,7 @@ const parseCartResponse = (response: any): CartItem[] => {
             "0"
         );
 
+        // Ensure basePrice is parsed as a number and defaults to 0 if null/undefined
         const basePrice = parseFloat(
           item.product?.basePrice?.toString() || "0"
         );
@@ -198,7 +202,7 @@ const parseCartResponse = (response: any): CartItem[] => {
           name: displayName,
           quantity: quantity,
           sellingPrice: sellingPrice,
-          basePrice: basePrice,
+          basePrice: basePrice, // Now a number
           image: image,
           variantId: finalVariantId, // Variant ID (number or null)
           variant: item.variant
@@ -246,6 +250,7 @@ export function LoggedInCartProvider({
   const [items, setItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [cartId, setCartId] = useState<number | null>(null); // Changed to number | null
 
   const fetchCartItems = useCallback(async () => {
     console.log("fetchCartItems called.");
@@ -256,6 +261,7 @@ export function LoggedInCartProvider({
 
     if (!token) {
       setItems([]);
+      setCartId(null);
       setLoading(false);
       console.log(
         "LoggedInCartProvider: No token, clearing items and finishing fetch."
@@ -269,16 +275,45 @@ export function LoggedInCartProvider({
       "LoggedInCartProvider: fetchCartItems initiated. Token present."
     );
     try {
-      // Log the token just before the API call for GET /cart
       console.log(
         "LoggedInCartProvider: Token sent to apiCore for GET /cart:",
         token
       );
-      const response = await apiCore("/cart", "GET", undefined, token);
+      // Explicitly type the response from apiCore as CartApiResponse
+      const response: CartApiResponse = await apiCore(
+        "/cart",
+        "GET",
+        undefined,
+        token
+      );
       console.log(
         "LoggedInCartProvider: Raw response from GET /cart API call:",
         response
       );
+
+      // Parse cartId based on the defined CartApiResponse type
+      let fetchedCartId: string | number | undefined;
+      if (
+        response &&
+        "data" in response &&
+        response.data &&
+        response.data.id !== undefined
+      ) {
+        fetchedCartId = response.data.id;
+      } else if (
+        response &&
+        "cart" in response &&
+        response.cart &&
+        response.cart.id !== undefined
+      ) {
+        fetchedCartId = response.cart.id;
+      } else if (response && response.id !== undefined) {
+        // Check for id directly at the root
+        fetchedCartId = response.id;
+      }
+      // Ensure cartId is stored as a number, or null if not found
+      setCartId(fetchedCartId !== undefined ? Number(fetchedCartId) : null);
+
       const fetchedItems = parseCartResponse(response);
       setItems(fetchedItems);
       console.log(
@@ -295,6 +330,7 @@ export function LoggedInCartProvider({
         setError(err.message || "Failed to fetch cart items.");
       }
       setItems([]); // Clear items on error to prevent displaying stale data
+      setCartId(null); // Clear cartId on error
     } finally {
       setLoading(false);
       console.log("LoggedInCartProvider: fetchCartItems finished.");
@@ -306,12 +342,14 @@ export function LoggedInCartProvider({
       fetchCartItems();
     } else {
       setItems([]); // Ensure cart is cleared when user logs out
+      setCartId(null); // Ensure cartId is cleared when user logs out
       setLoading(false);
     }
   }, [token, fetchCartItems]);
 
   const addCartItem = useCallback(
     async (itemToAdd: Omit<CartItem, "cartItemId">) => {
+      // Parameter name aligns with context type
       console.log("LoggedInCartProvider: addCartItem called.");
       console.log(
         "LoggedInCartProvider: Current token status (addCartItem):",
@@ -349,7 +387,6 @@ export function LoggedInCartProvider({
               : item
           );
         } else {
-          // If new item, add it with a temporary client-side cartItemId
           const tempCartItemId = Date.now() + Math.random(); // Generate a unique temporary number ID
 
           // Construct display name, prioritizing variant name
@@ -600,12 +637,10 @@ export function LoggedInCartProvider({
             "LoggedInCartProvider: Calling API for /cart/update (decrement) with payload:",
             { cartItemId: currentItem.cartItemId, quantity: newQuantity }
           );
-          // Log the token just before the API call for PUT /cart/update
           console.log(
             "LoggedInCartProvider: Token sent to apiCore for /cart/update (decrement):",
             token
           );
-          // Ensure cartItemId is converted to string for the URL path
           await apiCore(
             `/cart/update/${String(currentItem.cartItemId)}`,
             "PUT",
@@ -614,7 +649,6 @@ export function LoggedInCartProvider({
           );
         }
         console.log("LoggedInCartProvider: Decrement successful.");
-        // Re-fetch after successful update/removal
         await fetchCartItems();
       } catch (err: any) {
         console.error(
@@ -626,10 +660,10 @@ export function LoggedInCartProvider({
         } else {
           setError(err.message || "Failed to decrement item quantity.");
         }
-        setItems(prevItems); // Rollback on error
+        setItems(prevItems);
       }
     },
-    [token, items, fetchCartItems, removeCartItem] // Added fetchCartItems and removeCartItem to dependencies
+    [token, items, fetchCartItems]
   );
 
   const clearCart = useCallback(async () => {
@@ -645,18 +679,16 @@ export function LoggedInCartProvider({
     setError(null);
     const prevItems = [...items];
 
-    setItems([]); // Optimistic clear
+    setItems([]);
 
     try {
       console.log("LoggedInCartProvider: Calling API for /cart/clear.");
-      // Log the token just before the API call for DELETE /cart/clear
       console.log(
         "LoggedInCartProvider: Token sent to apiCore for /cart/clear:",
         token
       );
       await apiCore("/cart/clear", "DELETE", undefined, token);
       console.log("LoggedInCartProvider: /cart/clear successful.");
-      // Re-fetch to confirm cart is empty from backend
       await fetchCartItems();
     } catch (err: any) {
       console.error("LoggedInCartProvider: Failed to clear cart:", err);
@@ -665,11 +697,12 @@ export function LoggedInCartProvider({
       } else {
         setError(err.message || "Failed to clear cart.");
       }
-      setItems(prevItems); // Rollback on error
+      setItems(prevItems);
     }
-  }, [token, items, fetchCartItems]); // Added fetchCartItems to dependencies
+  }, [token, items, fetchCartItems]);
 
-  const contextValue = {
+  const contextValue: LoggedInCartContextType = {
+    // Explicitly type contextValue
     items,
     loading,
     error,
@@ -679,6 +712,7 @@ export function LoggedInCartProvider({
     decrementItemQuantity,
     clearCart,
     refetchCart: fetchCartItems,
+    cartId,
   };
 
   return (

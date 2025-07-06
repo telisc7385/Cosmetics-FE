@@ -1,4 +1,3 @@
-// app/account/my-orders/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -6,76 +5,10 @@ import toast from "react-hot-toast";
 import { useAppSelector } from "@/store/hooks/hooks";
 import { selectToken, selectIsLoggedIn } from "@/store/slices/authSlice";
 import { apiCore } from "@/api/ApiCore";
+import { Product } from "@/types/product";
+import Image from "next/image";
 
-// --- Interface Definitions for your Order Data (Same as before) ---
-interface OrderItem {
-  id: number;
-  orderId: number;
-  productId: number | null;
-  variantId: number | null;
-  quantity: number;
-  price: number;
-  createdAt: string;
-  updatedAt: string;
-  product?: {
-    id: number;
-    isActive: boolean;
-    createdAt: string;
-    updatedAt: string;
-    isDeleted: boolean;
-    deletedAt: string | null;
-    name: string;
-    description: string;
-    SKU: string;
-    basePrice: string;
-    sellingPrice: string;
-    priceDifferencePercent: number;
-    stock: number;
-    isNewArrival: boolean;
-    createdById: number;
-    deletedById: number | null;
-    updatedById: number;
-    categoryId: number;
-    subcategoryId: number | null;
-    length: string;
-    width: string;
-    weight: string;
-    slug: string;
-    sequenceNumber: number;
-    seoTitle: string;
-    seoKeyword: string;
-    seoDescription: string;
-    productDetails: string | null;
-    images?: {
-      id: number;
-      image: string;
-      productId: number;
-      createdAt: string;
-      updatedAt: string;
-    }[];
-  } | null;
-  variant?: {
-    id: number;
-    name: string | null;
-    images?: {
-      id: number;
-      url: string;
-      variantId: number;
-      createdAt: string;
-      updatedAt: string;
-    }[];
-  } | null;
-}
-
-interface Payment {
-  id: number;
-  method: string;
-  status: string;
-  transactionId: string | null;
-  paidAt: string | null;
-  createdAt: string;
-}
-
+// ✅ Address & Variant — NEW (from Step 1)
 interface Address {
   id: number;
   userId: number;
@@ -90,6 +23,40 @@ interface Address {
   isDefault: boolean;
   createdAt: string;
   updatedAt: string;
+}
+
+interface Variant {
+  id: number;
+  name: string | null;
+  images: {
+    id: number;
+    url: string;
+    variantId: number;
+    createdAt: string;
+    updatedAt: string;
+  }[];
+}
+
+interface Payment {
+  id: number;
+  method: string;
+  status: string;
+  transactionId: string | null;
+  paidAt: string | null;
+  createdAt: string;
+}
+
+interface OrderItem {
+  id: number;
+  orderId: number;
+  productId: number | null;
+  variantId: number | null;
+  quantity: number;
+  price: number;
+  createdAt: string;
+  updatedAt: string;
+  product?: Product | null;
+  variant?: Variant | null;
 }
 
 interface Order {
@@ -109,11 +76,15 @@ interface Order {
   address: Address;
 }
 
+interface APIOrderResponse {
+  success: boolean;
+  result: Order[];
+}
+
 export default function MyOrders() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  // State to manage which order card is expanded
   const [expandedOrderId, setExpandedOrderId] = useState<number | null>(null);
 
   const isLoggedIn = useAppSelector(selectIsLoggedIn);
@@ -125,105 +96,32 @@ export default function MyOrders() {
       setError(null);
 
       if (!isLoggedIn || !token) {
-        console.log(
-          "MyOrders: User not logged in or token not available. Not fetching orders."
-        );
         setLoading(false);
         setOrders([]);
         return;
       }
 
       try {
-        const response = await apiCore<{ success: boolean; result: any[] }>(
+        const response = await apiCore<APIOrderResponse>(
           "/order/history",
           "GET",
           undefined,
           token
         );
-        console.log("MyOrders: API Response for /order/history:", response);
 
         if (
           response &&
           response.success === true &&
           Array.isArray(response.result)
         ) {
-          const fetchedOrders: Order[] = response.result.map(
-            (orderData: any) => ({
-              id: orderData.id,
-              userId: orderData.userId,
-              totalAmount: parseFloat(orderData.totalAmount),
-              status: orderData.status,
-              subtotal: orderData.subtotal
-                ? parseFloat(orderData.subtotal)
-                : null,
-              discountAmount: parseFloat(orderData.discountAmount),
-              discountCode: orderData.discountCode,
-              createdAt: orderData.createdAt,
-              updatedAt: orderData.updatedAt,
-              paymentId: orderData.paymentId,
-              addressId: orderData.addressId,
-              items: orderData.items.map((item: any) => ({
-                id: item.id,
-                orderId: item.orderId,
-                productId: item.productId,
-                variantId: item.variantId,
-                quantity: item.quantity,
-                price: parseFloat(item.price),
-                createdAt: item.createdAt,
-                updatedAt: item.updatedAt,
-                product: item.product
-                  ? {
-                      ...item.product,
-                      basePrice: parseFloat(item.product.basePrice),
-                      sellingPrice: parseFloat(item.product.sellingPrice),
-                      images: item.product.images || [],
-                    }
-                  : null,
-                variant: item.variant
-                  ? {
-                      ...item.variant,
-                      images: item.variant.images || [],
-                    }
-                  : null,
-              })),
-              payment: {
-                id: orderData.payment.id,
-                method: orderData.payment.method,
-                status: orderData.payment.status,
-                transactionId: orderData.payment.transactionId,
-                paidAt: orderData.payment.paidAt,
-                createdAt: orderData.payment.createdAt,
-              },
-              address: {
-                id: orderData.address.id,
-                userId: orderData.address.userId,
-                type: orderData.address.type,
-                fullName: orderData.address.fullName,
-                phone: orderData.address.phone,
-                pincode: orderData.address.pincode,
-                state: orderData.address.state,
-                city: orderData.address.city,
-                addressLine: orderData.address.addressLine,
-                landmark: orderData.address.landmark,
-                isDefault: orderData.address.isDefault,
-                createdAt: orderData.address.createdAt,
-                updatedAt: orderData.address.updatedAt,
-              },
-            })
-          );
-          setOrders(fetchedOrders);
-          console.log("MyOrders: Orders loaded successfully.");
+          setOrders(response.result);
         } else {
-          console.warn(
-            "MyOrders: Unexpected API response structure for /order/history",
-            response
-          );
           toast.error("Unexpected order data format from server.");
           setOrders([]);
         }
-      } catch (err: any) {
-        console.error("MyOrders: Failed to fetch orders:", err);
-        const errorMessage = err.message || "Failed to load orders.";
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Failed to load orders.";
         setError(errorMessage);
         toast.error(errorMessage);
         setOrders([]);
@@ -240,11 +138,7 @@ export default function MyOrders() {
   };
 
   if (loading) {
-    return (
-      <div className="p-4 text-center">
-        <p>Loading orders...</p>
-      </div>
-    );
+    return <div className="p-4 text-center">Loading orders...</div>;
   }
 
   if (error) {
@@ -279,7 +173,6 @@ export default function MyOrders() {
               className="border border-gray-200 rounded-lg p-5 shadow-sm bg-white cursor-pointer transition-all duration-300 ease-in-out hover:shadow-md"
               onClick={() => handleCardClick(order.id)}
             >
-              {/* Small Card View (Always visible) */}
               <div className="flex justify-between items-center mb-2">
                 <p className="text-lg font-semibold text-indigo-700">
                   Order ID: {order.id}
@@ -304,44 +197,43 @@ export default function MyOrders() {
                 {new Date(order.createdAt).toLocaleDateString("en-IN")}
               </p>
 
-              {/* Expanded Details (Conditionally rendered) */}
               {expandedOrderId === order.id && (
                 <div className="mt-4 pt-4 border-t border-gray-200">
                   <h3 className="font-medium text-gray-700 mb-2">Items:</h3>
                   <ul className="list-disc list-inside space-y-1 text-gray-600">
                     {order.items.length > 0 ? (
-                      order.items.map((item, itemIndex) => (
-                        <li
-                          key={item.id || itemIndex}
-                          className="flex items-center gap-2"
-                        >
-                          {(() => {
-                            const imageUrl =
-                              item.variant?.images?.[0]?.url ||
-                              item.product?.images?.[0]?.image ||
-                              "";
-                            const itemName =
-                              item.variant?.name ||
-                              item.product?.name ||
-                              "Unknown Item";
-                            return (
-                              <>
-                                {imageUrl && (
-                                  <img
-                                    src={imageUrl}
-                                    alt={itemName}
-                                    className="w-8 h-8 object-cover rounded"
-                                  />
-                                )}
-                                <span>
-                                  {itemName} (x{item.quantity}) - ₹
-                                  {(item.price * item.quantity).toFixed(2)}
-                                </span>
-                              </>
-                            );
-                          })()}
-                        </li>
-                      ))
+                      order.items.map((item, index) => {
+                        const imageUrl =
+                          item.variant?.images?.[0]?.url ||
+                          item.product?.images?.[0]?.image ||
+                          "";
+                        const itemName =
+                          item.variant?.name ||
+                          item.product?.name ||
+                          "Unknown Item";
+
+                        return (
+                          <li
+                            key={item.id || index}
+                            className="flex items-center gap-2"
+                          >
+                            {imageUrl && (
+                              <Image
+                                src={imageUrl}
+                                alt={itemName}
+                                width={32}
+                                height={32}
+                                className="object-cover rounded"
+                                style={{ width: "32px", height: "32px" }}
+                              />
+                            )}
+                            <span>
+                              {itemName} (x{item.quantity}) - ₹
+                              {(item.price * item.quantity).toFixed(2)}
+                            </span>
+                          </li>
+                        );
+                      })
                     ) : (
                       <li>No items found for this order.</li>
                     )}

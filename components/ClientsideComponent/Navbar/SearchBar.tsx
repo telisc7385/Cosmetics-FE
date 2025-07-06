@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { FiSearch } from 'react-icons/fi';
-import { IoClose } from 'react-icons/io5';
-import Image from 'next/image';
-import { Product } from '@/types/product';
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { FiSearch } from "react-icons/fi";
+import { IoClose } from "react-icons/io5";
+import Image from "next/image";
+import { Product } from "@/types/product";
 
 const SearchBar = () => {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const [filtered, setFiltered] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -16,7 +16,7 @@ const SearchBar = () => {
   // 🔄 Live API search on input
   useEffect(() => {
     const term = query.trim();
-    if (term === '') {
+    if (term === "") {
       setFiltered([]);
       return;
     }
@@ -25,13 +25,15 @@ const SearchBar = () => {
       try {
         setLoading(true);
         const res = await fetch(
-          `https://cosmaticadmin.twilightparadox.com/product/filter/?search=${encodeURIComponent(term)}`
+          `https://cosmaticadmin.twilightparadox.com/product/filter/?search=${encodeURIComponent(
+            term
+          )}`
         );
         const data = await res.json();
-        console.log('🔍 API search results:', data.products); // Debug log
+        console.log("🔍 API search results:", data.products); // Debug log
         setFiltered(data.products?.slice(0, 6) || []);
       } catch (err) {
-        console.error(' Failed to fetch search suggestions:', err);
+        console.error(" Failed to fetch search suggestions:", err);
       } finally {
         setLoading(false);
       }
@@ -51,7 +53,7 @@ const SearchBar = () => {
   };
 
   const handleSelect = (slug: string) => {
-    setQuery('');
+    setQuery("");
     setFiltered([]);
     router.push(`/product/${slug}`);
   };
@@ -67,12 +69,15 @@ const SearchBar = () => {
             onChange={(e) => setQuery(e.target.value)}
             className="w-full px-8 py-2 border border-gray-300 rounded focus:outline-none focus:ring-0.5 focus:ring-orange-500"
           />
-          <FiSearch className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-300 " size={18} />
+          <FiSearch
+            className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-300 "
+            size={18}
+          />
           {query && (
             <IoClose
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer"
               size={18}
-              onClick={() => setQuery('')}
+              onClick={() => setQuery("")}
             />
           )}
         </div>
@@ -88,11 +93,11 @@ const SearchBar = () => {
               className="flex items-center gap-3 px-4 py-2 cursor-pointer hover:bg-gray-100"
             >
               <Image
-             src={
-              product.images?.[0]?.image || 
-              product.variants?.[0]?.images?.[0]?.url || 
-              '/placeholder.png'
-            }
+                src={
+                  product.images?.[0]?.image ||
+                  product.variants?.[0]?.images?.[0]?.url ||
+                  "/placeholder.png"
+                }
                 alt={product.name}
                 width={25}
                 height={25}

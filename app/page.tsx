@@ -8,6 +8,7 @@ import FeaturedSliderComponent from "@/components/ServersideComponent/FeaturedSl
 import GalleryPage from "@/components/ServersideComponent/GalleryPage/GalleryPage";
 import HotListWrapper from "@/components/HotList/HotListWrapper";
 import NewsletterSignup from "@/components/ClientsideComponent/NewsletterSignup/NewsletterSignup";
+import SlidingBanner from "@/components/ServersideComponent/SlidingBanner/SlidingBanner";
 
 export default async function HomePage() {
   return (
@@ -16,6 +17,7 @@ export default async function HomePage() {
       <CategorySection />
       <FeaturesBanner />
       <TopCategories />
+      <SlidingBanner />
       <HotListWrapper></HotListWrapper>
       <WhyChooseUs />
       <FeaturedSliderComponent />
