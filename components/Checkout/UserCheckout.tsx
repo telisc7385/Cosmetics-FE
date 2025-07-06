@@ -881,123 +881,123 @@ const UserCheckout = () => {
             <span>Subtotal:</span>
             <span className="font-semibold">₹{initialSubtotal.toFixed(2)}</span>
           </div>
-          <div className="flex justify-between text-gray-700 py-1.5 border-b border-gray-200 text-base">
-            <span>Shipping:</span>
-            <span className="font-semibold">₹{shippingCharges.toFixed(2)}</span>
-          </div>
 
           {/* Display discount if applied */}
           {discountAmount > 0 && (
             <div className="flex justify-between text-green-700 py-1.5 border-b border-gray-200 text-base">
-              <span>Discount ({appliedCoupon?.discount}%):</span>
+              <span>Discount ({appliedCoupon?.code}):</span>
               <span className="font-semibold">
                 - ₹{discountAmount.toFixed(2)}
               </span>
             </div>
           )}
 
-          <div className="flex justify-between font-bold text-gray-900 text-lg pt-3 mt-1">
+          <div className="flex justify-between text-gray-800 pt-3 text-lg font-bold">
             <span>Total:</span>
             <span>₹{finalTotalAmount.toFixed(2)}</span>
           </div>
 
-          {/* Applied Coupon Display */}
-          {appliedCoupon && (
-            <div className="mt-5 p-3 bg-[#D4EDDA] border border-[#AED6B4] text-[#155724] rounded-md text-sm">
-              <p className="font-semibold">Coupon Applied:</p>
-              <p>
-                {appliedCoupon.name} (
-                <span className="font-mono font-bold">
-                  {appliedCoupon.code}
-                </span>
-                ) - {appliedCoupon.discount}% Off
-              </p>
-              <p className="text-xs text-gray-600 mt-0.5">
-                Expires:{" "}
-                {new Date(appliedCoupon.expiresAt).toLocaleDateString()}
-              </p>
-              <button
-                onClick={handleRemoveCoupon}
-                className="mt-2 text-sm text-red-600 hover:underline py-0.5 px-1 rounded-md cursor-pointer" // Added cursor-pointer
-              >
-                Remove Coupon
-              </button>
-            </div>
-          )}
-
-          {/* Show/Hide Coupons Button */}
-          {!appliedCoupon && (
+          {/* Coupon Section */}
+          <div className="mt-6 border-t border-gray-200 pt-6">
             <button
               onClick={() => {
-                if (cartLoading) {
-                  toast.error("Please wait, cart information is loading.");
-                  return;
-                }
                 setShowCouponSection(!showCouponSection);
-                if (!showCouponSection) fetchCoupons(); // Fetch coupons when section is opened
+                if (!showCouponSection) fetchCoupons(); // Fetch coupons only when section is opened
               }}
-              className="mt-5 w-full bg-gray-100 text-gray-700 py-2 rounded-lg hover:bg-gray-200 transition-colors font-semibold text-sm cursor-pointer" // Added cursor-pointer
+              className="w-full text-center py-2 px-4 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#213E5A] cursor-pointer" // Added cursor-pointer
             >
               {showCouponSection ? "Hide Coupons" : "Apply Coupon"}
             </button>
-          )}
 
-          {/* Available Coupons List (Conditional Rendering) */}
-          {showCouponSection && !appliedCoupon && (
-            <div className="mt-5 pt-3 border-t border-gray-200">
-              <h3 className="font-semibold text-gray-700 mb-2 text-base">
-                Available Coupons:
-              </h3>
-              {availableCoupons.length === 0 ? (
-                <p className="text-gray-600 text-sm">No coupons available.</p>
-              ) : (
-                <ul className="space-y-2">
-                  {availableCoupons.map((coupon) => (
-                    <li
-                      key={coupon.id}
-                      className="flex items-center justify-between border border-gray-200 p-3 rounded-lg bg-white shadow-sm"
-                    >
-                      <div>
-                        <p className="font-semibold text-gray-800 text-sm">
-                          {coupon.name} - {coupon.discount}% Off
-                        </p>
-                        <p className="font-mono text-gray-600 text-xs mt-0.5">
-                          Code: <span className="font-bold">{coupon.code}</span>
-                        </p>
-                        <p className="text-xs text-gray-600 mt-0.5">
-                          Expires:{" "}
-                          {new Date(coupon.expiresAt).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <button
-                        onClick={() => handleApplyCoupon(coupon)}
-                        className="text-sm bg-[#E0F7FA] text-[#00796B] py-1 px-3 rounded-full hover:bg-[#B2EBF2] transition-colors font-medium cursor-pointer" // Added cursor-pointer
+            {showCouponSection && (
+              <div className="mt-4 p-4 border border-dashed border-gray-300 rounded-md bg-gray-50 max-h-60 overflow-y-auto">
+                {availableCoupons.length === 0 ? (
+                  <p className="text-gray-500 text-center">
+                    No coupons available.
+                  </p>
+                ) : (
+                  <ul className="space-y-3">
+                    {availableCoupons.map((coupon) => (
+                      <li
+                        key={coupon.id}
+                        className="flex justify-between items-center bg-white p-3 rounded-md border border-gray-200 shadow-sm"
                       >
-                        Apply
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          )}
+                        <div>
+                          <p className="font-semibold text-gray-800 text-sm">
+                            {coupon.name}
+                          </p>
+                          <p className="text-xs text-gray-600">
+                            Code:{" "}
+                            <span className="font-mono text-gray-900">
+                              {coupon.code}
+                            </span>
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            Discount: {coupon.discount}%
+                          </p>
+                          <p className="text-xs text-red-400">
+                            Expires:{" "}
+                            {new Date(coupon.expiresAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          {appliedCoupon?.code === coupon.code ? (
+                            <span className="text-green-600 text-sm flex items-center">
+                              Applied <CheckCircle size={16} className="ml-1" />
+                            </span>
+                          ) : (
+                            <button
+                              onClick={() => handleApplyCoupon(coupon)}
+                              className="text-sm bg-[#213E5A] text-white py-1.5 px-3 rounded-md hover:bg-[#1a324a] transition-colors cursor-pointer" // Added cursor-pointer
+                            >
+                              Apply
+                            </button>
+                          )}
+                          <button
+                            onClick={() => handleCopyCoupon(coupon.code)}
+                            className="text-gray-500 hover:text-[#213E5A] transition-colors text-sm cursor-pointer" // Added cursor-pointer
+                          >
+                            {copiedCouponCode === coupon.code ? (
+                              <CheckCircle size={18} />
+                            ) : (
+                              "Copy"
+                            )}
+                          </button>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
+            {appliedCoupon && (
+              <div className="mt-4 text-sm text-center text-green-700 flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-md">
+                <span>
+                  Coupon &quot;
+                  <span className="font-semibold">{appliedCoupon.code}</span>
+                  &quot; is applied.
+                </span>
+                <button
+                  onClick={handleRemoveCoupon}
+                  className="text-red-500 hover:text-red-600 font-medium ml-2 cursor-pointer" // Added cursor-pointer
+                >
+                  Remove
+                </button>
+              </div>
+            )}
+          </div>
 
-          {/* Place Order Button with Unique Loading Animation */}
           <button
             onClick={handlePlaceOrder}
-            disabled={isPlacingOrder || items.length === 0 || !token}
-            className={`mt-6 w-full relative flex items-center justify-center bg-[#213E5A] text-white py-3 rounded-lg font-semibold text-lg transition-all duration-300 ${
-              isPlacingOrder
-                ? "cursor-not-allowed opacity-70"
-                : "hover:bg-[#1a324a] cursor-pointer"
-            }`}
+            disabled={isPlacingOrder || items.length === 0}
+            className="mt-6 w-full flex items-center justify-center bg-[#213E5A] text-white py-3 rounded-lg hover:bg-[#1a324a] transition-colors font-bold text-lg disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
             {isPlacingOrder ? (
-              <div className="flex items-center">
-                <div className="cart-loader running mr-3">
-                  <div className="product"></div> {/* Product inside cart */}
+              <div className="flex items-center space-x-2">
+                <div className="cart-loader running">
                   <div className="wheel left"></div>
                   <div className="wheel right"></div>
+                  <div className="product"></div>
                 </div>
                 <span>Placing Order...</span>
               </div>
@@ -1010,16 +1010,22 @@ const UserCheckout = () => {
 
       {/* Address Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 overflow-y-auto">
+          <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-lg relative">
+            <h3 className="text-2xl font-bold mb-6 text-gray-800">
               {editingAddress ? "Edit Address" : "Add New Address"}
-            </h2>
+            </h3>
+            <button
+              onClick={() => setShowModal(false)}
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-3xl font-semibold"
+            >
+              &times;
+            </button>
             <form onSubmit={handleFormSubmit} className="space-y-4">
               <div>
                 <label
                   htmlFor="fullName"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="block text-sm font-medium text-gray-700"
                 >
                   Full Name
                 </label>
@@ -1029,14 +1035,14 @@ const UserCheckout = () => {
                   name="fullName"
                   value={formData.fullName}
                   onChange={handleFormChange}
-                  className="w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm focus:ring-[#213E5A] focus:border-[#213E5A]"
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-[#213E5A] focus:border-[#213E5A]"
                   required
                 />
               </div>
               <div>
                 <label
                   htmlFor="phone"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="block text-sm font-medium text-gray-700"
                 >
                   Phone Number
                 </label>
@@ -1046,33 +1052,52 @@ const UserCheckout = () => {
                   name="phone"
                   value={formData.phone}
                   onChange={handleFormChange}
-                  className="w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm focus:ring-[#213E5A] focus:border-[#213E5A]"
                   maxLength={10}
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-[#213E5A] focus:border-[#213E5A]"
                   required
                 />
               </div>
-              <div>
-                <label
-                  htmlFor="pincode"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Pincode
-                </label>
-                <input
-                  type="text"
-                  id="pincode"
-                  name="pincode"
-                  value={formData.pincode}
-                  onChange={handleFormChange}
-                  className="w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm focus:ring-[#213E5A] focus:border-[#213E5A]"
-                  maxLength={6}
-                  required
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label
+                    htmlFor="pincode"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Pincode
+                  </label>
+                  <input
+                    type="text"
+                    id="pincode"
+                    name="pincode"
+                    value={formData.pincode}
+                    onChange={handleFormChange}
+                    maxLength={6}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-[#213E5A] focus:border-[#213E5A]"
+                    required
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="city"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    City
+                  </label>
+                  <input
+                    type="text"
+                    id="city"
+                    name="city"
+                    value={formData.city}
+                    onChange={handleFormChange}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-[#213E5A] focus:border-[#213E5A]"
+                    required
+                  />
+                </div>
               </div>
               <div>
                 <label
                   htmlFor="state"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="block text-sm font-medium text-gray-700"
                 >
                   State
                 </label>
@@ -1082,33 +1107,16 @@ const UserCheckout = () => {
                   name="state"
                   value={formData.state}
                   onChange={handleFormChange}
-                  className="w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm focus:ring-[#213E5A] focus:border-[#213E5A]"
-                  required
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="city"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  City
-                </label>
-                <input
-                  type="text"
-                  id="city"
-                  name="city"
-                  value={formData.city}
-                  onChange={handleFormChange}
-                  className="w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm focus:ring-[#213E5A] focus:border-[#213E5A]"
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-[#213E5A] focus:border-[#213E5A]"
                   required
                 />
               </div>
               <div>
                 <label
                   htmlFor="addressLine"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="block text-sm font-medium text-gray-700"
                 >
-                  Address Line (House No., Street Name)
+                  Address Line (House No., Building, Street, Area)
                 </label>
                 <textarea
                   id="addressLine"
@@ -1116,14 +1124,14 @@ const UserCheckout = () => {
                   value={formData.addressLine}
                   onChange={handleFormChange}
                   rows={3}
-                  className="w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm focus:ring-[#213E5A] focus:border-[#213E5A]"
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-[#213E5A] focus:border-[#213E5A]"
                   required
                 ></textarea>
               </div>
               <div>
                 <label
                   htmlFor="landmark"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="block text-sm font-medium text-gray-700"
                 >
                   Landmark (Optional)
                 </label>
@@ -1133,22 +1141,22 @@ const UserCheckout = () => {
                   name="landmark"
                   value={formData.landmark}
                   onChange={handleFormChange}
-                  className="w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm focus:ring-[#213E5A] focus:border-[#213E5A]"
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-[#213E5A] focus:border-[#213E5A]"
                 />
               </div>
-              <div className="flex justify-end space-x-3 mt-6">
+              <div className="flex justify-end space-x-3">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors text-sm font-medium cursor-pointer" // Added cursor-pointer
+                  className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-[#213E5A] text-white rounded-md hover:bg-[#1a324a] transition-colors text-sm font-medium cursor-pointer" // Added cursor-pointer
+                  className="px-4 py-2 bg-[#213E5A] text-white rounded-md hover:bg-[#1a324a] transition-colors"
                 >
-                  {editingAddress ? "Save Changes" : "Add Address"}
+                  {editingAddress ? "Update Address" : "Save Address"}
                 </button>
               </div>
             </form>

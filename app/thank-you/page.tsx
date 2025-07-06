@@ -472,10 +472,7 @@ const ThankYouPage = () => {
               </span>
             </div>
           )}
-          <div className="flex justify-between text-lg font-semibold text-gray-700">
-            <span>Shipping:</span>
-            <span>₹{shippingCharges.toFixed(2)}</span>
-          </div>
+
           <div className="flex justify-between text-2xl font-bold text-blue-700 border-t pt-4 mt-4">
             <span>Total Paid:</span>
             <span>₹{order.order_info.final_total.toFixed(2)}</span>

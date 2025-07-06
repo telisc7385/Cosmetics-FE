@@ -19,6 +19,7 @@ const GuestCheckout = () => {
     0
   );
 
+  // Initialize formData with empty strings to capture user input
   const [formData, setFormData] = useState({
     email: "",
     fullName: "",
@@ -51,12 +52,14 @@ const GuestCheckout = () => {
   }) => {
     setFormData((prev) => ({
       ...prev,
-      ...data,
+      pincode: data.pincode, // Ensure pincode is updated
+      city: data.city, // Ensure city is updated
+      state: data.state, // Ensure state is updated
     }));
   };
 
   const handlePlaceOrder = async () => {
-    // Basic validations
+    // Basic frontend validations remain
     if (!formData.email) {
       toast.error("Email is required.");
       return;
@@ -85,14 +88,17 @@ const GuestCheckout = () => {
       return;
     }
 
+    // Constructing the items array for the payload
     const itemsForPayload = cartItems.map((item: CartItem) => ({
       quantity: item.quantity,
       price: item.sellingPrice,
+      // Conditionally include productId or variantId
       ...(item.variantId !== null && item.variantId !== undefined
         ? { variantId: item.variantId }
-        : { productId: item.id }), // This part correctly uses productId for non-variants
+        : { productId: item.id }),
     }));
 
+    // Construct the final payload using the dynamic formData values
     const payload = {
       email: formData.email,
       address: {
@@ -105,9 +111,11 @@ const GuestCheckout = () => {
         landmark: formData.landmark,
       },
       items: itemsForPayload,
-      totalAmount: subtotal,
+      totalAmount: parseFloat(subtotal.toFixed(2)), // Ensure number and correct decimal places
       paymentMethod: formData.paymentMethod,
     };
+
+    console.log("Sending payload:", payload); // Always useful to see what's being sent
 
     try {
       const response = await fetch(
@@ -120,8 +128,15 @@ const GuestCheckout = () => {
       );
 
       if (!response.ok) {
+        // Parse the error response from the backend
         const errorData = await response.json();
-        throw new Error(errorData.message || "Order failed");
+        // Log the full error object for detailed debugging
+        console.error("Backend error response:", errorData);
+        // Throw an error with a more specific message if available
+        throw new Error(
+          errorData.message ||
+            "Order failed. Please check your details and try again."
+        );
       }
 
       const data = await response.json();
@@ -129,9 +144,15 @@ const GuestCheckout = () => {
       toast.success("Order placed successfully!");
       router.push(`/thank-you?orderId=${data.order.id}`);
     } catch (error: unknown) {
-      console.error("Guest order placement error:", error);
+      // Catch network errors or errors thrown from the response.ok check
+      console.error(
+        "Guest order placement client-side error or API error:",
+        error
+      );
       const message =
-        error instanceof Error ? error.message : "Error placing guest order";
+        error instanceof Error
+          ? error.message
+          : "An unexpected error occurred while placing your order.";
       toast.error(message);
     }
   };
@@ -151,25 +172,18 @@ const GuestCheckout = () => {
     >
       {/* Billing & Shipping Section */}
       <div className="w-full lg:w-3/5 bg-white shadow-xl p-6 md:p-8 lg:p-10 border-r border-gray-200">
-        {" "}
-        {/* Added border-r for separation */}
         <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center tracking-wide">
           Guest Checkout
         </h2>
         <div className="space-y-5">
-          {" "}
-          {/* Reduced vertical spacing */}
-          {/* Assuming PincodeVerifier has its own compact styling */}
           <PincodeVerifier onVerified={handlePincodeVerified} />
           <form className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-3">
-            {" "}
-            {/* Reduced gaps */}
             <input
               type="email"
               name="email"
               placeholder="Email *"
               required
-              className="w-full border border-gray-300 rounded px-3 py-2.5 text-gray-800 focus:outline-none focus:ring-1 focus:ring-blue-300 bg-white placeholder-gray-500 text-sm" // Smaller padding, no transparent border on focus, text-sm
+              className="w-full border border-gray-300 rounded px-3 py-2.5 text-gray-800 focus:outline-none focus:ring-1 focus:ring-blue-300 bg-white placeholder-gray-500 text-sm"
               value={formData.email}
               onChange={handleChange}
             />
@@ -222,7 +236,7 @@ const GuestCheckout = () => {
             <textarea
               name="addressLine"
               placeholder="Address Line *"
-              rows={2} // Reduced rows
+              rows={2}
               required
               className="col-span-full border border-gray-300 rounded px-3 py-2.5 text-gray-800 focus:outline-none focus:ring-1 focus:ring-blue-300 bg-white placeholder-gray-500 text-sm"
               value={formData.addressLine}
@@ -237,14 +251,10 @@ const GuestCheckout = () => {
               onChange={handleChange}
             />
             <div className="col-span-full mt-3">
-              {" "}
-              {/* Reduced margin-top */}
               <label
                 htmlFor="paymentMethod"
                 className="block text-gray-700 text-xs font-medium mb-1"
               >
-                {" "}
-                {/* Smaller font, reduced margin */}
                 Select Payment Method:
               </label>
               <select
@@ -254,7 +264,7 @@ const GuestCheckout = () => {
                 onChange={(e) =>
                   setFormData({ ...formData, paymentMethod: e.target.value })
                 }
-                className="w-full border border-gray-300 rounded px-3 py-2.5 text-gray-700 bg-white focus:outline-none focus:ring-1 focus:ring-blue-300 appearance-none text-sm" // Smaller padding, text-sm
+                className="w-full border border-gray-300 rounded px-3 py-2.5 text-gray-700 bg-white focus:outline-none focus:ring-1 focus:ring-blue-300 appearance-none text-sm"
               >
                 <option value="COD">Cash on Delivery</option>
                 <option value="Razorpay">Pay Online (Razorpay)</option>
@@ -263,7 +273,7 @@ const GuestCheckout = () => {
             <button
               type="button"
               onClick={handlePlaceOrder}
-              className="col-span-full mt-5 text-white font-bold py-3 rounded shadow-md transition-all duration-300 text-lg tracking-wide uppercase focus:outline-none focus:ring-2 focus:ring-[#213E5A40] bg-[#213E5A] hover:bg-[#1A334B]" // Reduced padding, font size, ring width
+              className="col-span-full mt-5 text-white font-bold py-3 rounded shadow-md transition-all duration-300 text-lg tracking-wide uppercase focus:outline-none focus:ring-2 focus:ring-[#213E5A40] bg-[#213E5A] hover:bg-[#1A334B]"
             >
               Place Order
             </button>
@@ -282,43 +292,33 @@ const GuestCheckout = () => {
           </p>
         ) : (
           <ul className="space-y-4">
-            {" "}
-            {/* Reduced vertical spacing */}
             {cartItems.map((item: CartItem) => (
               <li
                 key={item.cartItemId}
-                className="flex gap-3 items-center p-2 rounded bg-gray-50/50 border border-gray-100 shadow-sm" // Reduced padding, gap, less rounded
+                className="flex gap-3 items-center p-2 rounded bg-gray-50/50 border border-gray-100 shadow-sm"
               >
                 <Image
                   src={item.image}
                   alt={item.name}
-                  width={70} // Smaller image size
-                  height={70} // Smaller image size
-                  className="w-16 h-16 rounded object-cover border border-gray-200" // Smaller image size
+                  width={70}
+                  height={70}
+                  className="w-16 h-16 rounded object-cover border border-gray-200"
                 />
                 <div className="flex-grow">
                   <p className="font-semibold text-gray-900 text-base">
-                    {" "}
-                    {/* Smaller font */}
                     {item.name}
                   </p>
                   {item.variantId && item.variant && (
                     <p className="text-xs text-gray-600 mt-0.5">
-                      {" "}
-                      {/* Smaller font, less margin */}
                       Variant:{" "}
                       <span className="font-medium">{item.variant.name}</span>
                     </p>
                   )}
                   <p className="text-xs text-gray-600 mt-0.5">
-                    {" "}
-                    {/* Smaller font, less margin */}
                     Qty: <span className="font-medium">{item.quantity}</span>
                   </p>
                   <p className="text-base text-gray-800 font-bold mt-1">
-                    {" "}
-                    {/* Smaller font, less margin */}₹
-                    {(item.quantity * item.sellingPrice).toFixed(2)}
+                    ₹{(item.quantity * item.sellingPrice).toFixed(2)}
                   </p>
                 </div>
               </li>
@@ -326,17 +326,11 @@ const GuestCheckout = () => {
           </ul>
         )}
         <div className="pt-6 mt-6 border-t border-gray-200">
-          {" "}
-          {/* Reduced padding and margin */}
           <div className="flex justify-between items-center text-xl font-bold text-gray-900">
-            {" "}
-            {/* Smaller font */}
             <span>Total:</span>
             <span>₹{subtotal.toFixed(2)}</span>
           </div>
           <p className="text-xs text-gray-500 text-right mt-1">
-            {" "}
-            {/* Smaller font */}
             (Excluding shipping, calculated at final step)
           </p>
         </div>
