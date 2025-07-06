@@ -235,9 +235,8 @@ export default function ProductDetailClient({
 
       <ProductTabs
         productDetails={product.productDetails}
-        keyIngredients={[]}
+        ingredients={product.seoDescription}
         benefits={[]}
-        howToUse={""}
         shippingInfo={`Shipping Information
 - Free standard shipping on orders over $50
 - Standard shipping (5-7 business days)

@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 type ProductTabProps = {
   productDetails: string;
-  keyIngredients: string[];
+  ingredients: string;
   benefits: string[];
 
   reviews?: string[]; // Optional: Can be replaced with review components
@@ -14,7 +14,7 @@ type ProductTabProps = {
 
 export default function ProductTabs({
   productDetails,
-  keyIngredients,
+  ingredients,
   benefits,
   reviews = [],
   shippingInfo,
@@ -36,8 +36,26 @@ export default function ProductTabs({
           }`}
           onClick={() => setActiveTab('details')}
         >
-          PRODUCT DETAILS
+           OVERVIEW
         </button>
+
+       
+        
+
+        <button
+    className={`pb-2 ${
+      activeTab === 'ingredients'
+        ? 'border-b-2 border-blue-600 text-blue-600'
+        : 'text-gray-600'
+    }`}
+    onClick={() => setActiveTab('ingredients')}
+  >
+    INGREDIENTS
+  </button>
+
+
+
+
 
         <button
           className={`pb-2 ${
@@ -51,36 +69,34 @@ export default function ProductTabs({
         </button>
       </div>
 
+
+
+
       {/* Tab Content */}
       <div className="mt-6 text-sm text-gray-700 leading-relaxed space-y-4">
         {activeTab === 'details' && (
           <div>
-            {/* <p>{productDetails}</p> */}
+    
             <div
   className="prose max-w-none "
   dangerouslySetInnerHTML={{ __html: productDetails || '' }}
 />
 
-            <div className="mt-4">
-              <h4 className="font-semibold">Key Ingredients</h4>
-              <ul className="list-disc list-inside">
-                {keyIngredients.map((item, idx) => (
-                  <li key={idx}>{item}</li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="mt-4">
-              <h4 className="font-semibold">Benefits</h4>
-              <ul className="list-disc list-inside">
-                {benefits.map((item, idx) => (
-                  <li key={idx}>{item}</li>
-                ))}
-              </ul>
-            </div>
 
           </div>
         )}
+
+
+
+{activeTab === 'ingredients' && (
+    <div>
+      <h4 className="font-semibold text-xl mb-2">Ingredients</h4>
+      <p className="text-sm leading-relaxed">{ingredients}</p>
+    </div>
+  )}
+
+
+
 
         {activeTab === 'reviews' && (
           <div>

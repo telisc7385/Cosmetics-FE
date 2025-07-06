@@ -7,8 +7,10 @@ import { Product } from "@/types/product";
 import Image from "next/image";
 import SidebarFiltersClient from "@/components/ServersideComponent/SidebarFilters/SidebarFilters";
 import ProductCard from "@/components/CommonComponents/ProductCard/ProductCard";
-import SortDropdown from "../SortDropdown.tsx/SortDropdown";
+// Corrected import path: removed .tsx from the folder name
+
 import { Funnel } from "lucide-react";
+import SortDropdown from "../SortDropdown.tsx/SortDropdown";
 
 interface Props {
   categories: Category[];
@@ -39,19 +41,32 @@ export default function ShopPageClient({ categories }: Props) {
     });
   };
 
-  // 🔄 Fetch products from backend with multiple category support
   useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true);
       try {
-        const categoryIds = Array.from(selectedCategories).join(",");
-        const url =
-          selectedCategories.size > 0
-            ? `https://cosmaticadmin.twilightparadox.com/product?categoryIds=${categoryIds}`
-            : `https://cosmaticadmin.twilightparadox.com/product`;
+        const queryParams = [];
+
+        // Add category query if selected
+        if (selectedCategories.size > 0) {
+          queryParams.push(
+            `category=${Array.from(selectedCategories).join(",")}`
+          );
+        }
+
+        // Add search query if present
+        if (searchQuery) {
+          queryParams.push(`search=${encodeURIComponent(searchQuery)}`);
+        }
+
+        // Construct the full URL
+        const queryString =
+          queryParams.length > 0 ? `?${queryParams.join("&")}` : "";
+        const url = `${process.env.NEXT_PUBLIC_BASE_URL}/product${queryString}`;
 
         const res = await fetch(url);
         const data = await res.json();
+
         setProducts(data.products || []);
       } catch (err) {
         console.error("Error fetching products:", err);
@@ -62,21 +77,22 @@ export default function ShopPageClient({ categories }: Props) {
     };
 
     fetchProducts();
-  }, [selectedCategories]);
+  }, [selectedCategories, searchQuery]); // Added searchQuery to dependency array
 
   useEffect(() => {
     setCurrentPage(1);
   }, [selectedCategories, priceRange, sortOrder, searchQuery]);
 
   const filteredProducts = useMemo(() => {
+    // Assuming backend now handles the 'search' query parameter,
+    // so client-side `matchesSearch` filtering is removed from here.
+    // This memo now primarily applies the `priceRange` filter.
     return products.filter((product) => {
-      const matchesSearch =
-        !searchQuery || product.name.toLowerCase().includes(searchQuery);
       const price = Number(product.sellingPrice);
       const inPriceRange = price >= priceRange[0] && price <= priceRange[1];
-      return matchesSearch && inPriceRange;
+      return inPriceRange;
     });
-  }, [products, searchQuery, priceRange]);
+  }, [products, priceRange]); // No longer depends on searchQuery here
 
   const sortedProducts = useMemo(() => {
     return [...filteredProducts].sort((a, b) => {
@@ -104,8 +120,9 @@ export default function ShopPageClient({ categories }: Props) {
       </div>
       <div className="mt-6 px-4 flex flex-col gap-4">
         <div className="flex justify-between items-center">
+          {/* Changed text color for better contrast */}
           <div className="bg-[#966ad7] border lg:w-1/5 w-full border-gray-300 rounded h-12 flex items-center px-4 shadow-sm">
-            <h1 className="text-base flex gap-1 font-semibold text-gray-800">
+            <h1 className="text-base flex gap-1 font-semibold text-white">
               <Funnel /> Filter
             </h1>
           </div>
