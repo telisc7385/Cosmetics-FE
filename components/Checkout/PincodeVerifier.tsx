@@ -74,7 +74,7 @@ const PincodeVerifier = ({ onVerified }: Props) => {
           type="button"
           onClick={handleVerify}
           disabled={verifying}
-          className="bg-purple-500 text-white px-4 py-2 rounded-md hover:bg-purple-600 disabled:opacity-50"
+          className="bg-[#1A324A] text-white px-4 py-2 rounded-md hover:bg-[#142835] disabled:opacity-50 hover:cursor-pointer"
         >
           {verifying ? "Checking..." : "Apply"}
         </button>
