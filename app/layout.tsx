@@ -7,7 +7,6 @@ import Navbar from "@/components/ServersideComponent/Navbar/NavbarComponent";
 import { Toaster } from "react-hot-toast";
 import Footer from "@/components/ServersideComponent/Footer/Footer";
 import { fetchTopCategories } from "@/api/fetchTopCategories";
-import { getNewArrivalProducts } from "@/api/fetchNewArrivalProducts";
 import ReduxProviderWrapper from "@/CartProvider/ReduxProviderWrapper";
 
 const geistSans = Geist({
@@ -37,7 +36,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const topCategories = await fetchTopCategories();
-  const newArrivals = await getNewArrivalProducts();
+  // const newArrivals = await getNewArrivalProducts();
   return (
     <html lang="en">
       <body
@@ -47,7 +46,7 @@ export default async function RootLayout({
           <Toaster position="top-center" />
           <Navbar />
           <main className="pt-0">{children}</main>
-          <Footer topCategories={topCategories} newArrivals={newArrivals} />
+          <Footer topCategories={topCategories} />
         </ReduxProviderWrapper>
       </body>
     </html>

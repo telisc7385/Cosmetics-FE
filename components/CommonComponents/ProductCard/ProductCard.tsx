@@ -96,6 +96,7 @@ const ProductCard = ({ product }: Props) => {
         toast.success(`${product.name} added to cart!`);
       } catch (error) {
         toast.error("Failed to add product to cart.");
+        return error;
       }
     } else {
       dispatch(

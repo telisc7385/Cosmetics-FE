@@ -1,35 +1,37 @@
-'use client';
+"use client";
 
-import { useEffect, useState, useMemo } from 'react';
-import { useSearchParams } from 'next/navigation';
-import Image from 'next/image';
-import { Funnel } from 'lucide-react';
+import { useEffect, useState, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
+import Image from "next/image";
+import { Funnel } from "lucide-react";
 
-import SidebarFiltersClient from '@/components/ServersideComponent/SidebarFilters/SidebarFilters';
-import ProductCard from '@/components/CommonComponents/ProductCard/ProductCard';
-import SortDropdown from '../SortDropdown.tsx/SortDropdown';
+import SidebarFiltersClient from "@/components/ServersideComponent/SidebarFilters/SidebarFilters";
+import ProductCard from "@/components/CommonComponents/ProductCard/ProductCard";
+import SortDropdown from "../SortDropdown.tsx/SortDropdown";
 
-import { Category } from '@/types/category';
-import { Product } from '@/types/product';
+import { Category } from "@/types/category";
+import { Product } from "@/types/product";
 
 interface Props {
   categories: Category[];
 }
 
-type SortOrder = 'price_asc' | 'price_desc';
+type SortOrder = "price_asc" | "price_desc";
 
 const PRODUCTS_PER_PAGE = 8;
 
 const ShopPageClient: React.FC<Props> = ({ categories }) => {
-  const [selectedCategories, setSelectedCategories] = useState<Set<number>>(new Set());
+  const [selectedCategories, setSelectedCategories] = useState<Set<number>>(
+    new Set()
+  );
   const [priceRange, setPriceRange] = useState<[number, number]>([10, 3999]);
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortOrder, setSortOrder] = useState<SortOrder>('price_asc');
+  const [sortOrder, setSortOrder] = useState<SortOrder>("price_asc");
 
   const searchParams = useSearchParams();
-  const search = searchParams.get('search') || '';
+  const search = searchParams.get("search") || "";
 
   // Fetch all products once based on search and selected categories
   const fetchProducts = async () => {
@@ -38,11 +40,11 @@ const ShopPageClient: React.FC<Props> = ({ categories }) => {
       const url = new URL(`${process.env.NEXT_PUBLIC_BASE_URL}/product`);
 
       Array.from(selectedCategories).forEach((id) =>
-        url.searchParams.append('category', id.toString())
+        url.searchParams.append("category", id.toString())
       );
 
       if (search) {
-        url.searchParams.append('search', search);
+        url.searchParams.append("search", search);
       }
 
       const res = await fetch(url.toString());
@@ -51,7 +53,7 @@ const ShopPageClient: React.FC<Props> = ({ categories }) => {
       const fetchedProducts = data.products || data.data?.products || [];
       setAllProducts(fetchedProducts);
     } catch (err) {
-      console.error('Failed to fetch products:', err);
+      console.error("Failed to fetch products:", err);
       setAllProducts([]);
     } finally {
       setLoading(false);
@@ -68,7 +70,11 @@ const ShopPageClient: React.FC<Props> = ({ categories }) => {
     setCurrentPage(1);
     setSelectedCategories((prev) => {
       const newSet = new Set(prev);
-      newSet.has(id) ? newSet.delete(id) : newSet.add(id);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
       return newSet;
     });
   };
@@ -91,7 +97,7 @@ const ShopPageClient: React.FC<Props> = ({ categories }) => {
     return [...filteredProducts].sort((a, b) => {
       const priceA = Number(a.sellingPrice);
       const priceB = Number(b.sellingPrice);
-      return sortOrder === 'price_asc' ? priceA - priceB : priceB - priceA;
+      return sortOrder === "price_asc" ? priceA - priceB : priceB - priceA;
     });
   }, [filteredProducts, sortOrder]);
 
@@ -168,36 +174,34 @@ const ShopPageClient: React.FC<Props> = ({ categories }) => {
             >
               Next
             </button>
-          </div> */}          
-{totalPages > 1 && (
-  <div className="mt-6 flex gap-4 items-center">
-    <button
-      onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-      disabled={currentPage === 1}
-      className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
-    >
-      Previous
-    </button>
-    <span>
-      Page {currentPage} of {totalPages}
-    </span>
-    <button
-      onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-      disabled={currentPage === totalPages}
-      className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
-    >
-      Next
-    </button>
-  </div>
-)}
-
-
-
+          </div> */}
+          {totalPages > 1 && (
+            <div className="mt-6 flex gap-4 items-center">
+              <button
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+              >
+                Previous
+              </button>
+              <span>
+                Page {currentPage} of {totalPages}
+              </span>
+              <button
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
+                disabled={currentPage === totalPages}
+                className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+              >
+                Next
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
 };
 
-export default ShopPageClient; 
-
+export default ShopPageClient;
