@@ -76,8 +76,6 @@ const ThankYouPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [showCelebration, setShowCelebration] = useState(false);
 
-  const shippingCharges = 0; // Assuming shipping is 0
-
   useEffect(() => {
     const fetchOrderDetails = async () => {
       if (!orderId) {

@@ -15,7 +15,6 @@ type ProductTabProps = {
 export default function ProductTabs({
   productDetails,
   ingredients,
-  benefits,
   reviews = [],
   shippingInfo,
   returnPolicy,

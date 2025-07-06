@@ -53,9 +53,15 @@ export default function PersonalInfo() {
       });
       // Important: Clear any pending image selection when user info is re-fetched/loaded
       setSelectedImageFile(null);
-    } catch (error) {
+    } catch (error: unknown) {
+      // Changed 'any' to 'unknown' here
       console.error("Failed to load personal info:", error);
-      toast.error("Failed to load personal info");
+      // You can add a type guard to access 'message' property
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Failed to load personal info");
+      }
     }
   }, [token]); // Dependency array: re-run if token changes
 
@@ -110,9 +116,16 @@ export default function PersonalInfo() {
       getUserInfo(); // Re-fetch user info to display all newly updated data (text and new image URL from server)
       setEditing(false); // Exit editing mode
       setSelectedImageFile(null); // Clear the locally held image file after successful upload
-    } catch (error: any) {
+    } catch (error: unknown) {
+      // Changed 'any' to 'unknown' here
       console.error("Failed to update profile:", error);
-      toast.error(error.message || "Failed to update profile.");
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else if (typeof error === "string") {
+        toast.error(error);
+      } else {
+        toast.error("Failed to update profile.");
+      }
     }
   };
 

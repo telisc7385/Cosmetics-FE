@@ -208,8 +208,6 @@
 
 // export default ProductCard;
 
-
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -220,7 +218,6 @@ import { addToCart } from "@/store/slices/cartSlice";
 import { selectIsLoggedIn } from "@/store/slices/authSlice";
 import { useLoggedInCart } from "@/CartProvider/LoggedInCartProvider";
 import { Product, ProductVariant } from "@/types/product";
-import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
 interface Props {
@@ -229,7 +226,6 @@ interface Props {
 
 const ProductCard = ({ product }: Props) => {
   const dispatch = useAppDispatch();
-  const router = useRouter();
   const isLoggedIn = useAppSelector(selectIsLoggedIn);
   const { addCartItem } = useLoggedInCart();
 
@@ -296,8 +292,11 @@ const ProductCard = ({ product }: Props) => {
         await addCartItem(itemPayload);
         toast.success(`${product.name} added to cart!`);
       } catch (error) {
-        console.error("ProductCard: Failed to add item to logged-in cart:", error);
-        toast.error(`Failed to add ${product.name} to cart. Please try again.`); 
+        console.error(
+          "ProductCard: Failed to add item to logged-in cart:",
+          error
+        );
+        toast.error(`Failed to add ${product.name} to cart. Please try again.`);
       }
     } else {
       dispatch(
@@ -344,7 +343,10 @@ const ProductCard = ({ product }: Props) => {
             </h3>
 
             <div className="mt-1 flex justify-center items-center gap-2">
-              <span className="font-bold text-base" style={{ color: "#213E5A" }}>
+              <span
+                className="font-bold text-base"
+                style={{ color: "#213E5A" }}
+              >
                 ₹{Number(product.basePrice ?? 0).toFixed(2)}
               </span>
               <span className="text-sm text-gray-400 line-through">
