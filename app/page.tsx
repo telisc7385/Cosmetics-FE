@@ -3,27 +3,53 @@ import FeaturesBanner from "@/components/ServersideComponent/FeaturesBanner/Feat
 import HeroBanner from "@/components/ServersideComponent/HeroBanner/HeroBanner";
 import WhyChooseUs from "@/components/ServersideComponent/WhyChooseUs/WhyChooseUs";
 import TestimonialsSection from "@/components/TestimonialsSection/TestimonialsSection";
-import TopCategories from "@/components/ServersideComponent/TopCategories/TopCategories";
 import FeaturedSliderComponent from "@/components/ServersideComponent/FeaturedSliderComponent/FeaturedSliderComponent";
 import GalleryPage from "@/components/ServersideComponent/GalleryPage/GalleryPage";
 import HotListWrapper from "@/components/HotList/HotListWrapper";
 import NewsletterSignup from "@/components/ClientsideComponent/NewsletterSignup/NewsletterSignup";
 import SlidingBanner from "@/components/ServersideComponent/SlidingBanner/SlidingBanner";
+import TopCategoriesClient from "@/components/ClientsideComponent/TopCategoriesClient/TopCategoriesClient";
+
+import { getBanners } from "@/api/getBannerApi";
+import { fetchCategories } from "@/api/fetchCategories";
+import {
+  getGallery,
+  getTestimonials,
+  getWhyChooseUs,
+} from "@/api/fetchWhyChooseUs";
+import { getProducts } from "@/api/fetchFeaturedSlider";
 
 export default async function HomePage() {
+  const [
+    banners,
+    categoriesResponse,
+    whyChooseItems,
+    product,
+    testimonials,
+    gallery,
+  ] = await Promise.all([
+    getBanners(),
+    fetchCategories(),
+    getWhyChooseUs(),
+    getProducts(),
+    getTestimonials(),
+    getGallery(),
+  ]);
+
+  const { categories } = categoriesResponse;
+
   return (
     <div>
-      <HeroBanner />
-      <CategorySection />
+      <HeroBanner banners={banners} />
+      <CategorySection categories={categories} />
       <FeaturesBanner />
-      <TopCategories />
+      <TopCategoriesClient categories={categories} />
       <SlidingBanner />
-      <HotListWrapper></HotListWrapper>
-      <WhyChooseUs />
-      <FeaturedSliderComponent />
-      <TestimonialsSection />
-      <GalleryPage />
-
+      <HotListWrapper />
+      <WhyChooseUs whyChooseItems={whyChooseItems} />
+      <FeaturedSliderComponent product={product} />
+      <TestimonialsSection testimonials={testimonials} />
+      <GalleryPage gallery={gallery} />
       <NewsletterSignup />
     </div>
   );

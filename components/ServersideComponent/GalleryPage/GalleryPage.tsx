@@ -4,15 +4,13 @@ import { GalleryImage } from "@/types/gallery";
 
 export const dynamic = "force-dynamic"; // ensures fresh data, disables caching
 
+type Props = {
+  gallery: GalleryImage[];
+}
 
-const GalleryPage = async () => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/gallery`, {
-    cache: "no-store",
-  });
+const GalleryPage = async ({gallery} : Props) => {
 
-  const data = await res.json();
-  const allImages: GalleryImage[] = data.result || [];
-  const images = allImages.filter((img) => img.is_active);
+  const images = gallery.filter((img) => img.is_active);
 
   return (
     <div className="h-auto bg-white px-[40px] container mx-auto">
