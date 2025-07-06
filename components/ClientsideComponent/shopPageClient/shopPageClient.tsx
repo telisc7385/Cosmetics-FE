@@ -175,4 +175,4 @@ const ShopPageClient: React.FC<Props> = ({ categories }) => {
   );
 };
 
-export default ShopPageClient;
+export default ShopPageClient; 

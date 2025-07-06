@@ -415,3 +415,4 @@ const ProductCard = ({ product }: Props) => {
 };
 
 export default ProductCard;
+ 
