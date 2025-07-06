@@ -10,7 +10,7 @@ export interface GetCategoriesResponse {
 
 export const fetchCategories = async (): Promise<GetCategoriesResponse> => {
   try {
-    const data = await apiCore("/category/frontend", "GET");
+    const data = await apiCore("/category", "GET");
     return data as GetCategoriesResponse;
   } catch (error) {
     console.error("Error fetching categories:", (error as Error).message);
