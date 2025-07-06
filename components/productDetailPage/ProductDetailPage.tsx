@@ -1,14 +1,16 @@
+// components/ProductDetailClient/ProductDetailClient.tsx
 "use client";
 import { useState } from "react";
 import Image from "next/image";
-import { Product, ProductVariant } from "@/types/product";
+import { Product, ProductVariant } from "@/types/product"; // Ensure correct path to your types
 import ProductCard from "../CommonComponents/ProductCard/ProductCard";
 import { useAppSelector, useAppDispatch } from "@/store/hooks/hooks";
 import { selectIsLoggedIn } from "@/store/slices/authSlice";
 import { addToCart as addGuestCartItem } from "@/store/slices/cartSlice";
 import { useLoggedInCart } from "@/CartProvider/LoggedInCartProvider";
-import { CartItem } from "@/types/cart";
+import { CartItem } from "@/types/cart"; // Ensure correct path to your CartItem type
 import ProductTabs from "./ProductTabs";
+import toast from "react-hot-toast"; // Import toast for user feedback
 
 type Props = {
   product: Product;
@@ -26,6 +28,7 @@ export default function ProductDetailClient({
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(
     product.variants?.[0] || null
   );
+  const [quantity, setQuantity] = useState<number>(1);
 
   const [selectedImage, setSelectedImage] = useState<string>(
     product.variants?.[0]?.images?.[0]?.url ||
@@ -52,8 +55,13 @@ export default function ProductDetailClient({
       ? Math.round(((basePrice - sellingPrice) / basePrice) * 100)
       : 0;
 
+  const currentStock = selectedVariant?.stock ?? product.stock ?? 0;
+  const isOutOfStock = currentStock === 0;
+  const isStockLimited = currentStock > 0 && currentStock <= 5;
+
   const handleVariantSelect = (variant: ProductVariant) => {
     setSelectedVariant(variant);
+    setQuantity(1); // Reset quantity when a new variant is selected
     if (variant.images?.length) {
       setSelectedImage(variant.images[0].url);
     } else if (product.images?.length) {
@@ -63,11 +71,39 @@ export default function ProductDetailClient({
     }
   };
 
+  const handleIncrement = () => {
+    // Only increment if the current quantity is less than the available stock.
+    // No toast here; the toast will be handled when "Add to Bag" is clicked.
+    if (quantity < currentStock) {
+      setQuantity((prev) => prev + 1);
+    }
+  };
+
+  const handleDecrement = () => {
+    setQuantity((prev) => Math.max(1, prev - 1)); // Quantity cannot go below 1
+  };
+
   const handleAddToCart = async () => {
+    // 1. Check if the product/variant is completely out of stock.
+    if (isOutOfStock) {
+      toast.error("Product is out of stock.");
+      return; // Exit immediately, no further checks or cart additions
+    }
+
+    // 2. Check if the requested quantity exceeds the current stock.
+    // This handles cases where user might have manually manipulated quantity (if that's an option)
+    // or if the quantity reached the limit via increment button.
+    if (quantity > currentStock) {
+      toast.error(`You can only add up to ${currentStock} items to your cart.`);
+      setQuantity(currentStock); // Optionally, reset quantity to max available if over
+      return; // Exit immediately
+    }
+
+    // If we reach here, it means the quantity is valid and within stock limits.
     const itemToAdd: Omit<CartItem, "cartItemId"> = {
       id: product.id,
       name: product.name,
-      quantity: 1,
+      quantity: quantity,
       sellingPrice: selectedVariant
         ? selectedVariant.selling_price
         : parseFloat(product.sellingPrice),
@@ -79,6 +115,7 @@ export default function ProductDetailClient({
       variantId: selectedVariant?.id || null,
       variant: selectedVariant || null,
       product: product,
+      stock: currentStock,
     };
 
     if (selectedVariant && selectedVariant.name) {
@@ -88,9 +125,10 @@ export default function ProductDetailClient({
     if (isLoggedIn) {
       try {
         await addLoggedInCartItem(itemToAdd);
-        console.log("Product added to logged-in cart:", itemToAdd);
+        toast.success(`${quantity} ${itemToAdd.name} added to cart!`);
       } catch (error) {
         console.error("Failed to add product to logged-in cart:", error);
+        toast.error("Failed to add product to cart. Please try again.");
       }
     } else {
       const guestCartItem: CartItem = {
@@ -98,7 +136,7 @@ export default function ProductDetailClient({
         cartItemId: Date.now() * -1 - Math.random(),
       };
       dispatch(addGuestCartItem(guestCartItem));
-      console.log("Product added to guest cart:", guestCartItem);
+      toast.success(`${quantity} ${guestCartItem.name} added to guest cart!`);
     }
   };
 
@@ -152,7 +190,7 @@ export default function ProductDetailClient({
             dangerouslySetInnerHTML={{ __html: product.description || "" }}
           />
 
-          {/* ✅ Conditional Rating */}
+          {/* Conditional Rating */}
           {product.rating && (
             <div className="flex items-center gap-2 text-yellow-500">
               <span>★★★★☆</span>
@@ -178,6 +216,23 @@ export default function ProductDetailClient({
             )}
           </div>
 
+          {/* Stock Information Display */}
+          <div className="mt-2">
+            {isOutOfStock ? (
+              <span className="text-red-600 font-semibold text-lg">
+                Out of Stock
+              </span>
+            ) : isStockLimited ? (
+              <span className="text-orange-600 font-semibold text-lg">
+                Limited Stock! ({currentStock} left)
+              </span>
+            ) : (
+              <span className="text-green-600 font-semibold text-lg">
+                In Stock
+              </span>
+            )}
+          </div>
+
           {/* Variant Selector */}
           {Array.isArray(product.variants) && product.variants.length > 0 && (
             <div className="space-y-2 mt-4">
@@ -187,10 +242,13 @@ export default function ProductDetailClient({
                   <button
                     key={variant.id}
                     onClick={() => handleVariantSelect(variant)}
+                    disabled={variant.stock === 0}
                     className={`border rounded-md p-1 transition ${
                       selectedVariant?.id === variant.id
                         ? "border-purple-600 ring-2 ring-purple-300"
                         : "border-gray-300 hover:border-gray-400"
+                    } ${
+                      variant.stock === 0 ? "opacity-50 cursor-not-allowed" : ""
                     }`}
                   >
                     <Image
@@ -201,22 +259,53 @@ export default function ProductDetailClient({
                       loading="lazy"
                       className="object-contain w-[30px] h-[30px] rounded"
                     />
+                    {variant.stock === 0 && (
+                      <span className="text-red-500 text-xs block mt-1">
+                        Out of Stock
+                      </span>
+                    )}
                   </button>
                 ))}
               </div>
             </div>
           )}
 
-          <div className="flex gap-4 mt-4 flex-wrap">
+          {/* Quantity Selector and Add to Bag Button */}
+          <div className="flex items-center gap-4 mt-4 flex-wrap">
+            {/* Quantity Selector */}
+            {!isOutOfStock && (
+              <div className="flex items-center border border-gray-300 rounded-md p-1">
+                <button
+                  onClick={handleDecrement}
+                  disabled={quantity <= 1}
+                  className="px-3 py-1 bg-gray-100 rounded-l-md hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  -
+                </button>
+                <span className="px-4 text-lg font-semibold">{quantity}</span>
+                <button
+                  onClick={handleIncrement}
+                  // Increment button is disabled if quantity is at max stock.
+                  // The toast for 'cannot add more' will now ONLY come from 'handleAddToCart'
+                  disabled={quantity >= currentStock || isOutOfStock}
+                  className="px-3 py-1 bg-gray-100 rounded-r-md hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  +
+                </button>
+              </div>
+            )}
+
             <button
               onClick={handleAddToCart}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-md font-semibold cursor-pointer"
+              disabled={isOutOfStock}
+              className={`px-6 py-2 rounded-md font-semibold ${
+                isOutOfStock
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
+              }`}
             >
-              Add to Bag
+              {isOutOfStock ? "Out of Stock" : "Add to Bag"}
             </button>
-            {/* <button className="border border-gray-300 px-6 py-2 rounded-md font-semibold">
-              ❤️ Wishlist
-            </button> */}
           </div>
 
           <div className="flex flex-wrap gap-6 mt-6 text-sm text-gray-700">

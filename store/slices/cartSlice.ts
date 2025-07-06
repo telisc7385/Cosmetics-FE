@@ -3,6 +3,7 @@
 
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { CartItem } from "@/types/cart"; // Import CartItem from central location
+import toast from "react-hot-toast"; // Import toast
 
 interface CartState {
   items: CartItem[];
@@ -20,8 +21,8 @@ const getInitialState = (): CartState => {
           const validItems: CartItem[] = parsedCart.map((item: any) => {
             // Ensure cartItemId is a number; generate if missing or invalid
             const cartItemId = typeof item.cartItemId === 'number' && !isNaN(item.cartItemId)
-                               ? item.cartItemId
-                               : Date.now() * -1 - Math.random(); // Generate a unique negative ID for guest
+              ? item.cartItemId
+              : Date.now() * -1 - Math.random(); // Generate a unique negative ID for guest
 
             // Ensure product ID and name are present
             if (typeof item.id !== 'number' || typeof item.name !== 'string') {
@@ -29,7 +30,7 @@ const getInitialState = (): CartState => {
               return null; // Filter out later
             }
 
-            // Construct CartItem, ensuring number types for prices and quantity
+            // Construct CartItem, ensuring number types for prices, quantity, and stock
             return {
               cartItemId: cartItemId,
               id: item.id,
@@ -39,6 +40,9 @@ const getInitialState = (): CartState => {
               basePrice: typeof item.basePrice === 'number' && !isNaN(item.basePrice) ? item.basePrice : 0,
               image: typeof item.image === 'string' ? item.image : "/placeholder.jpg",
               variantId: typeof item.variantId === 'number' || item.variantId === null ? item.variantId : undefined,
+              product: item.product || null,
+              variant: item.variant || null,
+              stock: typeof item.stock === 'number' && !isNaN(item.stock) ? item.stock : 9999, // Default stock if not found
             };
           }).filter(Boolean) as CartItem[]; // Filter out nulls
 
@@ -65,25 +69,38 @@ const cartSlice = createSlice({
         state.items = [];
       }
 
-      // Find existing item by product ID and variant ID (if applicable)
-      // This is for combining quantities of the same product for guests
+      const newItem = action.payload;
       const existing = state.items.find((item) => {
-        return item.id === action.payload.id &&
-               (action.payload.variantId !== undefined && action.payload.variantId !== null
-                 ? item.variantId === action.payload.variantId
-                 : item.variantId === undefined || item.variantId === null);
+        const isSameProduct = item.id === newItem.id;
+        const hasVariants = (newItem.variantId !== undefined && newItem.variantId !== null);
+        const isSameVariant = hasVariants
+          ? item.variantId === newItem.variantId
+          : (item.variantId === undefined || item.variantId === null);
+
+        return isSameProduct && isSameVariant;
       });
 
       if (existing) {
-        existing.quantity += action.payload.quantity;
+        const newQuantity = existing.quantity + newItem.quantity;
+        if (newQuantity > existing.stock) {
+          existing.quantity = existing.stock; // Cap at stock limit
+          toast.error(`You can only add up to ${existing.stock} of ${existing.name} (stock limit reached).`);
+        } else {
+          existing.quantity = newQuantity;
+        }
         console.log("cartSlice: Updated quantity for existing item. New state.items:", state.items);
       } else {
-        // Ensure the payload has a cartItemId for new items
-        if (typeof action.payload.cartItemId !== 'number') {
-            console.warn("cartSlice: addToCart received item without valid cartItemId, generating one.", action.payload);
-            action.payload.cartItemId = Date.now() * -1 - Math.random(); // Fallback if somehow missed
+        // Check stock for the new item being added
+        if (newItem.quantity > newItem.stock) {
+          toast.error(`Cannot add ${newItem.quantity} of ${newItem.name}. Only ${newItem.stock} in stock.`);
+          return; // Do not add the item if initial quantity exceeds stock
         }
-        state.items.push(action.payload);
+        // Ensure the payload has a cartItemId for new items
+        if (typeof newItem.cartItemId !== 'number') {
+          console.warn("cartSlice: addToCart received item without valid cartItemId, generating one.", newItem);
+          newItem.cartItemId = Date.now() * -1 - Math.random(); // Fallback if somehow missed
+        }
+        state.items.push(newItem);
         console.log("cartSlice: Added new item. New state.items:", state.items);
       }
 
@@ -113,8 +130,12 @@ const cartSlice = createSlice({
       }
       const item = state.items.find((item) => item.cartItemId === action.payload);
       if (item) {
-        item.quantity += 1;
-        console.log("cartSlice: Incremented quantity. New state.items:", state.items);
+        if (item.quantity < item.stock) { // Check against stock limit
+          item.quantity += 1;
+          console.log("cartSlice: Incremented quantity. New state.items:", state.items);
+        } else {
+          toast.error(`You've reached the maximum quantity for ${item.name} (stock limit: ${item.stock}).`);
+        }
       }
       if (typeof window !== 'undefined') {
         localStorage.setItem('guestCart', JSON.stringify(state.items));
@@ -135,6 +156,7 @@ const cartSlice = createSlice({
           state.items = state.items.filter(
             (cartItem) => cartItem.cartItemId !== action.payload
           );
+          toast.error(`${item.name} removed from cart.`); // Toast for removal on decrement to zero
         }
         console.log("cartSlice: Decremented quantity. New state.items:", state.items);
       }
@@ -152,6 +174,7 @@ const cartSlice = createSlice({
         localStorage.removeItem('guestCart');
         console.log("cartSlice: Guest cart cleared from localStorage.");
       }
+      toast.success("All items removed from cart."); // Toast for clearing cart
     },
 
     // setCart is typically used to load a cart (e.g., from backend after login)

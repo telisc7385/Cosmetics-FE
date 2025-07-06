@@ -48,7 +48,7 @@ export interface Product {
   basePrice: string; // Still string from API, will be parsed
   sellingPrice: string; // Still string from API, will be parsed
   priceDifferencePercent: number;
-  stock: number;
+  stock: number; // ADDED: Stock property
   isNewArrival: boolean;
   createdById: number;
   deletedById: number | null;
@@ -72,7 +72,7 @@ export interface Product {
 }
 
 export interface ProductVariant {
-  base_price: any; // Keeping 'any' as per your original request, but 'number' is often preferred if consistently numeric
+  base_price: number; // Changed to number assuming it's numeric in practice
   id: number;
   productId: number;
   name: string | null;
@@ -81,7 +81,7 @@ export interface ProductVariant {
   specification: Record<string, any>;
   selling_price: number;
   base_and_selling_price_difference_in_percent: number;
-  stock: number;
+  stock: number; // ADDED: Stock property
   colour_code: string;
   is_selected: boolean;
   is_active: boolean;
@@ -90,37 +90,37 @@ export interface ProductVariant {
   low_stock_threshold: number;
   createdAt: string;
   isDeleted: boolean;
-  images: ProductVariantImage[]; // Using the top-level ProductVariantImage interface
+  images: ProductVariantImage[];
   product: { // This refers to the parent product's essential details
     name: string;
     description: string;
-    id: number; // Added id here as it was in your previous CartItemFromAPI.variant.product
-    // Add other relevant product fields if they exist here (e.g., basePrice)
+    id: number;
   };
 }
 
 export interface CartItemFromAPI {
-  id: number; // This is the cart item ID
-  cartId: number;
-  productId: number | null; // Can be null if it's purely a variant
-  variantId: number | null; // This can be null from the API
+  id: number | string; // This is the cart item ID, allowing string from API for robustness
+  cartId: number | string; // Allowing string from API for robustness
+  productId: number | string | null; // Allowing string from API for robustness
+  variantId: number | string | null; // Allowing string from API for robustness
   quantity: number;
   createdAt: string;
-  product: Product | null; // Using the top-level Product interface
-  variant: ProductVariant | null; // Using the top-level ProductVariant interface
+  product: Product | null;
+  variant: ProductVariant | null;
 }
 
 export interface CartItem {
-  cartItemId: number;
-  id: number; // Product ID (or main product ID if it's a variant)
+  cartItemId: number; // Ensured to be number after parsing
+  id: number; // Product ID (ensured to be number after parsing)
   name: string;
   quantity: number;
   sellingPrice: number;
-  basePrice?: number; // Base price might not always be present or needed on frontend for display
+  basePrice?: number;
   image: string;
-  variantId?: number | null; // Optional, explicitly allowing 'null'
-  variant?: ProductVariant | null; // Optional, full variant object, can be null
-  product?: Product | null; // Optional, full product object, can be null (changed from 'any')
+  variantId?: number | null; // Keeps as number or null, optional
+  variant?: ProductVariant | null;
+  product?: Product | null;
+  stock: number; // ADDED: Consolidated stock property
 }
 
 export type CartApiResponse = {
@@ -135,11 +135,10 @@ export type CartApiResponse = {
     [key: string]: any;
   };
   items?: CartItemFromAPI[]; // Fallback for some API response structures
-  id?: string | number; // Fallback for some API response structures
+  id?: string | number;
   [key: string]: any;
 };
 
-// **THE ONLY CHANGE HERE: Made variantId optional to allow 'undefined'**
 export interface CartItemInput {
   id: number; // Product ID
   name: string;
@@ -147,9 +146,10 @@ export interface CartItemInput {
   sellingPrice: number;
   basePrice?: number;
   image: string;
-  variantId?: number | null; // Changed from `number | null` to `number | null | undefined` by making it optional
+  variantId?: number | null;
   variant?: ProductVariant | null;
   product?: Product | null;
+  stock: number; // ADDED: Stock property when inputting to cart
 }
 
 export interface LoggedInCartContextType {
@@ -162,5 +162,5 @@ export interface LoggedInCartContextType {
   decrementItemQuantity: (cartItemId: number) => Promise<void>;
   clearCart: () => Promise<void>;
   refetchCart: () => Promise<void>;
-  cartId: number | null; // This is the change that directly addresses the TypeScript error.
+  cartId: number | null;
 }

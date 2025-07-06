@@ -138,7 +138,6 @@ export type CartApiResponse = {
   [key: string]: any;
 };
 
-// **THE ONLY CHANGE HERE: Made variantId optional to allow 'undefined'**
 export interface CartItemInput {
   id: number; // Product ID
   name: string;
@@ -146,7 +145,7 @@ export interface CartItemInput {
   sellingPrice: number;
   basePrice?: number;
   image: string;
-  variantId?: number | null; // Changed from `number | null` to `number | null | undefined` by making it optional
+  variantId?: number | null; // This already allows `undefined` because it's optional.
   variant?: ProductVariant | null;
   product?: Product | null;
 }
@@ -163,5 +162,5 @@ export interface LoggedInCartContextType {
   decrementItemQuantity: (cartItemId: number) => Promise<void>;
   clearCart: () => Promise<void>;
   refetchCart: () => Promise<void>;
-  cartId: number | null; // <--- ENSURE THIS IS NUMBER | NULL IN types/product.ts
+  cartId: number | null;
 }
