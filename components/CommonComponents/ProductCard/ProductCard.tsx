@@ -85,12 +85,14 @@ const ProductCard = ({ product }: Props) => {
       stock: itemStock,
     };
 
-    if (itemStock <= 0) {
+    console.log("itemStock", itemStock);
+    if (itemStock === 0) {
+      console.log("issued");
       toast.error(`${product.name} is out of stock.`);
       return;
     }
 
-    if (isLoggedIn) {
+    if (isLoggedIn && itemStock > 0) {
       try {
         await addCartItem(itemPayload);
         toast.success(`${product.name} added to cart!`);
@@ -98,14 +100,14 @@ const ProductCard = ({ product }: Props) => {
         toast.error("Failed to add product to cart.");
         return error;
       }
-    } else {
+    } else if (itemStock > 0) {
       dispatch(
         addToCart({
           ...itemPayload,
           cartItemId: Date.now() * -1 - Math.floor(Math.random() * 1000),
         })
       );
-      // toast.success(`${product.name} added to cart!`);
+      toast.success(`${product.name} added to cart!`);
     }
   };
 
