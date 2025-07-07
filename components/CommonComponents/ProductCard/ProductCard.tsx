@@ -9,6 +9,8 @@ import { selectIsLoggedIn } from "@/store/slices/authSlice";
 import { useLoggedInCart } from "@/CartProvider/LoggedInCartProvider";
 import { Product, ProductVariant } from "@/types/cart";
 import toast from "react-hot-toast";
+import { HiOutlineShoppingBag } from "react-icons/hi2";
+import { MdTune } from "react-icons/md";
 
 interface Props {
   product: Product;
@@ -85,9 +87,7 @@ const ProductCard = ({ product }: Props) => {
       stock: itemStock,
     };
 
-    console.log("itemStock", itemStock);
     if (itemStock === 0) {
-      console.log("issued");
       toast.error(`${product.name} is out of stock.`);
       return;
     }
@@ -118,80 +118,70 @@ const ProductCard = ({ product }: Props) => {
 
   return (
     <div
-      className="relative group shadow-md hover:shadow-xl transition-all duration-300 rounded-md p-3 overflow-hidden w-[220px] sm:w-[240px] mx-auto"
-      style={{
-        background: "linear-gradient(to bottom right, #dae6f1, #ffffff)",
-      }}
+      className="relative group rounded-md overflow-hidden p-2 w-[160px] sm:w-[200px] bg-gradient-to-br from-[#dae6f1] to-white shadow-md hover:shadow-lg transition-all duration-300"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
       {product.priceDifferencePercent > 0 && (
-        <div className="absolute top-2 left-2 bg-red-600 text-white text-xs font-semibold px-2 py-1 rounded-md shadow-md z-10">
+        <div className="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-semibold px-2 py-0.5 rounded z-10">
           {product.priceDifferencePercent}% OFF
         </div>
       )}
 
       <Link href={`/product/${product.slug}`} className="block">
-        <div>
-          <div className="relative w-full h-44 rounded-md overflow-hidden bg-white shadow-inner">
-            <Image
-              src={currentMainImageSrc}
-              alt={product.name}
-              fill
-              className="object-contain transition-transform duration-300 ease-in-out group-hover:scale-105"
-            />
-          </div>
+        <div className="relative w-full h-36 rounded-md overflow-hidden bg-white">
+          <Image
+            src={currentMainImageSrc}
+            alt={product.name}
+            fill
+            className="object-contain transition-transform duration-300 ease-in-out group-hover:scale-105"
+          />
+        </div>
 
-          <h3 className="mt-2 text-center text-base font-semibold text-rose-800 line-clamp-2 min-h-[48px]">
+        <div className="flex flex-col mt-2 px-1">
+          <h3 className="text-xs font-semibold text-rose-800 line-clamp-2 min-h-[32px]">
             {product.name}
           </h3>
 
-          <div className="mt-1 flex justify-center items-center gap-2">
-          <span className="font-bold text-base" style={{ color: "#213E5A" }}>
-    ₹
-    {Number(product.basePrice ?? 0)}
-  </span>
-            <span className="text-sm text-gray-400 line-through">
-              ₹
-              {selectedVariant
-                ? Number(selectedVariant.selling_price ?? 0)
-                : Number(product.sellingPrice ?? 0)}
-            </span>
+          <div className="flex justify-between items-center mt-1">
+            <div className="text-xs font-bold text-[#213E5A]">
+              ₹{Number(product.basePrice ?? 0)}
+              {selectedVariant?.selling_price && (
+                <span className="text-[10px] text-gray-400 line-through ml-1 font-normal">
+                  ₹{Number(selectedVariant.selling_price)}
+                </span>
+              )}
+            </div>
+
+            {product.variants && product.variants.length > 0 ? (
+              <Link href={`/product/${product.slug}`}>
+                <button className="flex items-center gap-1 bg-[#213E5A] text-white text-[10px] px-2 py-1 rounded-full">
+                  <MdTune className="text-sm" /> Variant
+                </button>
+              </Link>
+            ) : (
+              <button
+                type="button"
+                onClick={handleAddToCart}
+                disabled={isOutOfStock}
+                className={`flex items-center gap-1 bg-[#213E5A] text-white text-[10px] px-2 py-1 rounded-full ${
+                  isOutOfStock
+                    ? "opacity-50 cursor-not-allowed"
+                    : "cursor-pointer"
+                }`}
+              >
+                <HiOutlineShoppingBag className="text-sm" /> Add
+              </button>
+            )}
           </div>
 
           {isOutOfStock && (
-            <p className="text-center text-sm text-red-600 mt-1 font-medium">
+            <p className="text-[11px] text-red-600 text-center mt-1 font-medium">
               Out of Stock
             </p>
           )}
         </div>
       </Link>
-
-      <div className="mt-2 flex justify-center">
-        {product.variants && product.variants.length > 0 ? (
-          <Link href={`/product/${product.slug}`} className="block">
-            <button
-              type="button"
-              className="text-white text-sm px-4 py-1.5 rounded-full transition cursor-pointer"
-              style={{ backgroundColor: "#213E5A" }}
-            >
-              Select Variant
-            </button>
-          </Link>
-        ) : (
-          <button
-            type="button"
-            onClick={handleAddToCart}
-            disabled={isOutOfStock}
-            className={`text-white text-sm px-4 py-1.5 rounded-full transition ${
-              isOutOfStock ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
-            }`}
-            style={{ backgroundColor: "#213E5A" }}
-          >
-            {isOutOfStock ? "Out of Stock" : "Add to Cart"}
-          </button>
-        )}
-      </div>
     </div>
   );
 };

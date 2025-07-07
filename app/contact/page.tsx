@@ -130,7 +130,7 @@ export default function ContactFormSection() {
                 value={formData[field.name as keyof typeof formData]}
                 onChange={handleChange}
                 required
-                className="border border-[#213E5A] rounded-md px-4 py-2 bg-white text-[16px]"
+                className="border border-[#213E5A] rounded-md px-2 py-1 sm:px-4 sm:py-2 bg-white text-[16px]"
               />
             ))}
 
@@ -139,7 +139,7 @@ export default function ContactFormSection() {
               value={formData.country}
               onChange={handleChange}
               required
-              className="border border-[#213E5A] rounded-md px-4 py-2 bg-white text-gray-600 w-full text-[16px]"
+              className="border border-[#213E5A] rounded-md px-2 py-1 sm:px-4 sm:py-2 bg-white text-gray-600 w-full text-[16px]"
             >
               <option value="">Select Country</option>
               {Object.keys(countryStateMap).map((country) => (
@@ -155,7 +155,7 @@ export default function ContactFormSection() {
               onChange={handleChange}
               required
               disabled={!formData.country}
-              className="border border-[#213E5A] rounded-md px-4 py-2 bg-white text-gray-600 w-full text-[16px]"
+              className="border border-[#213E5A] rounded-md px-2 py-1 sm:px-4 sm:py-2 bg-white text-gray-600 w-full text-[16px]"
             >
               <option value="">Select State</option>
               {availableStates.map((state) => (
@@ -171,7 +171,7 @@ export default function ContactFormSection() {
               value={formData.subject}
               onChange={handleChange}
               required
-              className="col-span-1 sm:col-span-2 border border-[#213E5A] rounded-md px-4 py-2 bg-white text-[16px]"
+              className="col-span-1 sm:col-span-2 border border-[#213E5A] rounded-md px-2 py-1 sm:px-4 sm:py-2 bg-white text-[16px]"
             />
 
             <textarea
@@ -181,13 +181,13 @@ export default function ContactFormSection() {
               value={formData.message}
               onChange={handleChange}
               required
-              className="col-span-1 sm:col-span-2 border border-[#213E5A] rounded-md px-4 py-2 bg-white text-[16px]"
+              className="col-span-1 sm:col-span-2 border border-[#213E5A] rounded-md px-2 py-1 sm:px-4 sm:py-2 bg-white text-[16px]"
             />
 
             <button
               type="submit"
               disabled={loading}
-              className="col-span-1 sm:col-span-2 bg-[#213E5A] text-white font-semibold py-2 rounded border border-[#213E5A] hover:bg-white hover:text-[#213E5A] transition-all text-[16px]"
+              className="col-span-1 sm:col-span-2 bg-[#213E5A] text-white font-semibold py-1 px-3 sm:py-2 sm:px-5 rounded border border-[#213E5A] hover:bg-white hover:text-[#213E5A] transition-all text-[16px]"
             >
               {loading ? (
                 <span className="animate-pulse">Sending...</span>
@@ -198,15 +198,35 @@ export default function ContactFormSection() {
           </form>
         </div>
 
-        {/* Right: Info + Map */}
+        {/* Right: Info Section */}
         <div className="w-full lg:w-5/12 flex flex-col justify-between h-full">
           {company && (
-            <div className="flex flex-col bg-[#F3F6F7] rounded-2xl shadow-lg border border-gray-200 px-3 py-2 mb-2 text-[16px]">
-              <h3 className="text-md uppercase text-gray-500 mb-3 font-semibold">
-                Contact Info
-              </h3>
-              <div className="flex flex-col sm:flex-row justify-between items-start gap-2">
-                <div className="flex-1 space-y-2">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 sm:gap-2 bg-[#F3F6F7] rounded-2xl shadow-lg border border-gray-200 px-4 py-3 mb-2 text-[16px] lg:h-[230px]">
+              <div className="flex flex-col sm:w-1/2 space-y-2 max-h-52 overflow-y-auto scrollbar-hide w-full">
+                <h3 className="text-md uppercase text-gray-500 font-semibold text-[17px] sm:text-[14px] text-center sm:text-left">
+                  Contact Info
+                </h3>
+
+                {/* Mobile View */}
+                <div className="flex flex-col gap-2 sm:hidden">
+                  <div className="flex justify-center gap-4 w-full text-center">
+                    <div className="w-1/2">
+                      <p className="font-bold text-[16px]">Address</p>
+                      <p className="text-sm">{company.address}</p>
+                    </div>
+                    <div className="w-1/2">
+                      <p className="font-bold text-[16px]">Call</p>
+                      <p className="text-sm">{company.phone}</p>
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <p className="font-bold text-[16px]">Email</p>
+                    <p className="text-sm">{company.email}</p>
+                  </div>
+                </div>
+
+                {/* Tablet/Laptop */}
+                <div className="hidden sm:block space-y-2">
                   <div>
                     <p className="font-bold text-[16px]">Address</p>
                     <p className="text-sm">{company.address}</p>
@@ -215,12 +235,28 @@ export default function ContactFormSection() {
                     <p className="font-bold text-[16px]">Email</p>
                     <p className="text-sm">{company.email}</p>
                   </div>
-                  <div>
+                  <div className="lg:mb-0">
                     <p className="font-bold text-[16px]">Call</p>
                     <p className="text-sm">{company.phone}</p>
                   </div>
                 </div>
-                <div className="flex-shrink-0 w-28 sm:w-36 lg:w-64 xl:w-72">
+              </div>
+
+              {/* Right: Lottie (desktop) / Map (mobile) */}
+              <div className="w-full sm:w-1/2 flex justify-center items-center lg:pb-0">
+                <div className="w-full sm:hidden rounded-xl overflow-hidden border border-gray-300 mt-4">
+                  <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3424.175008753406!2d73.89774167465146!3d18.49106117007603!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc2ea620bdc521b%3A0x14d7209d899076dc!2sConsociate%20Solutions!5e1!3m2!1sen!2sin!4v1751878629709!5m2!1sen!2sin"
+                    width="100%"
+                    height="200"
+                    style={{ border: 0 }}
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                  ></iframe>
+                </div>
+
+                <div className="hidden sm:block w-52 sm:w-52 lg:w-72 lg:h-60 lg:mb-0">
                   <Lottie
                     loop
                     play
@@ -232,11 +268,11 @@ export default function ContactFormSection() {
             </div>
           )}
 
-          <div className="overflow-hidden rounded-2xl shadow-lg border border-gray-200 flex-1">
+          <div className="overflow-hidden rounded-2xl shadow-lg border border-gray-200 flex-1 hidden sm:block">
             <iframe
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3424.175008753406!2d73.89774167465146!3d18.49106117007603!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc2ea620bdc521b%3A0x14d7209d899076dc!2sConsociate%20Solutions!5e1!3m2!1sen!2sin!4v1751878629709!5m2!1sen!2sin"
               width="100%"
-              height="270"
+              height="290"
               style={{ border: 0 }}
               allowFullScreen
               loading="lazy"

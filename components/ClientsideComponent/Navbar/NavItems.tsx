@@ -5,9 +5,9 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { getNavbarData } from "@/api/NavbarApi";
 import { fetchCategories } from "@/api/fetchCategories";
-
 import { NavItem } from "@/types/nav";
 import { Category } from "@/types/category";
+import { ChevronDown } from "lucide-react";
 
 const NavItems = () => {
   const pathname = usePathname();
@@ -39,24 +39,44 @@ const NavItems = () => {
       {navItems.map((item) =>
         item.is_active ? (
           item.name.toLowerCase() === "categories" ? (
-            <li key={item.id} className="relative group">
+            <li
+              key={item.id}
+              className="relative group flex items-center gap-1"
+            >
               <span
-                className={`hover:text-blue-600  ${
+                className={`hover:text-blue-600 flex items-center gap-1 ${
                   pathname.startsWith("/category") ? "underline" : ""
                 }`}
               >
                 {item.name}
+                <ChevronDown size={14} />
               </span>
 
-              {/* Dropdown menu */}
-              <ul className="absolute top-full left-0 mt-2 w-48 bg-white border border-gray-400 rounded shadow-lg opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all duration-200 z-50">
+              {/* Category Dropdown */}
+              <ul className="absolute top-full left-0 mt-2 bg-white border border-gray-300 rounded shadow-lg opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all duration-200 z-50 min-w-[220px]">
                 {categories.map((cat) => (
-                  <li key={cat.id}>
+                  <li key={cat.id} className="group relative">
                     <Link href={`/category/${cat.id}`}>
                       <span className="block px-4 py-2 hover:bg-[#edf3f8]">
                         {cat.name}
                       </span>
                     </Link>
+
+                    {/* Subcategories dropdown */}
+                    {Array.isArray(cat.subcategories) &&
+                      cat.subcategories.length > 0 && (
+                        <ul className="absolute top-0 left-full mt-0 ml-1 bg-white border border-gray-300 rounded shadow-lg opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all duration-200 min-w-[200px] z-50">
+                          {cat.subcategories.map((sub: Category) => (
+                            <li key={sub.id}>
+                              <Link href={`/subcategory/${sub.id}`}>
+                                <span className="block px-4 py-2 hover:bg-[#edf3f8] text-sm">
+                                  {sub.name}
+                                </span>
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
                   </li>
                 ))}
               </ul>
