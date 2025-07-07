@@ -93,7 +93,7 @@ const ProductCard = ({ product }: Props) => {
     if (isLoggedIn) {
       try {
         await addCartItem(itemPayload);
-        // toast.success(`${product.name} added to cart!`);
+        toast.success(`${product.name} added to cart!`);
       } catch (error) {
         toast.error("Failed to add product to cart.");
         return error;
@@ -105,7 +105,7 @@ const ProductCard = ({ product }: Props) => {
           cartItemId: Date.now() * -1 - Math.floor(Math.random() * 1000),
         })
       );
-      toast.success(`${product.name} added to cart!`);
+      // toast.success(`${product.name} added to cart!`);
     }
   };
 
