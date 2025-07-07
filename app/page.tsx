@@ -39,7 +39,7 @@ export default async function HomePage() {
   const { categories } = categoriesResponse;
 
   return (
-    <div>
+    <div className="bg-white">
       <HeroBanner banners={banners} />
       <CategorySection categories={categories} />
       <FeaturesBanner />
