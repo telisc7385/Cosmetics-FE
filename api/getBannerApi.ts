@@ -8,16 +8,19 @@ interface BannersApiResponse {
 
 export const getBanners = async (): Promise<BannerType[]> => {
   try {
-    const res = await apiCore<BannersApiResponse>("/frontend/banners", "GET");
+    // Tell TypeScript what the shape of the response is
+    const res = await apiCore<{ data: BannerType[] }>("/banners", "GET");
 
-    // Return res.data safely
-    return res?.data ?? [];
-  } catch (err: any) {
-    if (err.message.includes("API error 404")) {
+    // If the response is directly an array (fallback), return that; otherwise return res.data
+    return Array.isArray(res) ? res : res.data || [];
+  } catch (err: unknown) {
+    if (err instanceof Error && err.message.includes("API error 404")) {
       console.warn("Banner endpoint not found, fallback to empty array");
       return [];
     }
-    throw err;
+
+    console.error("Banner API error:", err instanceof Error ? err.message : err);
+    return [];
   }
 };
 

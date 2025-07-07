@@ -1,9 +1,18 @@
-import { fetchCategories } from "@/api/fetchCategories";
 import CategoryClientWrapper from "./CategoryClientWrapper";
 import SectionHeader from "../CommonComponents/SectionHeader";
 
-export default async function CategorySection() {
-  const { categories } = await fetchCategories();
+
+interface Category {
+  id: number;
+  name: string;
+  imageUrl: string;
+}
+
+type Props = {
+  categories: Category[];
+}
+
+export default async function CategorySection({categories} : Props) {
 
   return (
     <section className="w-full px-4 sm:px-10 mt-8 container mx-auto">

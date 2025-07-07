@@ -91,7 +91,7 @@ import Image from "next/image";
 import { useRef, useState } from "react";
 import type { Swiper as SwiperType } from "swiper";
  
-type Testimonial = {
+export type Testimonial = {
   id: string;
   name: string;
   role: string;

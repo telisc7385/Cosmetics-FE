@@ -449,7 +449,7 @@ export function LoggedInCartProvider({
         console.log("LoggedInCartProvider: /cart/add successful.");
 
         await fetchCartItems(); // Re-fetch to get official IDs and state
-        toast.success(`${itemToAdd.name} added to cart!`); // Success toast after API confirms
+        // toast.success(`${itemToAdd.name} added to cart!`); // Success toast after API confirms
       } catch (err: any) {
         console.error("LoggedInCartProvider: Failed to add cart item:", err);
         if (err.message && err.message.includes("401")) {
@@ -535,7 +535,7 @@ export function LoggedInCartProvider({
       // --- NEW STOCK CHECK (Client-side pre-check) ---
       if (newQuantity > currentItem.stock) {
         toast.error(
-          `You've reached the maximum quantity for ${currentItem.name} (stock limit: ${currentItem.stock}).`
+          `You've reached the maxim m quantity for ${currentItem.name} (stock limit: ${currentItem.stock}).`
         );
         return; // Prevent API call if stock limit is exceeded
       }
@@ -680,7 +680,8 @@ export function LoggedInCartProvider({
       console.log("LoggedInCartProvider: Calling API for /cart/clear.");
       await apiCore("/cart/clear", "DELETE", undefined, token);
       console.log("LoggedInCartProvider: /cart/clear successful.");
-      toast.success("All items removed from cart."); // Toast for clearing cart
+      //
+
       await fetchCartItems(); // Re-fetch to ensure sync (should be empty)
     } catch (err: any) {
       console.error("LoggedInCartProvider: Failed to clear cart:", err);

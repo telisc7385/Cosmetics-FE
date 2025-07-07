@@ -103,7 +103,7 @@ const CartPage = () => {
     if (isLoggedIn) {
       try {
         await removeLoggedInItem(cartItemId);
-        toast.error(`${itemToRemove.name} removed from cart.`);
+        // toast.error(`${itemToRemove.name} removed from cart.`);
       } catch (err: unknown) {
         console.error("Failed to remove item from cart:", err);
         toast.error(`Failed to remove ${itemToRemove.name}. Please try again.`);

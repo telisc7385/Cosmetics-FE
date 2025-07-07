@@ -162,7 +162,7 @@ const Footer = async ({ topCategories }: { topCategories: Category[] }) => {
           </span>
         </div>
         <p className="text-xs text-gray-500">
-          © 2025 ReadymadeUI. All Rights Reserved.
+          {/* © 2025 ReadymadeUI. All Rights Reserved. */}
         </p>
       </div>
     </footer>

@@ -1,10 +1,11 @@
-import { getWhyChooseUs } from "@/api/fetchWhyChooseUs";
 import SectionHeader from "@/components/CommonComponents/SectionHeader";
+import { WhyChooseUsItem } from "@/types/whyChooseUs";
 import Image from "next/image";
 
-export default async function WhyChooseUs() {
-  const items = await getWhyChooseUs();
-
+type Props = {
+  whyChooseItems: WhyChooseUsItem[];
+};
+export default async function WhyChooseUs({ whyChooseItems }: Props) {
   return (
     <div className="w-full py-5 px-[40px]">
       <div className="container mx-auto my-14">
@@ -13,7 +14,7 @@ export default async function WhyChooseUs() {
           subtitle="Trusted by Thousands, Loved for a Reason."
         />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {items.slice(0, 3).map(
+          {whyChooseItems.slice(0, 3).map(
             (
               item // ✅ only first 3
             ) => (

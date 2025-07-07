@@ -3,7 +3,13 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { useAppSelector, useAppDispatch } from "@/store/hooks/hooks";
-import { selectCartItems, clearCart } from "@/store/slices/cartSlice";
+import {
+  selectCartItems,
+  clearCart,
+  incrementQuantity,
+  decrementQuantity,
+  removeFromCart,
+} from "@/store/slices/cartSlice";
 import { CartItem } from "@/types/cart";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
@@ -30,6 +36,8 @@ const GuestCheckout = () => {
     paymentMethod: "COD",
   });
 
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false); // 🔄 Loader state
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -42,6 +50,7 @@ const GuestCheckout = () => {
       toast.error("Email is required.");
       return;
     }
+
     if (
       !formData.fullName ||
       !formData.phone ||
@@ -52,10 +61,12 @@ const GuestCheckout = () => {
       toast.error("Please fill all required address fields.");
       return;
     }
+
     if (!/^\d{10}$/.test(formData.phone)) {
       toast.error("Please enter a valid 10-digit phone number.");
       return;
     }
+
     if (cartItems.length === 0) {
       toast.error("Your cart is empty. Please add items to place an order.");
       return;
@@ -85,6 +96,7 @@ const GuestCheckout = () => {
       paymentMethod: formData.paymentMethod,
     };
 
+    setIsPlacingOrder(true); // Start loader
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BASE_URL}/guest/checkout`,
@@ -111,6 +123,8 @@ const GuestCheckout = () => {
           ? error.message
           : "Unexpected error placing order.";
       toast.error(message);
+    } finally {
+      setIsPlacingOrder(false); // Stop loader
     }
   };
 
@@ -132,7 +146,6 @@ const GuestCheckout = () => {
           Guest Checkout
         </h2>
         <div className="space-y-5">
-          {/* PincodeVerifier removed */}
           <form className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-3">
             <input
               type="email"
@@ -213,12 +226,40 @@ const GuestCheckout = () => {
                 <option value="Razorpay">Pay Online (Razorpay)</option>
               </select>
             </div>
+
             <button
               type="button"
               onClick={handlePlaceOrder}
-              className="col-span-full mt-5 text-white font-bold py-3 rounded bg-[#213E5A] hover:bg-[#1A334B] text-lg"
+              disabled={isPlacingOrder}
+              className="col-span-full mt-5 text-white font-bold py-3 rounded bg-[#213E5A] hover:bg-[#1A334B] text-lg flex items-center justify-center gap-2"
             >
-              Place Order
+              {isPlacingOrder ? (
+                <>
+                  <svg
+                    className="animate-spin h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8v4l3.536-3.536A9 9 0 1021 12h-2a7 7 0 11-7-7v4z"
+                    ></path>
+                  </svg>
+                  Placing Order...
+                </>
+              ) : (
+                "Place Order"
+              )}
             </button>
           </form>
         </div>
@@ -242,19 +283,65 @@ const GuestCheckout = () => {
                 className="w-16 h-16 rounded object-cover border"
               />
               <div className="flex-grow">
-                <p className="font-semibold text-gray-900 text-base">
-                  {item.name}
-                </p>
-                {item.variantId && item.variant && (
-                  <p className="text-xs text-gray-600 mt-0.5">
-                    Variant:{" "}
-                    <span className="font-medium">{item.variant.name}</span>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="font-semibold text-gray-900 text-base">
+                      {item.name}
+                    </p>
+                    {item.variantId && item.variant && (
+                      <p className="text-xs text-gray-600 mt-0.5">
+                        Variant:{" "}
+                        <span className="font-medium">{item.variant.name}</span>
+                      </p>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => dispatch(removeFromCart(item.cartItemId))}
+                    className="text-gray-400 hover:text-red-600 transition text-sm"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <div className="flex items-center mt-2 gap-2">
+                  <button
+                    onClick={() =>
+                      item.quantity > 1 &&
+                      dispatch(decrementQuantity(item.cartItemId))
+                    }
+                    disabled={item.quantity <= 1}
+                    className={`px-2 py-1 rounded border text-sm ${
+                      item.quantity <= 1
+                        ? "cursor-not-allowed bg-gray-200 text-gray-400"
+                        : "hover:bg-gray-200"
+                    }`}
+                  >
+                    -
+                  </button>
+                  <span className="text-sm font-medium">{item.quantity}</span>
+                  <button
+                    onClick={() =>
+                      item.quantity < item.stock &&
+                      dispatch(incrementQuantity(item.cartItemId))
+                    }
+                    disabled={item.quantity >= item.stock}
+                    className={`px-2 py-1 rounded border text-sm ${
+                      item.quantity >= item.stock
+                        ? "cursor-not-allowed bg-gray-200 text-gray-400"
+                        : "hover:bg-gray-200"
+                    }`}
+                  >
+                    +
+                  </button>
+                </div>
+
+                {item.quantity >= item.stock && (
+                  <p className="text-xs text-red-500 mt-1">
+                    Stock limit reached
                   </p>
                 )}
-                <p className="text-xs text-gray-600 mt-0.5">
-                  Qty: <span className="font-medium">{item.quantity}</span>
-                </p>
-                <p className="text-base text-gray-800 font-bold mt-1">
+
+                <p className="text-base text-gray-800 font-bold mt-2">
                   ₹{(item.quantity * item.sellingPrice).toFixed(2)}
                 </p>
               </div>

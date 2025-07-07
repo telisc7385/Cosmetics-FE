@@ -41,7 +41,7 @@ const NavItems = () => {
           item.name.toLowerCase() === "categories" ? (
             <li key={item.id} className="relative group">
               <span
-                className={`hover:text-blue-600 cursor-pointer ${
+                className={`hover:text-blue-600  ${
                   pathname.startsWith("/category") ? "underline" : ""
                 }`}
               >
