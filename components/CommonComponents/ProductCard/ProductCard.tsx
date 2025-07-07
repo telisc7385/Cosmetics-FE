@@ -144,17 +144,15 @@ const ProductCard = ({ product }: Props) => {
           </h3>
 
           <div className="mt-1 flex justify-center items-center gap-2">
-            <span className="font-bold text-base" style={{ color: "#213E5A" }}>
-              ₹
-              {selectedVariant
-                ? Number(selectedVariant.base_price ?? 0).toFixed(2)
-                : Number(product.basePrice ?? 0).toFixed(2)}
-            </span>
+          <span className="font-bold text-base" style={{ color: "#213E5A" }}>
+    ₹
+    {Number(product.basePrice ?? 0)}
+  </span>
             <span className="text-sm text-gray-400 line-through">
               ₹
               {selectedVariant
-                ? Number(selectedVariant.selling_price ?? 0).toFixed(2)
-                : Number(product.sellingPrice ?? 0).toFixed(2)}
+                ? Number(selectedVariant.selling_price ?? 0)
+                : Number(product.sellingPrice ?? 0)}
             </span>
           </div>
 
