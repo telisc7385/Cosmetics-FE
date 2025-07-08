@@ -895,6 +895,17 @@ const UserCheckout = () => {
               ))}
             </ul>
           )}
+          {/* Back to Shopping button added here, after the list of items */}
+          <button
+            onClick={() => router.push("/shop")} // Assuming '/shop' is the shopping page
+            className={`
+                       mt-6 w-full py-3 rounded-md font-semibold transition-all duration-200
+                       bg-[#1F3958] text-white
+                       hover:bg-white hover:text-[#1F3958] hover:border hover:border-[#1F3958] cursor-pointer
+            `}
+          >
+            Back to Shopping
+          </button>
           <hr className="my-6 border-gray-200" />
           <div className="flex justify-between items-center text-lg font-semibold text-gray-800">
             <span>Subtotal:</span>
@@ -908,6 +919,7 @@ const UserCheckout = () => {
           {appliedCoupon && (
             <div className="flex justify-between items-center text-sm text-green-600 mt-2">
               <span>
+                <CheckCircle size={18} className="inline mr-2" />
                 Coupon ({appliedCoupon.code} - {appliedCoupon.discount}% off):
               </span>
               <span>-₹{discountAmount.toFixed(2)}</span>

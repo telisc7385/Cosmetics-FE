@@ -15,7 +15,10 @@ const Page = async ({ params }: PageProps) => {
       { cache: "no-store" }
     );
 
-    console.log("Fetching category from:", `${process.env.NEXT_PUBLIC_BASE_URL}/category/id?category=${id}`);
+    console.log(
+      "Fetching category from:",
+      `${process.env.NEXT_PUBLIC_BASE_URL}/category/id?category=${id}`
+    );
 
     if (!categoryRes.ok) return notFound();
 
@@ -43,8 +46,6 @@ const Page = async ({ params }: PageProps) => {
     console.error("❌ Failed to load category:", error);
     return notFound();
   }
-  
-
 };
 
 export default Page;
