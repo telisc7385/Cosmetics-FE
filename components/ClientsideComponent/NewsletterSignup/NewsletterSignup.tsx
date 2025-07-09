@@ -3,36 +3,38 @@
 import { subscribeToNewsletter } from "@/components/ServersideComponent/NewsletterAction/NewsletterAction";
 import { RootState } from "@/store/store";
 import { useState } from "react";
-import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
 
 export default function NewsletterSignup() {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [message, setMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
 
-  // ✅ Extract token from Redux but unused intentionally
   const token = useSelector((state: RootState) => state.auth.token); // eslint-disable-line @typescript-eslint/no-unused-vars
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
-
-    // if (!token) {
-    //   toast.error('Authentication token not found');
-    //   setIsSubmitting(false);
-    //   return;
-    // }
+    setMessage(null); // Clear previous message
 
     const formData = new FormData();
     formData.append("email", email);
 
     const res = await subscribeToNewsletter(formData);
 
-    if (res.success) {
-      toast.success(res.message);
+    // Example check if message includes 'already subscribed'
+    const alreadySubscribed = res.message
+      ?.toLowerCase()
+      .includes("already subscribed");
+
+    if (res.success && !alreadySubscribed) {
+      setMessage({ type: "success", text: res.message });
       setEmail("");
     } else {
-      toast.error(res.message);
+      setMessage({ type: "error", text: res.message });
     }
 
     setIsSubmitting(false);
@@ -66,6 +68,17 @@ export default function NewsletterSignup() {
             {isSubmitting ? "Subscribing..." : "Subscribe"}
           </button>
         </form>
+
+        {/* ✅ Message under input, styled */}
+        {message && (
+          <p
+            className={`mt-4 text-sm ${
+              message.type === "success" ? "text-green-400" : "text-red-400"
+            }`}
+          >
+            {message.text}
+          </p>
+        )}
       </div>
     </section>
   );

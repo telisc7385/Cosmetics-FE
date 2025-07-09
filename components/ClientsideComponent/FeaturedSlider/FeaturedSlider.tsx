@@ -1,20 +1,19 @@
-'use client';
+"use client";
 
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Autoplay } from 'swiper/modules';
-import 'swiper/css';
-import 'swiper/css/navigation';
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Autoplay } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/navigation";
 
-import Image from 'next/image';
-import Link from 'next/link';
-import { Product } from '@/types/product';
-
-
+import Image from "next/image";
+import Link from "next/link";
+import { Product } from "@/types/product";
 
 export default function FeaturedSlider({ products }: { products: Product[] }) {
   return (
     <div className="bg-[#e3e9f1] py-6 px-4 sm:px-6 lg:px-10">
-      <div className="container mx-auto">
+      {/* --- CHANGE MADE HERE: Changed 'container mx-auto' to 'max-w-[84rem] mx-auto' --- */}
+      <div className="max-w-[84rem] mx-auto">
         <Swiper
           modules={[Navigation, Autoplay]}
           spaceBetween={30}
@@ -29,7 +28,7 @@ export default function FeaturedSlider({ products }: { products: Product[] }) {
                 {/* Product Image */}
                 <div className="relative w-full lg:w-1/2 flex justify-center">
                   <Image
-                    src={product.images[0]?.image || '/placeholder.jpg'}
+                    src={product.images[0]?.image || "/placeholder.jpg"}
                     alt={product.name}
                     width={350}
                     height={350}
@@ -39,19 +38,23 @@ export default function FeaturedSlider({ products }: { products: Product[] }) {
 
                 {/* Product Info */}
                 <div className="w-full lg:w-1/2 text-center lg:text-left">
-                  <p className="text-sm text-gray-500">{product.category?.name}</p>
-                  <h3 className="text-xl sm:text-2xl font-bold mt-1">{product.name}</h3>
+                  <p className="text-sm text-gray-500">
+                    {product.category?.name}
+                  </p>
+                  <h3 className="text-xl sm:text-2xl font-bold mt-1">
+                    {product.name}
+                  </h3>
                   <p className="text-[#e60076] font-semibold text-lg sm:text-xl mt-2">
                     ₹{product.basePrice}
                     <span className="line-through text-gray-500 text-sm ml-2">
                       ₹{product.sellingPrice}
                     </span>
                   </p>
-                 
+
                   <p
-  className="mt-2 text-gray-700 text-sm"
-  dangerouslySetInnerHTML={{ __html: product.description }}
-></p>
+                    className="mt-2 text-gray-700 text-sm"
+                    dangerouslySetInnerHTML={{ __html: product.description }}
+                  ></p>
                   <p className="text-sm text-green-700 mt-1">
                     ● In Stock ({product.stock} available)
                   </p>

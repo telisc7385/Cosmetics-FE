@@ -1,6 +1,7 @@
 import { Product } from "./product";
 
 export interface Category {
+  subcategories?: Category[]; // ✅ changed from `any` to `Category[]`
   description: string;
   products: Product[];
   id: number;

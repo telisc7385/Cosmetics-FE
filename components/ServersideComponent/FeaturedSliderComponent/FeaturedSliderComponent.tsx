@@ -10,7 +10,8 @@ type Props = {
 export default async function FeaturedSliderComponent({ product }: Props) {
   return (
     <>
-      <div className=" px-[40px] container mx-auto">
+      {/* --- CHANGE MADE HERE: Changed 'container' to 'max-w-[84rem]' --- */}
+      <div className="px-[40px] max-w-[88rem] mx-auto">
         <SectionHeader
           title="Shop Our Best Sellers"
           subtitle="Trusted by Thousands, Loved for a Reason."

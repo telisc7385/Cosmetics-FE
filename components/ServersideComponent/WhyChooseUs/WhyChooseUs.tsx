@@ -5,10 +5,12 @@ import Image from "next/image";
 type Props = {
   whyChooseItems: WhyChooseUsItem[];
 };
+
 export default async function WhyChooseUs({ whyChooseItems }: Props) {
   return (
     <div className="w-full py-5 px-[40px]">
-      <div className="container mx-auto my-14">
+      {/* --- CHANGE MADE HERE: Changed 'container mx-auto' to 'max-w-[84rem] mx-auto' --- */}
+      <div className="max-w-[84rem] mx-auto my-14">
         <SectionHeader
           title="Why Choose Us"
           subtitle="Trusted by Thousands, Loved for a Reason."

@@ -101,3 +101,39 @@ body {
   animation: infinite-scroll-left 20s linear infinite;
   padding-right: 5rem; /* ✅ End spacing after last message */
 }
+
+/* Border of contact us */
+@keyframes glowing-border {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+.outer-glow-border {
+  position: relative;
+  border-radius: 1rem;
+}
+
+.outer-glow-border::before {
+  content: "";
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  z-index: -1;
+  background: linear-gradient(
+    270deg,
+    #213e5a,
+    #ffffff,
+    #213e5a,
+    #ffffff,
+    #213e5a
+  );
+  background-size: 400% 400%;
+  border-radius: 1rem;
+  animation: glowing-border 5s linear infinite;
+}

@@ -21,10 +21,11 @@ export default function HotListWrapper() {
   }, []);
 
   const [sliderRef] = useKeenSlider<HTMLDivElement>({
-    loop: false,
+    // --- CHANGE MADE HERE: Set loop to true to enable continuous looping ---
+    loop: true, // Now the slider will loop endlessly
     mode: "free",
     slides: {
-      perView: 1,
+      perView: 2, // Show 2 cards on mobile
       spacing: 15,
     },
     breakpoints: {
@@ -50,15 +51,15 @@ export default function HotListWrapper() {
   }
 
   return (
-    <div className="py-5 px-4 md:px-10 container mx-auto">
+    <div className="py-5 px-4 md:px-10 max-w-[88rem] mx-auto">
       <SectionHeader
         title="Hot List"
         subtitle="Out the most popular and trending products."
       />
 
-      <div ref={sliderRef} className="keen-slider container mx-auto">
+      <div ref={sliderRef} className="keen-slider">
         {products.map((product) => (
-          <div key={product.id} className="keen-slider__slide">
+          <div key={product.id} className="keen-slider__slide py-5">
             <ProductCard product={product} />
           </div>
         ))}

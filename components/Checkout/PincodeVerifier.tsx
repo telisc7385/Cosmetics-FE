@@ -59,7 +59,7 @@ const PincodeVerifier = ({ onVerified }: Props) => {
   return (
     <div className="mb-5">
       <h4 className="font-semibold mb-2">Select Delivery Location</h4>
-      <p className="text-sm text-red-500 mb-3">
+      <p className="text-sm text-gray-500 mb-3">
         Enter your area pincode to check delivery availability
       </p>
       <div className="flex gap-2">
