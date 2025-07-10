@@ -13,7 +13,7 @@ export default async function ProductPage({ params }: Props) {
   // Change: Remove 'await' when destructuring params
   const { slug } = params;
 
-  console.log("Slug received by ProductPage:", slug); // Added console log for debugging
+  console.log("Slug received by ProductPage:", slug) // Added console log for debugging
 
 
   const product = await fetchProductBySlug(slug);
