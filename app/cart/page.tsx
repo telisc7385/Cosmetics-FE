@@ -1,8 +1,10 @@
+// app/cart/page.tsx or components/CartPage.tsx
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAppSelector, useAppDispatch } from "@/store/hooks/hooks";
 import Image from "next/image";
+import Link from "next/link";
 import {
   selectCartItems as selectGuestCartItems,
   incrementQuantity,
@@ -19,6 +21,7 @@ import { FiTrash2 } from "react-icons/fi";
 import Lottie from "react-lottie-player";
 import emptyCartAnimationData from "@/public/cart.json";
 import PincodeVerifier from "@/components/Checkout/PincodeVerifier";
+import AuthPromptModal from "@/components/Checkout/AuthPromptModal";
 
 const EmptyCartAnimation = () => (
   <div className="flex flex-col items-center justify-center py-10 bg-white rounded-lg shadow-md animate-fadeIn">
@@ -75,6 +78,14 @@ const CartPage = () => {
   } = useLoggedInCart();
 
   const [pincodeVerified, setPincodeVerified] = useState(false);
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false);
+
+  // Use useEffect to check localStorage on initial load
+  useEffect(() => {
+    if (localStorage.getItem("verifiedPincode")) {
+      setPincodeVerified(true);
+    }
+  }, []);
 
   const items = isLoggedIn ? loggedInCartItems : guestCartItems;
   const loading = isLoggedIn ? loggedInLoading : false;
@@ -103,7 +114,7 @@ const CartPage = () => {
     if (isLoggedIn) {
       try {
         await removeLoggedInItem(cartItemId);
-        // toast.error(`${itemToRemove.name} removed from cart.`);
+        // toast.error(`${itemToRemove.name} removed from cart.`); // Consider if you want this toast here, as the cart updates
       } catch (err: unknown) {
         console.error("Failed to remove item from cart:", err);
         toast.error(`Failed to remove ${itemToRemove.name}. Please try again.`);
@@ -120,7 +131,26 @@ const CartPage = () => {
     } else {
       dispatch(clearGuestCart());
     }
-    toast.success("All items removed from cart.");
+    // toast.success("All items removed from cart.");
+  };
+
+  // --- New Checkout Logic ---
+  const handleCheckoutClick = () => {
+    if (!pincodeVerified) {
+      toast.error("Please verify your pincode first.");
+      return;
+    }
+
+    if (isLoggedIn) {
+      router.push("/checkout"); // Directly go to UserCheckout if logged in
+    } else {
+      setShowAuthPrompt(true); // Show the pop-up if not logged in
+    }
+  };
+
+  const handleContinueAsGuest = () => {
+    setShowAuthPrompt(false); // Close the pop-up
+    router.push("/checkout"); // Redirect to GuestCheckout (handled by CheckoutPage.tsx)
   };
 
   const subtotal = items.reduce(
@@ -128,7 +158,7 @@ const CartPage = () => {
       total + item.sellingPrice * item.quantity,
     0
   );
-  const tax = 0;
+  const tax = 0; // Assuming tax is 0 as per your current code
   const total = subtotal + tax;
 
   if (loading && items.length === 0)
@@ -155,18 +185,47 @@ const CartPage = () => {
               className="bg-white rounded-lg p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between border border-gray-200 shadow-sm mb-4"
             >
               <div className="flex items-start sm:items-center w-full sm:w-auto mb-4 sm:mb-0">
-                <Image
-                  src={item.image}
-                  alt={item.name}
-                  width={112}
-                  height={112}
-                  className="w-28 h-28 object-cover rounded-md mr-6 flex-shrink-0"
-                />
+                {/* Link for Image */}
+                {/* Image is clickable if item.slug exists */}
+                {item.slug ? (
+                  <Link
+                    href={`/product/${item.slug}`}
+                    className="flex-shrink-0 mr-6"
+                  >
+                    <Image
+                      src={item.image}
+                      alt={item.name}
+                      width={112}
+                      height={112}
+                      className="w-28 h-28 object-cover rounded-md cursor-pointer"
+                    />
+                  </Link>
+                ) : (
+                  // Renders Image without Link if slug is missing
+                  <Image
+                    src={item.image}
+                    alt={item.name}
+                    width={112}
+                    height={112}
+                    className="w-28 h-28 object-cover rounded-md mr-6 flex-shrink-0"
+                  />
+                )}
                 <div className="flex flex-col justify-between h-full">
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 line-clamp-2">
-                      {item.name}
-                    </h3>
+                    {/* Link for Product Name */}
+                    {/* Product name is clickable if item.slug exists */}
+                    {item.slug ? (
+                      <Link href={`/product/${item.slug}`}>
+                        <h3 className="text-lg font-semibold text-gray-900 line-clamp-2 hover:text-[#007BFF] transition-colors cursor-pointer">
+                          {item.name}
+                        </h3>
+                      </Link>
+                    ) : (
+                      // Renders H3 without Link if slug is missing
+                      <h3 className="text-lg font-semibold text-gray-900 line-clamp-2">
+                        {item.name}
+                      </h3>
+                    )}
                     <p className="text-sm text-gray-500 mt-0.5">
                       Brand: Sephora Collection
                     </p>
@@ -229,9 +288,10 @@ const CartPage = () => {
 
           <div className="mb-4">
             <PincodeVerifier
-              onVerified={() => {
-                // toast.success("Pincode verified!");
-                setPincodeVerified(true);
+              onVerified={(data) => {
+                // This callback is triggered when PincodeVerifier successfully verifies
+                // or when it loads a previously verified pincode from localStorage
+                setPincodeVerified(!!data.pincode); // Set true if pincode exists, false otherwise (e.g., if cleared)
               }}
             />
           </div>
@@ -258,7 +318,7 @@ const CartPage = () => {
           </div>
 
           <button
-            onClick={() => router.push("/checkout")}
+            onClick={handleCheckoutClick}
             className={`w-full py-3 mt-6 text-white font-semibold rounded-md transition-colors ${
               pincodeVerified
                 ? "bg-[#1A324A] hover:bg-[#142636] cursor-pointer"
@@ -277,6 +337,13 @@ const CartPage = () => {
           </button>
         </div>
       </div>
+
+      {showAuthPrompt && (
+        <AuthPromptModal
+          onClose={() => setShowAuthPrompt(false)}
+          onContinueAsGuest={handleContinueAsGuest}
+        />
+      )}
     </div>
   );
 };

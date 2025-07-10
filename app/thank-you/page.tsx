@@ -5,19 +5,18 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { apiCore } from "@/api/ApiCore";
-import { useAppSelector } from "@/store/hooks/hooks"; // CORRECTED LINE HERE
+import { useAppSelector } from "@/store/hooks/hooks";
 import { selectToken } from "@/store/slices/authSlice";
 import Image from "next/image";
 
-// Keep these interfaces as they were, matching your CURRENT API response
 interface CustomerInfo {
   first_name: string;
   last_name: string;
   country_code_for_phone_number: string | null;
-  phone_number: string; // This is the customer's primary phone
+  phone_number: string;
   email: string;
-  billing_address: string; // Still a string as per your current API
-  delivery_address: string; // Still a string as per your current API
+  billing_address: string;
+  delivery_address: string;
 }
 
 interface OrderInfo {
@@ -47,6 +46,7 @@ interface RawOrderItemFromApi {
   quantity: number;
   category: string;
   specification: string;
+  slug?: string | null;
 }
 
 interface DetailedOrder {
@@ -378,8 +378,6 @@ const ThankYouPage = () => {
             <h3 className="text-xl font-semibold text-gray-700 mb-2">
               Billing Address:
             </h3>
-            {/* Displaying customer's name and phone number (from customer_info) 
-                along with the full address string */}
             <p className="text-md text-gray-600">
               <span className="font-semibold">
                 {order.customer_info.first_name} {order.customer_info.last_name}
@@ -389,7 +387,6 @@ const ThankYouPage = () => {
                 {order.customer_info.phone_number}
               </span>
               <br />
-              {/* This will render the entire address string from your backend */}
               <span className="whitespace-pre-line">
                 {order.customer_info.billing_address}
               </span>
@@ -399,8 +396,6 @@ const ThankYouPage = () => {
             <h3 className="text-xl font-semibold text-gray-700 mb-2">
               Shipping Address:
             </h3>
-            {/* Displaying customer's name and phone number (from customer_info) 
-                along with the full address string */}
             <p className="text-md text-gray-600">
               <span className="font-semibold">
                 {order.customer_info.first_name} {order.customer_info.last_name}
@@ -410,7 +405,6 @@ const ThankYouPage = () => {
                 {order.customer_info.phone_number}
               </span>
               <br />
-              {/* This will render the entire address string from your backend */}
               <span className="whitespace-pre-line">
                 {order.customer_info.delivery_address}
               </span>
@@ -426,15 +420,43 @@ const ThankYouPage = () => {
                 key={item.id}
                 className="flex flex-col sm:flex-row items-start sm:items-center gap-4 border p-4 rounded-md bg-gray-50"
               >
-                <Image
-                  src={item.image}
-                  alt={item.name}
-                  width={80}
-                  height={80}
-                  className="w-20 h-20 object-cover rounded flex-shrink-0"
-                />
+                {/* Link for Image - Added cursor-pointer class */}
+                {item.slug ? (
+                  <Link
+                    href={`/product/${item.slug}`}
+                    className="flex-shrink-0 cursor-pointer"
+                  >
+                    <Image
+                      src={item.image}
+                      alt={item.name}
+                      width={80}
+                      height={80}
+                      className="w-20 h-20 object-cover rounded"
+                    />
+                  </Link>
+                ) : (
+                  <Image
+                    src={item.image}
+                    alt={item.name}
+                    width={80}
+                    height={80}
+                    className="w-20 h-20 object-cover rounded flex-shrink-0"
+                  />
+                )}
                 <div className="flex-grow">
-                  <p className="font-medium text-gray-900">{item.name}</p>
+                  {/* Link for Product Name - Added cursor-pointer class */}
+                  {item.slug ? (
+                    <Link
+                      href={`/product/${item.slug}`}
+                      className="cursor-pointer"
+                    >
+                      <p className="font-medium text-gray-900 hover:text-blue-600 transition-colors">
+                        {item.name}
+                      </p>
+                    </Link>
+                  ) : (
+                    <p className="font-medium text-gray-900">{item.name}</p>
+                  )}
                   {item.variant_id && (
                     <p className="text-sm text-gray-600">SKU: {item.SKU}</p>
                   )}

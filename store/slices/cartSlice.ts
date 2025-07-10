@@ -43,6 +43,7 @@ const getInitialState = (): CartState => {
               product: item.product || null,
               variant: item.variant || null,
               stock: typeof item.stock === 'number' && !isNaN(item.stock) ? item.stock : 9999, // Default stock if not found
+              slug: typeof item.slug === 'string' ? item.slug : null, // Ensure slug is included and typed
             };
           }).filter(Boolean) as CartItem[]; // Filter out nulls
 
@@ -87,6 +88,10 @@ const cartSlice = createSlice({
           toast.error(`You can only add up to ${existing.stock} of ${existing.name} (stock limit reached).`);
         } else {
           existing.quantity = newQuantity;
+          // Only show success if quantity actually increased
+          if (newItem.quantity > 0) {
+            // toast.success(`Increased quantity of ${existing.name} in cart!`);
+          }
         }
         console.log("cartSlice: Updated quantity for existing item. New state.items:", state.items);
       } else {
@@ -101,6 +106,7 @@ const cartSlice = createSlice({
           newItem.cartItemId = Date.now() * -1 - Math.random(); // Fallback if somehow missed
         }
         state.items.push(newItem);
+        // toast.success(`${newItem.name} added to cart!`);
         console.log("cartSlice: Added new item. New state.items:", state.items);
       }
 
@@ -115,7 +121,11 @@ const cartSlice = createSlice({
       if (!Array.isArray(state.items)) {
         state.items = [];
       }
+      const itemRemoved = state.items.find(item => item.cartItemId === action.payload);
       state.items = state.items.filter((item) => item.cartItemId !== action.payload);
+      if (itemRemoved) {
+        // toast.error(`${itemRemoved.name} removed from cart.`);
+      }
       console.log("cartSlice: Removed item. New state.items:", state.items);
       if (typeof window !== 'undefined') {
         localStorage.setItem('guestCart', JSON.stringify(state.items));

@@ -1,3 +1,4 @@
+// LoggedInCartProvider.tsx
 "use client";
 
 import React, {
@@ -50,7 +51,6 @@ const parseCartResponse = (response: CartApiResponse): CartItem[] => {
     ) {
       rawCartItems = response.items;
     } else {
-      // console.warn("LoggedInCartProvider: Unexpected GET /cart response structure. Please adjust parseCartResponse.", response); // Removed console.warn
       return [];
     }
 
@@ -71,7 +71,6 @@ const parseCartResponse = (response: CartApiResponse): CartItem[] => {
           item.variant.productId !== null);
 
       if (!cartItemIdExists || !productIdExists) {
-        // console.warn("LoggedInCartProvider: Skipping malformed cart item due to missing critical IDs (id or product/variant productId):", item); // Removed console.warn
         return false;
       }
       return true;
@@ -156,6 +155,9 @@ const parseCartResponse = (response: CartApiResponse): CartItem[] => {
             ? item.product.stock
             : 0; // Default to 0 if stock is missing
 
+        // *** CRITICAL ADDITION: Extracting and assigning the slug ***
+        const slug = item.product?.slug || item.variant?.product?.slug || null; // Ensure slug is assigned, or null if not found
+
         return {
           cartItemId: cartItemId,
           id: productId,
@@ -195,6 +197,7 @@ const parseCartResponse = (response: CartApiResponse): CartItem[] => {
               }
             : undefined,
           stock: stock, // Consolidated stock
+          slug: slug, // Assign the extracted slug here!
         };
       }
     );
@@ -442,7 +445,6 @@ export function LoggedInCartProvider({
 
       const currentItem = items.find((item) => item.cartItemId === cartItemId);
       if (!currentItem) {
-        // console.warn("Attempted to increment non-existent item."); // Removed console.warn
         return;
       }
 
@@ -473,7 +475,7 @@ export function LoggedInCartProvider({
           { quantity: newQuantity },
           token
         );
-        // --- THIS WAS THE PROBLEM! Removed await fetchCartItems(); ---
+        // Removed await fetchCartItems(); here because optimistic update is enough unless something goes wrong
       } catch (err: any) {
         console.error(
           "LoggedInCartProvider: Failed to increment quantity:",
@@ -506,7 +508,6 @@ export function LoggedInCartProvider({
 
       const currentItem = items.find((item) => item.cartItemId === cartItemId);
       if (!currentItem) {
-        // console.warn("Attempted to decrement non-existent item."); // Removed console.warn
         return;
       }
 
@@ -543,7 +544,7 @@ export function LoggedInCartProvider({
             token
           );
         }
-        // --- THIS WAS THE PROBLEM! Removed await fetchCartItems(); ---
+        // Removed await fetchCartItems(); here because optimistic update is enough unless something goes wrong
       } catch (err: any) {
         console.error(
           "LoggedInCartProvider: Failed to decrement quantity:",

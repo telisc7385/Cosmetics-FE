@@ -58,7 +58,7 @@ export interface Product {
   length: string;
   width: string;
   weight: string;
-  slug: string;
+  slug: string; // This property is correctly defined here
   sequenceNumber: number;
   seoTitle: string;
   seoKeyword: string;
@@ -91,10 +91,12 @@ export interface ProductVariant {
   createdAt: string;
   isDeleted: boolean;
   images: ProductVariantImage[];
-  product: { // This refers to the parent product's essential details
+  product: {
+    // This refers to the parent product's essential details
     name: string;
     description: string;
     id: number;
+    slug?: string; // It's a good idea to add slug here too if variant's product includes it
   };
 }
 
@@ -121,6 +123,7 @@ export interface CartItem {
   variant?: ProductVariant | null;
   product?: Product | null;
   stock: number; // ADDED: Consolidated stock property
+  slug?: string | null; // Allow slug to be string or null
 }
 
 export type CartApiResponse = {
@@ -150,6 +153,7 @@ export interface CartItemInput {
   variant?: ProductVariant | null;
   product?: Product | null;
   stock: number; // ADDED: Stock property when inputting to cart
+  slug?: string | null; // <--- **This is the only line changed here**
 }
 
 export interface LoggedInCartContextType {

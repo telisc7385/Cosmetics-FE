@@ -34,6 +34,10 @@ const NavItems = () => {
     fetchData();
   }, []);
 
+  const hasAnySub = categories.some(
+    (cat) => Array.isArray(cat.subcategories) && cat.subcategories.length > 0
+  );
+
   return (
     <ul className="flex gap-10">
       {navItems.map((item) =>
@@ -49,24 +53,26 @@ const NavItems = () => {
                 }`}
               >
                 {item.name}
-                <ChevronDown size={14} />
+                {hasAnySub && <ChevronDown size={14} />}
               </span>
 
-              {/* Category Dropdown */}
               <ul className="absolute top-full left-0 mt-2 bg-white border border-gray-300 rounded shadow-lg opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all duration-200 z-50 min-w-[220px]">
                 {categories.map((cat) => (
-                  <li key={cat.id} className="group relative">
+                  <li key={cat.id} className="relative group">
                     <Link href={`/category/${cat.id}`}>
-                      <span className="block px-4 py-2 hover:bg-[#edf3f8]">
+                      <span className="block px-4 py-2 hover:bg-[#edf3f8] flex items-center gap-1">
                         {cat.name}
+                        {Array.isArray(cat.subcategories) &&
+                          cat.subcategories.length > 0 && (
+                            <ChevronDown size={12} className="ml-1" />
+                          )}
                       </span>
                     </Link>
 
-                    {/* Subcategories dropdown */}
                     {Array.isArray(cat.subcategories) &&
                       cat.subcategories.length > 0 && (
                         <ul className="absolute top-0 left-full mt-0 ml-1 bg-white border border-gray-300 rounded shadow-lg opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all duration-200 min-w-[200px] z-50">
-                          {cat.subcategories.map((sub: Category) => (
+                          {cat.subcategories.map((sub) => (
                             <li key={sub.id}>
                               <Link href={`/subcategory/${sub.id}`}>
                                 <span className="block px-4 py-2 hover:bg-[#edf3f8] text-sm">

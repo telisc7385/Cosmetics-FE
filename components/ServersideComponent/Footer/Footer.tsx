@@ -1,6 +1,6 @@
 import { Category } from "@/types/category";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "next/link"; // Ensure Link is imported
 import { getCompanySettings } from "@/api/CompanyApi";
 import { getNavbarData } from "@/api/NavbarApi";
 import { NavItem } from "@/types/nav";
@@ -20,8 +20,8 @@ const Footer = async ({ topCategories }: { topCategories: Category[] }) => {
   }
 
   return (
-    <footer className="bg-white border-t text-gray-700">
-      <div className="max-w-7xl mx-auto px-4 py-12">
+    <footer className="bg-[#F3F6F7] text-[#213C66] pt-12 pb-0">
+      <div className="max-w-7xl mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 text-[15px]">
           {/* Column 1: Logo + Description */}
           <div className="lg:col-span-1 text-center lg:text-left space-y-4">
@@ -32,138 +32,207 @@ const Footer = async ({ topCategories }: { topCategories: Category[] }) => {
               height={70}
               className="mx-auto lg:mx-0"
             />
-            <p className="text-sm text-gray-500 leading-relaxed max-w-sm mx-auto lg:mx-0">
-              {company.description}
+            <p className="text-sm leading-relaxed max-w-sm mx-auto lg:mx-0">
+              {company?.description ||
+                "Keep it simple, keep it minimal, yet stylish. We bring timeless, modern furniture designed for elegant, everyday living."}
             </p>
           </div>
 
-          {/* Columns 2 to 5 */}
-          <div className="lg:col-span-4 grid grid-cols-2 md:grid-cols-4 gap-10">
-            {/* Quick Links */}
-            <div className="text-center lg:text-left space-y-2">
-              <h4 className="font-semibold text-base mb-4 text-black">
-                Quick Links
-              </h4>
-              <ul className="space-y-2 text-gray-600">
-                {navItems.map((item) => (
-                  <li key={item.id}>
-                    <Link href={item.link || "#"}>
-                      <span className="cursor-pointer hover:text-black">
-                        {item.name}
-                      </span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
+          {/* Menu + Categories grid for mobile */}
+          <div className="block lg:hidden w-full">
+            <div className="grid grid-cols-2 gap-6">
+              {/* Menu */}
+              <div>
+                <h4 className="font-bold text-black mb-3 text-lg">Menu</h4>
+                <ul className="space-y-2">
+                  {navItems.map((item) => (
+                    <li key={item.id}>
+                      <Link href={item.link || "#"}>
+                        <span className="cursor-pointer hover:text-black text-md">
+                          {item.name}
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
 
-            {/* Help */}
-            <div className="text-center lg:text-left space-y-2">
-              <h4 className="font-semibold text-base mb-4 text-black">Help</h4>
-              <ul className="space-y-2 text-gray-600">
-                <li className="cursor-pointer hover:text-black">Contact Us</li>
-                <li className="cursor-pointer hover:text-black">FAQs</li>
-                <li className="cursor-pointer hover:text-black">
-                  Cancellation & Return
-                </li>
-                <li className="cursor-pointer hover:text-black">
-                  Shipping & Delivery
-                </li>
-              </ul>
-            </div>
+                {/* Services under Menu in mobile */}
+                <div className="mt-6">
+                  <h4 className="font-bold text-black mb-3 text-lg">
+                    Services
+                  </h4>
+                  <ul className="space-y-2">
+                    {/* Link for "Terms" page */}
+                    <li>
+                      <Link href="/terms">
+                        <span className="cursor-pointer hover:text-black text-md">
+                          Terms
+                        </span>
+                      </Link>
+                    </li>
+                    <li className="cursor-pointer hover:text-black text-md">
+                      Privacy Policy
+                    </li>
+                    <li className="cursor-pointer hover:text-black text-md">
+                      Terms & Conditions
+                    </li>
+                    <li className="cursor-pointer hover:text-black text-md">
+                      Help
+                    </li>
+                  </ul>
+                </div>
+              </div>
 
-            {/* Top Categories */}
-            <div className="text-center lg:text-left space-y-2">
-              <h4 className="font-semibold text-base mb-4 text-black">
-                Top Categories
-              </h4>
-              <ul className="space-y-2 text-gray-600">
-                {topCategories.map((category) => (
-                  <li
-                    key={category.id}
-                    className="cursor-pointer hover:text-black"
-                  >
-                    <Link href={`/category/${category.id}`}>
+              {/* Categories */}
+              <div>
+                <h4 className="font-bold text-black mb-3 text-lg">
+                  Categories
+                </h4>
+                <ul className="space-y-2">
+                  {topCategories.map((category) => (
+                    <li key={category.id}>
+                      <Link href={`/category/${category.id}`}>
+                        <span className="cursor-pointer hover:text-black text-md">
+                          {category.name}
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          {/* Desktop Menu */}
+          <div className="hidden lg:block">
+            <h4 className="font-bold text-black mb-3 text-lg">Menu</h4>
+            <ul className="space-y-2">
+              {navItems.map((item) => (
+                <li key={item.id}>
+                  <Link href={item.link || "#"}>
+                    <span className="cursor-pointer hover:text-black text-md">
+                      {item.name}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Desktop Categories */}
+          <div className="hidden lg:block">
+            <h4 className="font-bold text-black mb-3 text-lg">Categories</h4>
+            <ul className="space-y-2">
+              {topCategories.map((category) => (
+                <li key={category.id}>
+                  <Link href={`/category/${category.id}`}>
+                    <span className="cursor-pointer hover:text-black text-md">
                       {category.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Desktop Services */}
+          <div className="hidden lg:block">
+            <h4 className="font-bold text-black mb-3 text-lg">Services</h4>
+            <ul className="space-y-2">
+              {/* Link for "Terms" page */}
+              <li>
+                <Link href="/terms">
+                  <span className="cursor-pointer hover:text-black text-md">
+                    Terms
+                  </span>
+                </Link>
+              </li>
+              <li>
+                <Link href="/privacypolicy">
+                  <span className="cursor-pointer hover:text-black text-md">
+                    Privacy Policy
+                  </span>
+                </Link>
+              </li>
+              <li className="cursor-pointer hover:text-black text-md">
+                Terms & Conditions
+              </li>
+              <li className="cursor-pointer hover:text-black text-md">Help</li>
+            </ul>
+          </div>
+
+          {/* Contact + Social */}
+          <div>
+            <h4 className="font-bold text-black mb-3 text-lg">Get In Touch</h4>
+            <div className="mb-2 flex items-start gap-2 text-lg">
+              <span>📞</span>
+              <a
+                href={`tel:${company?.phone || "+91180041224826"}`}
+                className="hover:underline"
+              >
+                {company?.phone || "+91 1800 4122 4826"}
+              </a>
+            </div>
+            <div className="mb-4 flex items-start gap-2 text-lg">
+              <span>✉️</span>
+              <a
+                href={`mailto:${company?.email || "sales@mangochairs.com"}`}
+                className="hover:underline"
+              >
+                {company?.email || "sales@mangochairs.com"}
+              </a>
             </div>
 
-            {/* Social + Contact */}
-            <div className="text-center lg:text-left space-y-3">
-              <h4 className="font-semibold text-base mb-4 text-black">
-                Social
-              </h4>
-              <ul className="space-y-2 text-gray-600">
-                <li>
-                  <span className="font-medium">Phone:</span>{" "}
-                  {company?.phone || "N/A"}
-                </li>
-                <li>
-                  <span className="font-medium">Email:</span>{" "}
-                  {company?.email || "N/A"}
-                </li>
-                <li className="mt-2 ml-[-6px]">
-                  <div className="flex items-center gap-5 justify-start">
-                    <Link href={company?.facebook_link || "#"} target="_blank">
-                      <Image
-                        src={company.facebook_icon}
-                        alt="Facebook"
-                        width={40}
-                        height={40}
-                      />
-                    </Link>
-                    <Link href={company?.instagram_link || "#"} target="_blank">
-                      <Image
-                        src={company.instagram_icon}
-                        alt="Instagram"
-                        width={40}
-                        height={40}
-                      />
-                    </Link>
-                    <Link href={company?.twitter_link || "#"} target="_blank">
-                      <Image
-                        src={company.twitter_icon}
-                        alt="Twitter"
-                        width={40}
-                        height={40}
-                      />
-                    </Link>
-                    <Link href={company?.linkedin_link || "#"} target="_blank">
-                      <Image
-                        src={company.linkedin_icon}
-                        alt="LinkedIn"
-                        width={40}
-                        height={40}
-                      />
-                    </Link>
-                  </div>
-                </li>
-              </ul>
+            <div className="flex gap-4 text-[#213C66] text-lg -mt-2">
+              {company?.facebook_icon && (
+                <Link href={company.facebook_link || "#"} target="_blank">
+                  <Image
+                    src={company.facebook_icon}
+                    alt="fb"
+                    width={60}
+                    height={60}
+                  />
+                </Link>
+              )}
+              {company?.instagram_icon && (
+                <Link href={company.instagram_link || "#"} target="_blank">
+                  <Image
+                    src={company.instagram_icon}
+                    alt="ig"
+                    width={60}
+                    height={60}
+                  />
+                </Link>
+              )}
+              {company?.twitter_icon && (
+                <Link href={company.twitter_link || "#"} target="_blank">
+                  <Image
+                    src={company.twitter_icon}
+                    alt="tw"
+                    width={60}
+                    height={60}
+                  />
+                </Link>
+              )}
+              {company?.linkedin_icon && (
+                <Link href={company.linkedin_link || "#"} target="_blank">
+                  <Image
+                    src={company.linkedin_icon}
+                    alt="li"
+                    width={60}
+                    height={60}
+                  />
+                </Link>
+              )}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Bottom Section */}
-      <div className="border-t py-6 text-center text-sm text-gray-600">
-        <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 mb-3">
-          <span className="hover:underline cursor-pointer">Privacy Policy</span>
-          <span className="hover:underline cursor-pointer">
-            Terms & Conditions
-          </span>
-          <span className="hover:underline cursor-pointer">
-            Shipping Policy
-          </span>
-          <span className="hover:underline cursor-pointer">
-            Cancellation Policy
-          </span>
-        </div>
-        <p className="text-xs text-gray-500">
-          {/* © 2025 ReadymadeUI. All Rights Reserved. */}
-        </p>
+      {/* Bottom Bar */}
+      <div className="bg-[#213c66] text-white text-sm text-center py-3 w-full mt-10">
+        © 2025 Glam Cosmetics. All rights reserved. Powered by{" "}
+        <span className="font-semibold">Consociate Solutions</span>
       </div>
     </footer>
   );

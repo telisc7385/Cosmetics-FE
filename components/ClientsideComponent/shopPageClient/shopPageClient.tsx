@@ -155,26 +155,7 @@ const ShopPageClient: React.FC<Props> = ({ categories }) => {
             </div>
           )}
 
-          {/* Pagination Controls */}
-          {/* <div className="mt-6 flex gap-4 items-center">
-            <button
-              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-              className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
-            >
-              Previous
-            </button>
-            <span>
-              Page {currentPage} of {totalPages}
-            </span>
-            <button
-              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-              disabled={currentPage === totalPages}
-              className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
-            >
-              Next
-            </button>
-          </div> */}
+    
           {totalPages > 1 && (
             <div className="mt-6 flex gap-4 items-center">
               <button

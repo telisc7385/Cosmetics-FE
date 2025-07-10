@@ -5,12 +5,19 @@ import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { loginSuccess } from "@/store/slices/authSlice";
-import Image from "next/image";
 import { Eye, EyeOff } from "lucide-react";
 import ForgotPassword from "@/components/ClientsideComponent/ForgotPassword/ForgotPassword";
+import Image from "next/image";
 
+interface LoginFormProps {
+  redirectPath: string;
+  onSwitchToRegister: () => void;
+}
 
-export default function LoginPage() {
+export default function LoginForm({
+  redirectPath,
+  onSwitchToRegister,
+}: LoginFormProps) {
   const dispatch = useDispatch();
   const router = useRouter();
 
@@ -54,7 +61,7 @@ export default function LoginPage() {
       if (res.ok && data.token && data.user) {
         dispatch(loginSuccess({ customer: data.user, token: data.token }));
         toast.success("Login successful!");
-        router.push("/");
+        router.push(redirectPath);
       } else {
         toast.error(data.message || "Login failed");
       }
@@ -67,120 +74,134 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="w-full max-w-5xl flex mx-auto md:p-4 border border-gray-300 bg-white rounded-lg shadow-lg">
-      <div className="w-full md:w-1/2 p-5 justify-center flex flex-col">
-        {showForgotPassword ? (
-          <>
-            <button
-              onClick={() => setShowForgotPassword(false)}
-              className="text-sm text-gray-600 hover:underline mb-4"
-            >
-              ← Back to Login
-            </button>
-            <ForgotPassword />
-          </>
-        ) : (
-          <>
-            <h2 className="text-3xl font-bold text-gray-900 mb-1">Sign in</h2>
-            <form onSubmit={handleLogin}>
-              <div className="mb-2">
-                <label className="block text-sm mb-1 text-gray-700">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  className={`w-full p-2 rounded border ${
-                    errors.email
-                      ? "border-red-500 bg-red-50"
-                      : "border-gray-300"
-                  }`}
-                  placeholder="admin@gmail.com"
-                  value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                    setErrors((prev) => ({ ...prev, email: "" }));
-                  }}
-                />
-                {errors.email && (
-                  <p className="text-red-500 text-sm mt-1">{errors.email}</p>
-                )}
-              </div>
-              <div className="mb-2">
-                <label className="block text-sm mb-1 text-gray-700">
-                  Password
-                </label>
-                <div className="relative">
+    <div className="px-4 sm:px-6 md:px-0">
+      <div className="w-full max-w-5xl flex mx-auto md:p-4 border border-gray-300 bg-white rounded-lg shadow-lg">
+        <div className="w-full md:w-1/2 p-5 justify-center flex flex-col">
+          {showForgotPassword ? (
+            <>
+              <button
+                onClick={() => setShowForgotPassword(false)}
+                className="text-sm text-gray-600 hover:underline mb-4"
+              >
+                ← Back to Login
+              </button>
+              <ForgotPassword />
+            </>
+          ) : (
+            <>
+              <h2 className="text-3xl font-bold text-gray-900 mb-1">Sign in</h2>
+              <form onSubmit={handleLogin}>
+                <div className="mb-2">
+                  <label className="block text-sm mb-1 text-gray-700">
+                    Email
+                  </label>
                   <input
-                    type={showPassword ? "text" : "password"}
-                    className={`w-full p-2 pr-10 rounded border ${
-                      errors.password
+                    type="email"
+                    className={`w-full p-2 rounded border ${
+                      errors.email
                         ? "border-red-500 bg-red-50"
                         : "border-gray-300"
                     }`}
-                    placeholder="••••••••"
-                    value={password}
+                    placeholder="admin@gmail.com"
+                    value={email}
                     onChange={(e) => {
-                      setPassword(e.target.value);
-                      setErrors((prev) => ({ ...prev, password: "" }));
+                      setEmail(e.target.value);
+                      setErrors((prev) => ({ ...prev, email: "" }));
                     }}
                   />
+                  {errors.email && (
+                    <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+                  )}
+                </div>
+                <div className="mb-2">
+                  <label className="block text-sm mb-1 text-gray-700">
+                    Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      className={`w-full p-2 pr-10 rounded border ${
+                        errors.password
+                          ? "border-red-500 bg-red-50"
+                          : "border-gray-300"
+                      }`}
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+                        setErrors((prev) => ({ ...prev, password: "" }));
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((prev) => !prev)}
+                      className="absolute right-3 top-3 text-gray-400"
+                    >
+                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
+                  </div>
+                  {errors.password && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.password}
+                    </p>
+                  )}
+                </div>
+
+                <div className="mb-4 text-right">
                   <button
                     type="button"
-                    onClick={() => setShowPassword((prev) => !prev)}
-                    className="absolute right-3 top-3 text-gray-400"
+                    onClick={() => setShowForgotPassword(true)}
+                    className="text-[#214364] text-sm hover:underline cursor-pointer"
                   >
-                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    Forgot Password?
                   </button>
                 </div>
-                {errors.password && (
-                  <p className="text-red-500 text-sm mt-1">{errors.password}</p>
-                )}
-              </div>
 
-              <div className="mb-4 text-right">
                 <button
-                  type="button"
-                  onClick={() => setShowForgotPassword(true)}
-                  className="text-purple-600 text-sm hover:underline cursor-pointer"
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-[#214364] text-white py-3 rounded-lg font-semibold hover:bg-opacity-90 transition"
                 >
-                  Forgot Password?
+                  {loading ? "Signing in..." : "Sign in"}
                 </button>
-              </div>
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition"
-              >
-                {loading ? "Signing in..." : "Sign in"}
-              </button>
+                <div className="flex items-center my-2">
+                  <hr className="flex-grow border-gray-300" />
+                  <span className="px-4 text-gray-500 text-sm">or</span>
+                  <hr className="flex-grow border-gray-300" />
+                </div>
 
-              <div className="flex items-center my-2">
-                <hr className="flex-grow border-gray-300" />
-                <span className="px-4 text-gray-500 text-sm">or</span>
-                <hr className="flex-grow border-gray-300" />
-              </div>
+                <div className="flex justify-center items-center gap-4 mt-4 text-sm">
+                  <button
+                    type="button"
+                    onClick={onSwitchToRegister}
+                    className="text-[#214364] hover:underline font-medium"
+                  >
+                    New User? Register Here
+                  </button>
+                  <span className="text-gray-400">|</span>
+                  <button
+                    type="button"
+                    onClick={() => router.push(redirectPath)}
+                    className="text-gray-600 hover:underline font-medium"
+                  >
+                    Continue as Guest
+                  </button>
+                </div>
+              </form>
+            </>
+          )}
+        </div>
 
-              <button
-                type="button"
-                disabled={loading}
-                className="w-full bg-gray-100 text-gray-800 py-3 rounded-lg font-semibold hover:bg-gray-200 transition"
-              >
-                Continue as Guest
-              </button>
-            </form>
-          </>
-        )}
-      </div>
-
-      <div className="hidden md:flex w-1/2 items-center justify-center bg-[#000842]">
-        <Image
-          src="https://readymadeui-nextjs-ecommerce-site-3.vercel.app/_next/image?url=%2Fassets%2Fimages%2Fsignin-image.webp&w=1080&q=75"
-          alt="Login Illustration"
-          width={400}
-          height={400}
-          className="rounded-lg"
-        />
+        <div className="hidden md:flex w-1/2 items-center justify-center bg-[#000842]">
+          <Image
+            src="https://readymadeui-nextjs-ecommerce-site-3.vercel.app/_next/image?url=%2Fassets%2Fimages%2Fsignin-image.webp&w=1080&q=75"
+            alt="Login Illustration"
+            width={400}
+            height={400}
+            className="rounded-lg"
+          />
+        </div>
       </div>
     </div>
   );

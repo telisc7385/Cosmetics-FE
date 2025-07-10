@@ -1,7 +1,7 @@
+// app/page.tsx
 import CategorySection from "@/components/CategorySection/CategorySection";
 import FeaturesBanner from "@/components/ServersideComponent/FeaturesBanner/FeaturesBanner";
 import HeroBanner from "@/components/ServersideComponent/HeroBanner/HeroBanner";
-import WhyChooseUs from "@/components/ServersideComponent/WhyChooseUs/WhyChooseUs";
 import TestimonialsSection from "@/components/TestimonialsSection/TestimonialsSection";
 import FeaturedSliderComponent from "@/components/ServersideComponent/FeaturedSliderComponent/FeaturedSliderComponent";
 import GalleryPage from "@/components/ServersideComponent/GalleryPage/GalleryPage";
@@ -22,15 +22,15 @@ import { getProducts } from "@/api/fetchFeaturedSlider";
 export default async function HomePage() {
   const [
     banners,
-    categoriesResponse,
-    whyChooseItems,
+    categoriesResponse, // This comma is the only change: it skips the third element, effectively ignoring _whyChooseItems
+    ,
     product,
     testimonials,
     gallery,
   ] = await Promise.all([
     getBanners(),
     fetchCategories(),
-    getWhyChooseUs(),
+    getWhyChooseUs(), // The function is still called, but its return value is discarded
     getProducts(),
     getTestimonials(),
     getGallery(),
@@ -42,11 +42,11 @@ export default async function HomePage() {
     <div>
       <HeroBanner banners={banners} />
       <CategorySection categories={categories} />
-      <FeaturesBanner />
+
       <TopCategoriesClient categories={categories} />
       <SlidingBanner />
       <HotListWrapper />
-      <WhyChooseUs whyChooseItems={whyChooseItems} />
+      <FeaturesBanner />
       <FeaturedSliderComponent product={product} />
       <TestimonialsSection testimonials={testimonials} />
       <GalleryPage gallery={gallery} />

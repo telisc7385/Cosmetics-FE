@@ -1,6 +1,7 @@
+// components/ClientsideComponent/Auth/PincodeVerifier.tsx
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { apiCore } from "@/api/ApiCore";
 
@@ -18,6 +19,24 @@ const PincodeVerifier = ({ onVerified }: Props) => {
   const [enteredPincode, setEnteredPincode] = useState("");
   const [verifying, setVerifying] = useState(false);
   const [verifiedData, setVerifiedData] = useState<PincodeData | null>(null);
+
+  // Use useEffect to load the saved pincode from localStorage on component mount
+  useEffect(() => {
+    const savedPincode = localStorage.getItem("verifiedPincode");
+    const savedCity = localStorage.getItem("verifiedCity");
+    const savedState = localStorage.getItem("verifiedState");
+
+    if (savedPincode && savedCity && savedState) {
+      const data = {
+        pincode: savedPincode,
+        city: savedCity,
+        state: savedState,
+      };
+      setEnteredPincode(savedPincode);
+      setVerifiedData(data);
+      onVerified(data); // Inform the parent component (CartPage) that it's verified
+    }
+  }, [onVerified]); // Add onVerified to dependency array
 
   const handleVerify = async () => {
     if (!enteredPincode || enteredPincode.length !== 6) {
@@ -46,14 +65,33 @@ const PincodeVerifier = ({ onVerified }: Props) => {
       setVerifiedData(pincodeInfo);
       onVerified(pincodeInfo);
       toast.success(`Delivery available in ${res.city}, ${res.state}`);
+
+      // Save verified pincode data to localStorage
+      localStorage.setItem("verifiedPincode", pincodeInfo.pincode);
+      localStorage.setItem("verifiedCity", pincodeInfo.city);
+      localStorage.setItem("verifiedState", pincodeInfo.state);
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : "Verification failed";
       toast.error(message);
       setVerifiedData(null);
+      // Clear localStorage if verification fails
+      localStorage.removeItem("verifiedPincode");
+      localStorage.removeItem("verifiedCity");
+      localStorage.removeItem("verifiedState");
     } finally {
       setVerifying(false);
     }
+  };
+
+  const handleClearVerification = () => {
+    setEnteredPincode("");
+    setVerifiedData(null);
+    localStorage.removeItem("verifiedPincode");
+    localStorage.removeItem("verifiedCity");
+    localStorage.removeItem("verifiedState");
+    // Optionally, inform the parent that verification is cleared
+    onVerified({ pincode: "", city: "", state: "" }); // Pass empty data
   };
 
   return (
@@ -73,11 +111,20 @@ const PincodeVerifier = ({ onVerified }: Props) => {
         <button
           type="button"
           onClick={handleVerify}
-          disabled={verifying}
+          disabled={verifying || verifiedData !== null} // Disable if already verified
           className="bg-[#1A324A] text-white px-4 py-2 rounded-md hover:bg-[#142835] disabled:opacity-50 hover:cursor-pointer"
         >
           {verifying ? "Checking..." : "Apply"}
         </button>
+        {verifiedData && (
+          <button
+            type="button"
+            onClick={handleClearVerification}
+            className="text-red-500 hover:text-red-700 font-medium ml-2"
+          >
+            Clear
+          </button>
+        )}
       </div>
 
       {verifiedData && (

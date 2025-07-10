@@ -1,7 +1,9 @@
+// app/checkout/GuestCheckout.tsx or components/Checkout/GuestCheckout.tsx
 "use client";
 
 import React, { useState } from "react";
 import Image from "next/image";
+import Link from "next/link"; // Import Link
 import { useAppSelector, useAppDispatch } from "@/store/hooks/hooks";
 import {
   selectCartItems,
@@ -275,19 +277,41 @@ const GuestCheckout = () => {
               key={item.cartItemId}
               className="flex gap-3 items-center p-2 rounded bg-gray-50 border"
             >
-              <Image
-                src={item.image}
-                alt={item.name}
-                width={70}
-                height={70}
-                className="w-16 h-16 rounded object-cover border"
-              />
+              {/* Conditional Link for Image */}
+              {item.slug ? (
+                <Link href={`/product/${item.slug}`} className="flex-shrink-0">
+                  <Image
+                    src={item.image}
+                    alt={item.name}
+                    width={70}
+                    height={70}
+                    className="w-16 h-16 rounded object-cover border cursor-pointer"
+                  />
+                </Link>
+              ) : (
+                <Image
+                  src={item.image}
+                  alt={item.name}
+                  width={70}
+                  height={70}
+                  className="w-16 h-16 rounded object-cover border flex-shrink-0"
+                />
+              )}
               <div className="flex-grow">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="font-semibold text-gray-900 text-base">
-                      {item.name}
-                    </p>
+                    {/* Conditional Link for Product Name */}
+                    {item.slug ? (
+                      <Link href={`/product/${item.slug}`}>
+                        <p className="font-semibold text-gray-900 text-base hover:text-[#007BFF] transition-colors cursor-pointer">
+                          {item.name}
+                        </p>
+                      </Link>
+                    ) : (
+                      <p className="font-semibold text-gray-900 text-base">
+                        {item.name}
+                      </p>
+                    )}
                     {item.variantId && item.variant && (
                       <p className="text-xs text-gray-600 mt-0.5">
                         Variant:{" "}

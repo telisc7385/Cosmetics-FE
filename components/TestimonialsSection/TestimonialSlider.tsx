@@ -6,7 +6,6 @@ import "swiper/css";
 import Image from "next/image";
 import { useRef, useState } from "react";
 import type { Swiper as SwiperType } from "swiper";
-import SectionHeader from "../CommonComponents/SectionHeader"; // Re-import SectionHeader
 
 export type Testimonial = {
   id: string;
@@ -24,21 +23,12 @@ type Props = {
 };
 
 // --- CHANGE MADE HERE: Added title and subtitle to destructuring ---
-export default function TestimonialSlider({
-  testimonials,
-  title,
-  subtitle,
-}: Props) {
+export default function TestimonialSlider({ testimonials }: Props) {
   const [activeIndex, setActiveIndex] = useState(0);
   const swiperRef = useRef<SwiperType | null>(null);
 
   return (
     <>
-      {/* --- CHANGE MADE HERE: SectionHeader is rendered here, outside the blue background div --- */}
-      {/* This div ensures the header aligns with the main content container of 84rem */}
-
-      {/* Outer div: Handles full-width blue background, vertical padding, and overflow. */}
-      {/* This div's background will span the entire width of its parent (TestimonialSection). */}
       <div className="max-w-full bg-[#b0c9e8] py-1 sm:py-4 overflow-hidden">
         {/* Inner div: This is the container for the Swiper content, limited to max-w-[84rem] and centered. */}
         {/* It also applies horizontal padding to the content within the full-width blue background. */}
