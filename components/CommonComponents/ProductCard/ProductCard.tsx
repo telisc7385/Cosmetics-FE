@@ -146,34 +146,30 @@ const ProductCard = ({ product }: Props) => {
       </Link>
 
       <div className="flex flex-col mt-2 px-1">
-        {/* Title also links to product page */}
+        {/* Product Title */}
         <Link href={`/product/${product.slug}`}>
           <h3 className="text-xs font-semibold text-black line-clamp-2 min-h-[32px]">
             {product.name}
           </h3>
         </Link>
 
-        {/* Combined price display and buttons to maintain horizontal alignment */}
-        <div className="flex justify-between items-center mt-1">
-          {/* Price display on the left */}
-          {/* Swapped order: Selling Price then Base Price (strikethrough) */}
-          <div className="flex flex-row items-baseline gap-1">
-            {/* Selling Price - made text-base for slight increase in prominence */}
-            <div className="text-base font-bold text-[#213E5A]">
-              ₹{currentBasePrice.toFixed(2)}
-            </div>
-            {/* Base Price with dash - always show */}
-            <div className="text-xs text-gray-400 line-through">
-              ₹{currentSellingPrice.toFixed(2)}
-            </div>
+        {/* Price Display - Centered */}
+        <div className="flex flex-row items-baseline gap-1 justify-center mt-1">
+          {/* Selling Price (now `currentBasePrice` based on your code) */}
+          <div className="text-base font-bold text-[#213E5A]">
+            ₹{currentBasePrice.toFixed(2)}
           </div>
+          {/* Base Price with strikethrough (now `currentSellingPrice`) */}
+          <div className="text-xs text-gray-400 line-through">
+            ₹{currentSellingPrice.toFixed(2)}
+          </div>
+        </div>
 
-          {/* Buttons on the right */}
+        {/* Buttons - centered below the price */}
+        <div className="flex justify-center mt-2 w-full">
           {product.variants && product.variants.length > 0 ? (
             <Link href={`/product/${product.slug}`}>
               <button className="flex items-center gap-1 bg-[#213E5A] text-white text-[11px] px-2 py-1.5 rounded-full">
-                {" "}
-                {/* Increased padding */}
                 <MdTune className="text-sm" /> Variant
               </button>
             </Link>
@@ -182,8 +178,7 @@ const ProductCard = ({ product }: Props) => {
               type="button"
               onClick={handleAddToCart}
               disabled={isOutOfStock}
-              className={`flex items-center gap-1 bg-[#213E5A] text-white text-[11px] px-2 py-1.5 rounded-full ${
-                // Increased padding
+              className={`flex items-center gap-1 bg-[#213E5A] text-white text-[11px] px-4 py-1.5 rounded-full ${
                 isOutOfStock
                   ? "opacity-50 cursor-not-allowed"
                   : "cursor-pointer"
