@@ -88,7 +88,7 @@ export default function UserAvatar() {
       <Link href="/auth" aria-label="Login">
         <div className="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600">
           <FiUser size={20} />
-          <span className="whitespace-nowrap">Sign In / Sign Up</span>
+          <span className="whitespace-nowrap">Login</span>
         </div>
       </Link>
     );

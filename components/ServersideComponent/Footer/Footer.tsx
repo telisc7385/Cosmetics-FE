@@ -24,7 +24,7 @@ const Footer = async ({ topCategories }: { topCategories: Category[] }) => {
       <div className="max-w-7xl mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 text-[15px]">
           {/* Column 1: Logo + Description */}
-          <div className="lg:col-span-1 text-center lg:text-left space-y-4">
+          <div className="lg:col-span-1 text-center lg:text-left space-y-0 -mt-3">
             <Image
               src={company?.logo || "/logo1.png"}
               alt="Site Logo"
@@ -38,16 +38,17 @@ const Footer = async ({ topCategories }: { topCategories: Category[] }) => {
             </p>
           </div>
 
-          {/* Menu + Categories grid for mobile */}
+          {/* Menu + Categories grid for mobile and tablet views */}
           <div className="block lg:hidden w-full">
             <div className="grid grid-cols-2 gap-6">
-              {/* Menu */}
+              {/* Menu (Mobile/Tablet) */}
               <div>
                 <h4 className="font-bold text-black mb-3 text-lg">Menu</h4>
                 <ul className="space-y-2">
                   {navItems.map((item) => (
                     <li key={item.id}>
-                      <Link href={item.link || "#"}>
+                      {/* For mobile and tablet, links under Menu show # */}
+                      <Link href="#">
                         <span className="cursor-pointer hover:text-black text-md">
                           {item.name}
                         </span>
@@ -56,13 +57,13 @@ const Footer = async ({ topCategories }: { topCategories: Category[] }) => {
                   ))}
                 </ul>
 
-                {/* Services under Menu in mobile */}
+                {/* Services under Menu in mobile/tablet */}
                 <div className="mt-6">
                   <h4 className="font-bold text-black mb-3 text-lg">
                     Services
                   </h4>
                   <ul className="space-y-2">
-                    {/* Link for "Terms" page */}
+                    {/* Link for "Terms" page - remains unchanged */}
                     <li>
                       <Link href="/terms">
                         <span className="cursor-pointer hover:text-black text-md">
@@ -70,20 +71,34 @@ const Footer = async ({ topCategories }: { topCategories: Category[] }) => {
                         </span>
                       </Link>
                     </li>
-                    <li className="cursor-pointer hover:text-black text-md">
-                      Privacy Policy
+                    {/* Other service options with '#' links for mobile/tablet */}
+                    <li>
+                      <Link href="#">
+                        {" "}
+                        {/* Changed to # */}
+                        <span className="cursor-pointer hover:text-black text-md">
+                          Privacy Policy
+                        </span>
+                      </Link>
                     </li>
-                    <li className="cursor-pointer hover:text-black text-md">
-                      Terms & Conditions
+                    <li>
+                      <Link href="#">
+                        {" "}
+                        {/* Changed to # */}
+                        <span className="cursor-pointer hover:text-black text-md">
+                          Terms & Conditions
+                        </span>
+                      </Link>
                     </li>
-                    <li className="cursor-pointer hover:text-black text-md">
+                    {/* Removed Help option for mobile and tablet view */}
+                    {/* <li className="cursor-pointer hover:text-black text-md">
                       Help
-                    </li>
+                    </li> */}
                   </ul>
                 </div>
               </div>
 
-              {/* Categories */}
+              {/* Categories (Mobile/Tablet) */}
               <div>
                 <h4 className="font-bold text-black mb-3 text-lg">
                   Categories
@@ -91,7 +106,8 @@ const Footer = async ({ topCategories }: { topCategories: Category[] }) => {
                 <ul className="space-y-2">
                   {topCategories.map((category) => (
                     <li key={category.id}>
-                      <Link href={`/category/${category.id}`}>
+                      {/* For mobile and tablet, links under Categories show # */}
+                      <Link href="#">
                         <span className="cursor-pointer hover:text-black text-md">
                           {category.name}
                         </span>
@@ -154,11 +170,16 @@ const Footer = async ({ topCategories }: { topCategories: Category[] }) => {
                   </span>
                 </Link>
               </li>
-              <Link href="/terms_and_condition">
-                <span className="cursor-pointer hover:text-black text-md">
-                  Terms and Conditions
-                </span>
-              </Link>
+              <li>
+                {" "}
+                {/* Wrapped in li */}
+                <Link href="/termscondition">
+                  <span className="cursor-pointer hover:text-black text-md">
+                    Terms and Conditions
+                  </span>
+                </Link>
+              </li>
+              {/* Help option is retained for desktop view */}
               {/* <li className="cursor-pointer hover:text-black text-md">Help</li> */}
             </ul>
           </div>
@@ -234,7 +255,13 @@ const Footer = async ({ topCategories }: { topCategories: Category[] }) => {
       {/* Bottom Bar */}
       <div className="bg-[#213c66] text-white text-sm text-center py-3 w-full mt-10">
         © 2025 Glam Cosmetics. All rights reserved. Powered by{" "}
-        <span className="font-semibold">Consociate Solutions</span>
+        <Link
+          href="https://consociatesolutions.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <span className="font-semibold">Consociate Solutions</span>
+        </Link>
       </div>
     </footer>
   );

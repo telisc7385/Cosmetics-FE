@@ -110,7 +110,8 @@ export default function ManageAddresses() {
             setEditId(null);
             setFormData({});
           }}
-          className="flex items-center gap-1 bg-blue-600 text-white px-4 py-1 rounded"
+          className="flex items-center gap-1 text-white px-4 py-1 rounded cursor-pointer"
+          style={{ backgroundColor: "#203b67" }} // Applied color
         >
           <Plus size={16} /> {showAddForm ? "Cancel" : "Add New Address"}
         </button>
@@ -147,7 +148,8 @@ export default function ManageAddresses() {
           ))}
           <button
             onClick={handleAddAddress}
-            className="mt-3 bg-green-600 text-white px-4 py-1 rounded"
+            className="mt-3 text-white px-4 py-1 rounded cursor-pointer"
+            style={{ backgroundColor: "#203b67" }} // Applied color
           >
             Save Address
           </button>
@@ -192,13 +194,14 @@ export default function ManageAddresses() {
                   <div className="flex gap-3 mt-4">
                     <button
                       onClick={handleUpdate}
-                      className="flex items-center gap-1 bg-green-600 text-white px-3 py-1 rounded"
+                      className="flex items-center gap-1 text-white px-3 py-1 rounded cursor-pointer"
+                      style={{ backgroundColor: "#203b67" }} // Applied color
                     >
                       <Save size={16} /> Save
                     </button>
                     <button
                       onClick={() => setEditId(null)}
-                      className="flex items-center gap-1 bg-gray-300 text-black px-3 py-1 rounded"
+                      className="flex items-center gap-1 bg-gray-300 text-black px-3 py-1 rounded cursor-pointer" // Cancel button unchanged, added cursor
                     >
                       <X size={16} /> Cancel
                     </button>
@@ -224,13 +227,15 @@ export default function ManageAddresses() {
                   <div className="flex gap-4 mt-4">
                     <button
                       onClick={() => handleEdit(addr)}
-                      className="text-blue-600 flex items-center gap-1 text-[#213E5A]"
+                      className="flex items-center gap-1 text-white px-3 py-1 rounded cursor-pointer"
+                      style={{ backgroundColor: "#203b67" }} // Applied color
                     >
                       <Pencil size={16} /> Edit
                     </button>
                     <button
                       onClick={() => handleDelete(addr.id!)}
-                      className="text-red-600 flex items-center gap-1 text-[#213E5A]"
+                      className="flex items-center gap-1 text-white px-3 py-1 rounded cursor-pointer"
+                      style={{ backgroundColor: "#203b67" }} // Applied color
                     >
                       <Trash2 size={16} /> Delete
                     </button>

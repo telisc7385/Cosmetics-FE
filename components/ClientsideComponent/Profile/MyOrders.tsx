@@ -137,6 +137,23 @@ export default function MyOrders() {
     setExpandedOrderId((prevId) => (prevId === orderId ? null : orderId));
   };
 
+  // Function to determine the status badge class
+  const getStatusBadgeClass = (status: string) => {
+    switch (status.toUpperCase()) {
+      case "DELIVERED":
+        return "bg-green-100 text-green-800";
+      case "CANCELLED":
+        return "bg-red-100 text-red-800";
+      case "PENDING":
+        return "bg-yellow-100 text-yellow-800";
+      case "SHIPPED": // Assuming SHIPPED uses blue, as per original logic for non-specific statuses
+        return "bg-blue-100 text-blue-800";
+      default:
+        // Default for any other status
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
   if (loading) {
     return <div className="p-4 text-center">Loading orders...</div>;
   }
@@ -178,13 +195,9 @@ export default function MyOrders() {
                   Order ID: {order.id}
                 </p>
                 <span
-                  className={`px-3 py-1 rounded-full text-sm font-medium ${
-                    order.status === "CONFIRMED"
-                      ? "bg-green-100 text-green-800"
-                      : order.status === "PENDING"
-                      ? "bg-yellow-100 text-yellow-800"
-                      : "bg-blue-100 text-blue-800"
-                  }`}
+                  className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusBadgeClass(
+                    order.status
+                  )}`}
                 >
                   {order.status}
                 </span>

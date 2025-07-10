@@ -8,14 +8,14 @@ const TermsAndConditionsPage: React.FC = () => {
         <title>Terms & Conditions - GlowUp Cosmetics</title>
       </Head>
 
-      <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 py-12 px-2 sm:px-6 lg:px-8 flex items-center justify-center">
         {/* Main container for the terms content */}
         {/* max-w-7xl for a wider content width on larger screens (laptop view) */}
         {/* mx-auto for centering */}
         {/* py-12 for increased vertical padding */}
         {/* bg-white for background, rounded-lg for rounded corners */}
         {/* shadow-md for a subtle shadow */}
-        <div className="w-full max-w-7xl bg-white shadow-md rounded-lg p-8 sm:p-10 lg:p-12">
+        <div className="w-full max-w-7xl bg-white shadow-md rounded-lg p-4 sm:p-10 lg:p-12">
           {/* Page Title */}
           {/* Reduced from text-4xl lg:text-5xl to text-3xl lg:text-4xl */}
           <h1 className="text-3xl lg:text-4xl font-extrabold text-gray-900 mb-8 text-center">

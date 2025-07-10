@@ -9,6 +9,9 @@ import Footer from "@/components/ServersideComponent/Footer/Footer";
 import { fetchTopCategories } from "@/api/fetchTopCategories";
 import ReduxProviderWrapper from "@/CartProvider/ReduxProviderWrapper";
 
+// Import your PromotionBanner component
+import PromotionBanner from "@/components/ClientsideComponent/PromotionBanner/PromotionBanner";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -47,6 +50,8 @@ export default async function RootLayout({
           <Navbar />
           <main className="pt-0 bg-white">{children}</main>
           <Footer topCategories={topCategories} />
+          {/* Add the PromotionBanner component here */}
+          <PromotionBanner />
         </ReduxProviderWrapper>
       </body>
     </html>
