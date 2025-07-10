@@ -215,7 +215,7 @@ export default function ForgotPassword() {
           <p className="text-gray-700">
             Enter the 6-digit OTP sent to your email.
           </p>
-          <div className="flex justify-center gap-2 mb-4">
+          <div className="flex justify-center gap-2 mb-4 text-[#213E5A] ">
             {[0, 1, 2, 3, 4, 5].map((i) => (
               <input
                 key={i}

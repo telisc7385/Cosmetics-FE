@@ -2,7 +2,7 @@
 
 import { useKeenSlider } from "keen-slider/react";
 import "keen-slider/keen-slider.min.css";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 
 interface BannerItem {
@@ -30,6 +30,15 @@ export default function BannerSlider({ banners }: { banners: BannerItem[] }) {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
+  // Corrected filtering logic for filteredBanners
+  const filteredBanners = useMemo(() => {
+    return banners.filter((banner) => {
+      // Condition: Exclude the banner if its ID is exactly 5
+      return banner.id !== 5;
+    });
+  }, [banners]);
+
+  // Pass filteredBanners to KeenSlider
   const [sliderRef, instanceRef] = useKeenSlider<HTMLDivElement>(
     {
       loop: true,
@@ -49,7 +58,7 @@ export default function BannerSlider({ banners }: { banners: BannerItem[] }) {
 
         function nextTimeout() {
           clearTimeout(timeout);
-          if (mouseOver) return;
+          if (mouseOver || filteredBanners.length === 0) return; // Add check for empty banners
           timeout = setTimeout(() => {
             slider.next();
           }, 4000);
@@ -74,11 +83,17 @@ export default function BannerSlider({ banners }: { banners: BannerItem[] }) {
     ]
   );
 
+  // If there are no filtered banners, render nothing or a fallback message
+  if (filteredBanners.length === 0) {
+    return null;
+  }
+
   return (
     <div className="relative w-full h-[250px] sm:h-[300px] md:h-[400px] lg:h-[450px] xl:h-[500px] overflow-hidden">
       {/* Slider */}
       <div ref={sliderRef} className="keen-slider w-full h-full">
-        {banners.map((banner) => (
+        {/* Use filteredBanners here */}
+        {filteredBanners.map((banner) => (
           <div
             key={banner.id}
             className="keen-slider__slide relative w-full h-full"
@@ -121,54 +136,69 @@ export default function BannerSlider({ banners }: { banners: BannerItem[] }) {
         ))}
       </div>
 
-      {/* Dots */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
-        {banners.map((_, idx) => (
+      {/* Dots - only show if there's more than one banner */}
+      {filteredBanners.length > 1 && (
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+          {filteredBanners.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => instanceRef.current?.moveToIdx(idx)}
+              className={`w-3 h-3 rounded-full transition ${
+                currentSlide === idx ? "bg-white" : "bg-gray-400"
+              }`}
+            ></button>
+          ))}
+        </div>
+      )}
+
+      {/* Arrows (hidden on mobile) - only show if there's more than one banner */}
+      {filteredBanners.length > 1 && (
+        <>
           <button
-            key={idx}
-            onClick={() => instanceRef.current?.moveToIdx(idx)}
-            className={`w-3 h-3 rounded-full transition ${
-              currentSlide === idx ? "bg-white" : "bg-gray-400"
-            }`}
-          ></button>
-        ))}
-      </div>
+            onClick={() => instanceRef.current?.prev()}
+            className="absolute left-4 top-1/2 -translate-y-1/2 p-2 hover:scale-110 transition z-10 hidden sm:block"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="36"
+              height="36"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="#007BFF"
+              strokeWidth="2"
+              className="rotate-180"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M9 5l7 7-7 7"
+              />
+            </svg>
+          </button>
 
-      {/* Arrows (hidden on mobile) */}
-      <button
-        onClick={() => instanceRef.current?.prev()}
-        className="absolute left-4 top-1/2 -translate-y-1/2 p-2 hover:scale-110 transition z-10 hidden sm:block"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="36"
-          height="36"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="#007BFF"
-          strokeWidth="2"
-          className="rotate-180"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-        </svg>
-      </button>
-
-      <button
-        onClick={() => instanceRef.current?.next()}
-        className="absolute right-4 top-1/2 -translate-y-1/2 p-2 hover:scale-110 transition z-10 hidden sm:block"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="36"
-          height="36"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="#007BFF"
-          strokeWidth="2"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-        </svg>
-      </button>
+          <button
+            onClick={() => instanceRef.current?.next()}
+            className="absolute right-4 top-1/2 -translate-y-1/2 p-2 hover:scale-110 transition z-10 hidden sm:block"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="36"
+              height="36"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="#007BFF"
+              strokeWidth="2"
+              className="rotate-180"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M9 5l7 7-7 7"
+              />
+            </svg>
+          </button>
+        </>
+      )}
     </div>
   );
 }

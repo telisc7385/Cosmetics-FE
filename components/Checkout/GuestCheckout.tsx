@@ -15,6 +15,48 @@ import {
 import { CartItem } from "@/types/cart";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import Lottie from "react-lottie-player"; // Import Lottie
+// Assuming your new Lottie animation data is at "@/public/shoppingCart.json"
+import ShoppingCart from "@/public/ShoppingCart.json";
+
+// Define EmptyCartAnimation component for GuestCheckout
+const EmptyCartAnimation = () => (
+  <div className="flex flex-col items-center justify-center py-10 bg-white animate-fadeIn">
+    <style jsx>{`
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .animate-fadeIn {
+        animation: fadeIn 0.8s ease-out forwards;
+      }
+    `}</style>
+    <Lottie
+      loop
+      animationData={ShoppingCart} // Changed to use the new animation data
+      play
+      style={{ width: 300, height: 300 }}
+    />
+    <p className="mt-6 text-xl font-semibold text-gray-700">
+      Your cart is empty!
+    </p>
+    <p className="mt-2 text-gray-500">
+      Looks like you haven&apos;t added anything to your cart yet.
+    </p>
+    <button
+      onClick={() => (window.location.href = "/shop")}
+      className="mt-6 px-6 py-3 bg-[#213E5A] text-white rounded-md shadow-lg hover:bg-[#1a324a] transition-all duration-300 transform hover:scale-105 cursor-pointer"
+    >
+      Start Shopping
+    </button>
+  </div>
+);
 
 const GuestCheckout = () => {
   const cartItems = useAppSelector(selectCartItems);
@@ -130,10 +172,11 @@ const GuestCheckout = () => {
     }
   };
 
+  // Render EmptyCartAnimation if cart is empty
   if (cartItems.length === 0) {
     return (
-      <div className="flex items-center justify-center min-h-[400px] text-gray-600 text-xl font-medium px-4">
-        Your cart is empty. Please add items to proceed to checkout.
+      <div className="flex items-center justify-center min-h-[400px] px-4">
+        <EmptyCartAnimation />
       </div>
     );
   }
@@ -334,7 +377,7 @@ const GuestCheckout = () => {
                       dispatch(decrementQuantity(item.cartItemId))
                     }
                     disabled={item.quantity <= 1}
-                    className={`px-2 py-1 rounded border text-sm ${
+                    className={`px-2 py-1 rounded border text-sm text-[#213E5A]  ${
                       item.quantity <= 1
                         ? "cursor-not-allowed bg-gray-200 text-gray-400"
                         : "hover:bg-gray-200"
@@ -342,14 +385,16 @@ const GuestCheckout = () => {
                   >
                     -
                   </button>
-                  <span className="text-sm font-medium">{item.quantity}</span>
+                  <span className="text-sm font-medium text-[#213E5A] ">
+                    {item.quantity}
+                  </span>
                   <button
                     onClick={() =>
                       item.quantity < item.stock &&
                       dispatch(incrementQuantity(item.cartItemId))
                     }
                     disabled={item.quantity >= item.stock}
-                    className={`px-2 py-1 rounded border text-sm ${
+                    className={`px-2 py-1 rounded border text-sm text-[#213E5A]  ${
                       item.quantity >= item.stock
                         ? "cursor-not-allowed bg-gray-200 text-gray-400"
                         : "hover:bg-gray-200"

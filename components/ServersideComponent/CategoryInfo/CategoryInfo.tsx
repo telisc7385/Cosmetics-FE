@@ -11,7 +11,7 @@ interface Props {
 
 export default function CategoryInfo({ category, products }: Props) {
   return (
-    <div className="w-full">
+    <div className="w-full bg-white">
       {/* Full-width Banner */}
       <div className="relative w-full h-[220px] sm:h-[350px] lg:h-[290px]">
         {category.banner ? (
@@ -40,8 +40,10 @@ export default function CategoryInfo({ category, products }: Props) {
             <div className="absolute top-0 left-0 w-24 h-24 bg-orange-100 rounded-full opacity-30 -translate-x-1/2 -translate-y-1/2" />
             <div className="absolute bottom-0 right-0 w-24 h-24 bg-orange-100 rounded-full opacity-30 translate-x-1/2 translate-y-1/2" />
 
-            <h2 className="text-2xl font-semibold mb-4">{category.name}</h2>
-            <p className="text-gray-700 text-lg leading-relaxed">
+            <h2 className="text-[#213E5A] text-2xl font-semibold mb-4">
+              {category.name}
+            </h2>
+            <p className="text-[#213E5A] text-lg leading-relaxed">
               {category.description ||
                 "Discover premium, handpicked products tailored to your needs in this category."}
             </p>

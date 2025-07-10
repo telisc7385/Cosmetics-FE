@@ -1,4 +1,3 @@
-// components/ClientsideComponent/Auth/PincodeVerifier.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -12,7 +11,7 @@ type PincodeData = {
 };
 
 type Props = {
-  onVerified: (data: PincodeData) => void;
+  onVerified?: (data: PincodeData) => void; // Made optional
 };
 
 const PincodeVerifier = ({ onVerified }: Props) => {
@@ -34,9 +33,12 @@ const PincodeVerifier = ({ onVerified }: Props) => {
       };
       setEnteredPincode(savedPincode);
       setVerifiedData(data);
-      onVerified(data); // Inform the parent component (CartPage) that it's verified
+      // Conditionally call onVerified only if it exists
+      if (onVerified) {
+        onVerified(data);
+      }
     }
-  }, [onVerified]); // Add onVerified to dependency array
+  }, [onVerified]); //   onVerified to dependency array
 
   const handleVerify = async () => {
     if (!enteredPincode || enteredPincode.length !== 6) {
@@ -63,8 +65,13 @@ const PincodeVerifier = ({ onVerified }: Props) => {
       };
 
       setVerifiedData(pincodeInfo);
-      onVerified(pincodeInfo);
-      toast.success(`Delivery available in ${res.city}, ${res.state}`);
+      // Conditionally call onVerified only if it exists
+      if (onVerified) {
+        onVerified(pincodeInfo);
+      }
+      toast.success(
+        `Delivery available in ${pincodeInfo.city}, ${pincodeInfo.state}`
+      ); // Use pincodeInfo for toast
 
       // Save verified pincode data to localStorage
       localStorage.setItem("verifiedPincode", pincodeInfo.pincode);
@@ -91,12 +98,17 @@ const PincodeVerifier = ({ onVerified }: Props) => {
     localStorage.removeItem("verifiedCity");
     localStorage.removeItem("verifiedState");
     // Optionally, inform the parent that verification is cleared
-    onVerified({ pincode: "", city: "", state: "" }); // Pass empty data
+    // Conditionally call onVerified only if it exists
+    if (onVerified) {
+      onVerified({ pincode: "", city: "", state: "" }); // Pass empty data
+    }
   };
 
   return (
     <div className="mb-5">
-      <h4 className="font-semibold mb-2">Select Delivery Location</h4>
+      <h4 className="font-semibold mb-2 text-[#213E5A]">
+        Select Delivery Location
+      </h4>
       <p className="text-sm text-gray-500 mb-3">
         Enter your area pincode to check delivery availability
       </p>
@@ -106,7 +118,7 @@ const PincodeVerifier = ({ onVerified }: Props) => {
           placeholder="Enter pincode"
           value={enteredPincode}
           onChange={(e) => setEnteredPincode(e.target.value)}
-          className="border border-gray-300 rounded-md px-4 py-2 w-72 bg-gray-100 focus:bg-white outline-none"
+          className="border text-[#213E5A] border-gray-300 rounded-md px-4 py-2 w-72 bg-gray-100 focus:bg-white outline-none"
         />
         <button
           type="button"

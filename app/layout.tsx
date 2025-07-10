@@ -45,7 +45,7 @@ export default async function RootLayout({
         <ReduxProviderWrapper>
           <Toaster position="top-center" />
           <Navbar />
-          <main className="pt-0">{children}</main>
+          <main className="pt-0 bg-white">{children}</main>
           <Footer topCategories={topCategories} />
         </ReduxProviderWrapper>
       </body>

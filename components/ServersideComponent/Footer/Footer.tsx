@@ -154,10 +154,12 @@ const Footer = async ({ topCategories }: { topCategories: Category[] }) => {
                   </span>
                 </Link>
               </li>
-              <li className="cursor-pointer hover:text-black text-md">
-                Terms & Conditions
-              </li>
-              <li className="cursor-pointer hover:text-black text-md">Help</li>
+              <Link href="/terms_and_condition">
+                <span className="cursor-pointer hover:text-black text-md">
+                  Terms and Conditions
+                </span>
+              </Link>
+              {/* <li className="cursor-pointer hover:text-black text-md">Help</li> */}
             </ul>
           </div>
 

@@ -48,7 +48,7 @@ const NavItems = () => {
               className="relative group flex items-center gap-1"
             >
               <span
-                className={`hover:text-blue-600 flex items-center gap-1 ${
+                className={`text-black hover:text-[#213E5A] flex items-center gap-1 ${
                   pathname.startsWith("/category") ? "underline" : ""
                 }`}
               >
@@ -56,11 +56,11 @@ const NavItems = () => {
                 {hasAnySub && <ChevronDown size={14} />}
               </span>
 
-              <ul className="absolute top-full left-0 mt-2 bg-white border border-gray-300 rounded shadow-lg opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all duration-200 z-50 min-w-[220px]">
+              <ul className="absolute top-full left-0 mt-2 text-black bg-white border border-gray-300 rounded shadow-lg opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all duration-200 z-50 min-w-[220px]">
                 {categories.map((cat) => (
                   <li key={cat.id} className="relative group">
                     <Link href={`/category/${cat.id}`}>
-                      <span className="block px-4 py-2 hover:bg-[#edf3f8] flex items-center gap-1">
+                      <span className="block px-4 py-2 text-black hover:bg-[#edf3f8] flex items-center gap-1">
                         {cat.name}
                         {Array.isArray(cat.subcategories) &&
                           cat.subcategories.length > 0 && (
@@ -91,7 +91,7 @@ const NavItems = () => {
             <li key={item.id}>
               <Link href={item.link || "#"}>
                 <span
-                  className={`hover:text-blue-600 ${
+                  className={`text-black hover:text-blue-600 ${
                     pathname === item.link ? "underline" : ""
                   }`}
                 >

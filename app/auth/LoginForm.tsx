@@ -97,7 +97,7 @@ export default function LoginForm({
                   </label>
                   <input
                     type="email"
-                    className={`w-full p-2 rounded border ${
+                    className={`w-full p-2 rounded border text-[#213E5A] ${
                       errors.email
                         ? "border-red-500 bg-red-50"
                         : "border-gray-300"
@@ -120,7 +120,7 @@ export default function LoginForm({
                   <div className="relative">
                     <input
                       type={showPassword ? "text" : "password"}
-                      className={`w-full p-2 pr-10 rounded border ${
+                      className={`w-full p-2 pr-10 rounded border text-[#213E5A]  ${
                         errors.password
                           ? "border-red-500 bg-red-50"
                           : "border-gray-300"

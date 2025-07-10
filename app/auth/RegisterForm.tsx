@@ -131,7 +131,7 @@ export default function RegisterForm({
   return (
     <div className="px-4 sm:px-6 md:px-0">
       <div className="w-full max-w-3xl mx-auto p-4 md:p-4 border-[1px] border-gray-300 bg-white rounded-lg shadow-lg">
-        <h2 className="text-2xl font-semibold text-center mb-3">
+        <h2 className="text-2xl font-semibold text-center mb-3 text-[#213E5A] ">
           Create an Account!
         </h2>
 
@@ -155,7 +155,7 @@ export default function RegisterForm({
           {step === 1 && (
             <>
               <div>
-                <label className="block font-semibold mb-1">
+                <label className="block font-semibold mb-1 text-[#213E5A] ">
                   Personal Information :
                 </label>
                 <div className="flex gap-4">
@@ -166,7 +166,7 @@ export default function RegisterForm({
                       placeholder="First Name"
                       value={form.firstName}
                       onChange={handleInputChange}
-                      className={`w-full p-2 rounded border cursor-pointer ${
+                      className={`w-full p-2 rounded border cursor-pointer text-[#213E5A]  ${
                         errors.firstName
                           ? "border-red-500 bg-red-50"
                           : "border-gray-300"
@@ -178,14 +178,14 @@ export default function RegisterForm({
                       </p>
                     )}
                   </div>
-                  <div className="w-1/2">
+                  <div className="w-1/2 ">
                     <input
                       type="text"
                       name="lastName"
                       placeholder="Last Name"
                       value={form.lastName}
                       onChange={handleInputChange}
-                      className={`w-full p-2 rounded border cursor-pointer ${
+                      className={`w-full p-2 rounded border cursor-pointer text-[#213E5A]  ${
                         errors.lastName
                           ? "border-red-500 bg-red-50"
                           : "border-gray-300"
@@ -201,14 +201,14 @@ export default function RegisterForm({
               </div>
 
               <div>
-                <label className="block font-semibold mb-1">
+                <label className="block font-semibold mb-1 text-[#213E5A] ">
                   Profile Picture :
                 </label>
                 <input
                   type="file"
                   accept="image/*"
                   onChange={handleImageChange}
-                  className={`w-full p-2 border rounded cursor-pointer ${
+                  className={`w-full p-2 border rounded cursor-pointer text-[#213E5A]  ${
                     errors.image
                       ? "border-red-500 bg-red-50"
                       : "border-gray-300"
@@ -225,7 +225,7 @@ export default function RegisterForm({
           {step === 2 && (
             <>
               <div>
-                <label className="block font-semibold">
+                <label className="block font-semibold text-[#213E5A] ">
                   Email Verification and Password :
                 </label>
                 <input
@@ -234,7 +234,7 @@ export default function RegisterForm({
                   placeholder="Enter your email"
                   value={form.email}
                   onChange={handleInputChange}
-                  className={`w-full p-2 border rounded cursor-pointer ${
+                  className={`w-full p-2 border rounded cursor-pointer text-[#213E5A]  ${
                     errors.email
                       ? "border-red-500 bg-red-50"
                       : "border-gray-300"
@@ -253,7 +253,7 @@ export default function RegisterForm({
                     placeholder="Password"
                     value={form.password}
                     onChange={handleInputChange}
-                    className={`w-full p-2 pr-10 rounded border cursor-pointer ${
+                    className={`w-full p-2 pr-10 rounded border cursor-pointer text-[#213E5A]  ${
                       errors.password
                         ? "border-red-500 bg-red-50"
                         : "border-gray-300"
@@ -280,7 +280,7 @@ export default function RegisterForm({
                     placeholder="Confirm Password"
                     value={form.confirmPassword}
                     onChange={handleInputChange}
-                    className={`w-full p-2 pr-10 rounded border cursor-pointer ${
+                    className={`w-full p-2 pr-10 rounded border cursor-pointer text-[#213E5A]  ${
                       errors.confirmPassword
                         ? "border-red-500 bg-red-50"
                         : "border-gray-300"
@@ -310,14 +310,16 @@ export default function RegisterForm({
           {/* Step 3: Bio */}
           {step === 3 && (
             <div>
-              <label className="block font-semibold mb-1">Bio :</label>
+              <label className="block font-semibold mb-1 text-[#213E5A] ">
+                Bio :
+              </label>
               <textarea
                 name="Bio"
                 placeholder="Enter your bio"
                 value={form.Bio}
                 onChange={handleInputChange}
                 rows={4}
-                className={`w-full p-2 border rounded resize-none cursor-pointer ${
+                className={`w-full p-2 border rounded resize-none cursor-pointer text-[#213E5A]  ${
                   errors.Bio ? "border-red-500 bg-red-50" : "border-gray-300"
                 }`}
               />

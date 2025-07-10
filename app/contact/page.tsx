@@ -108,7 +108,7 @@ export default function ContactFormSection() {
 
       <div className="container mx-auto flex flex-col lg:flex-row items-stretch justify-center gap-10">
         {/* Left: Form */}
-        <div className="w-full lg:w-7/12 bg-white/80 backdrop-blur-md p-6 sm:p-10 rounded-2xl shadow-2xl border border-pink-200 h-full">
+        <div className="w-full lg:w-7/12 bg-white/80 backdrop-blur-md p-6 sm:p-10 rounded-2xl shadow-lg border border-pink-200 h-full">
           <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
             Contact Us
           </h2>
@@ -130,7 +130,7 @@ export default function ContactFormSection() {
                 value={formData[field.name as keyof typeof formData]}
                 onChange={handleChange}
                 required
-                className="border border-[#213E5A] rounded-md px-2 py-1 sm:px-4 sm:py-2 bg-white text-[16px]"
+                className="border border-[#213E5A] text-[#213E5A] rounded-md px-2 py-1 sm:px-4 sm:py-2 bg-white text-[16px]"
               />
             ))}
 
@@ -171,7 +171,7 @@ export default function ContactFormSection() {
               value={formData.subject}
               onChange={handleChange}
               required
-              className="col-span-1 sm:col-span-2 border border-[#213E5A] rounded-md px-2 py-1 sm:px-4 sm:py-2 bg-white text-[16px]"
+              className="col-span-1 sm:col-span-2 border border-[#213E5A] text-[#213E5A] rounded-md px-2 py-1 sm:px-4 sm:py-2 bg-white text-[16px]"
             />
 
             <textarea
@@ -181,7 +181,7 @@ export default function ContactFormSection() {
               value={formData.message}
               onChange={handleChange}
               required
-              className="col-span-1 sm:col-span-2 border border-[#213E5A] rounded-md px-2 py-1 sm:px-4 sm:py-2 bg-white text-[16px]"
+              className="col-span-1 sm:col-span-2 border border-[#213E5A] text-[#213E5A] rounded-md px-2 py-1 sm:px-4 sm:py-2 bg-white text-[16px]"
             />
 
             <button
@@ -211,33 +211,69 @@ export default function ContactFormSection() {
                 <div className="flex flex-col gap-2 sm:hidden">
                   <div className="flex justify-center gap-4 w-full text-center">
                     <div className="w-1/2">
-                      <p className="font-bold text-[16px]">Address</p>
-                      <p className="text-sm">{company.address}</p>
+                      <p className="font-bold text-[16px] text-[#213E5A]">
+                        Address
+                      </p>
+                      <p className="text-sm text-[#213E5A]">
+                        {company.address}
+                      </p>
                     </div>
                     <div className="w-1/2">
-                      <p className="font-bold text-[16px]">Call</p>
-                      <p className="text-sm">{company.phone}</p>
+                      <p className="font-bold text-[16px] text-[#213E5A]">
+                        Call
+                      </p>
+                      {/* Made phone number clickable */}
+                      <a
+                        href={`tel:${company.phone}`}
+                        className="text-sm text-[#213E5A] hover:underline"
+                      >
+                        {company.phone}
+                      </a>
                     </div>
                   </div>
                   <div className="text-center">
-                    <p className="font-bold text-[16px]">Email</p>
-                    <p className="text-sm">{company.email}</p>
+                    <p className="font-bold text-[16px] text-[#213E5A]">
+                      Email
+                    </p>
+                    {/* Made email clickable */}
+                    <a
+                      href={`mailto:${company.email}`}
+                      className="text-sm text-[#213E5A] hover:underline"
+                    >
+                      {company.email}
+                    </a>
                   </div>
                 </div>
 
                 {/* Tablet/Laptop */}
                 <div className="hidden sm:block space-y-2">
                   <div>
-                    <p className="font-bold text-[16px]">Address</p>
-                    <p className="text-sm">{company.address}</p>
+                    <p className="font-bold text-[16px] text-[#213E5A]">
+                      Address
+                    </p>
+                    <p className="text-sm text-[#213E5A]">{company.address}</p>
                   </div>
                   <div>
-                    <p className="font-bold text-[16px]">Email</p>
-                    <p className="text-sm">{company.email}</p>
+                    <p className="font-bold text-[16px] text-[#213E5A]">
+                      Email
+                    </p>
+                    {/* Made email clickable */}
+                    <a
+                      href={`mailto:${company.email}`}
+                      className="text-sm text-[#213E5A] hover:underline"
+                    >
+                      {company.email}
+                    </a>
                   </div>
                   <div className="lg:mb-0">
-                    <p className="font-bold text-[16px]">Call</p>
-                    <p className="text-sm">{company.phone}</p>
+                    <p className="font-bold text-[16px] text-[#213E5A]">Call</p>
+                    {/* Made phone number clickable */}
+                    <a
+                      href={`tel:${company.phone}`}
+                      className="text-sm text-[#213E5A] hover:underline"
+                    >
+                      {company.phone}
+                    </a>
                   </div>
                 </div>
               </div>

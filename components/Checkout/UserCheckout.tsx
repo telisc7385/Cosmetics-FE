@@ -802,7 +802,7 @@ const UserCheckout = () => {
             onChange={(e) =>
               setPaymentMethod(e.target.value as "COD" | "RAZORPAY")
             }
-            className="w-full border border-gray-300 px-3 py-2 rounded-md focus:ring-[#213E5A] focus:border-[#213E5A] appearance-none text-sm cursor-pointer" // Added cursor-pointer
+            className="w-full text-[#213E5A] border border-gray-300 px-3 py-2 rounded-md focus:ring-[#213E5A] focus:border-[#213E5A] appearance-none text-sm cursor-pointer" // Added cursor-pointer
           >
             <option value="COD">Cash on Delivery (COD)</option>
             <option value="RAZORPAY">Pay Online (Razorpay)</option>

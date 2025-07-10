@@ -4,9 +4,9 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../store";
 
 interface AuthState {
-  user?: User;
+  user?: User; // This 'user' property is currently unused in your reducers, 'customer' holds the logged-in user data.
   items?: string[];
-  customer: AuthCustomer | null;
+  customer: AuthCustomer | null; // This is where the logged-in user's data is stored
   token: string | null;
 
   resetLoading: boolean;
@@ -23,7 +23,7 @@ const initialState: AuthState = {
   resetStep: 1,
   resetSuccess: false,
   items: undefined,
-  user: undefined,
+  user: undefined, // Keeping this as undefined as it's not populated by loginSuccess
 };
 
 const authSlice = createSlice({
@@ -33,10 +33,13 @@ const authSlice = createSlice({
     loginSuccess(state, action: PayloadAction<{ customer: AuthCustomer; token: string }>) {
       state.customer = action.payload.customer;
       state.token = action.payload.token;
+      // If you intend to use 'state.user', you would populate it here, e.g.:
+      // state.user = action.payload.customer as User; // Assuming AuthCustomer is compatible with User
     },
     logout(state) {
       state.customer = null;
       state.token = null;
+      // state.user = undefined; // Clear user on logout if it was populated
     },
 
     resetRequestStart(state) {
@@ -104,5 +107,7 @@ export const {
 
 export const selectToken = (state: RootState) => state.auth.token;
 export const selectIsLoggedIn = (state: RootState) => state.auth.token !== null;
+// Export selectUser to get the customer object (which contains user details)
+export const selectUser = (state: RootState) => state.auth.customer;
 
 export default authSlice.reducer;
