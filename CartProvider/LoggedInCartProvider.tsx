@@ -1,3 +1,4 @@
+// src/CartProvider/LoggedInCartProvider.tsx
 "use client";
 
 import React, {
@@ -319,6 +320,11 @@ export function LoggedInCartProvider({
       // Use the stock from itemToAdd, which should come from the ProductCard
       const availableStock = itemToAdd.stock;
 
+      if (availableStock === 0) {
+        toast.error(`${itemToAdd.name} is currently out of stock.`);
+        return;
+      }
+
       if (totalQuantityAfterAdd > availableStock) {
         toast.error(
           `Cannot add ${itemToAdd.quantity} more of ${itemToAdd.name}. ` +
@@ -372,7 +378,8 @@ export function LoggedInCartProvider({
 
         await apiCore("/cart/add", "POST", payload, token);
         await fetchCartItems(); // Re-fetch to get official IDs and state
-        // toast.success(`${itemToAdd.name} added to cart!`); // Success toast after API confirms
+        // --- ADDED THIS LINE: Now the success toast will show! ---
+        toast.success(`${itemToAdd.quantity} ${itemToAdd.name} added to cart!`);
       } catch (err: any) {
         console.error("LoggedInCartProvider: Failed to add cart item:", err);
         if (err.message && err.message.includes("401")) {
@@ -578,7 +585,7 @@ export function LoggedInCartProvider({
 
     try {
       await apiCore("/cart/clear", "DELETE", undefined, token);
-      // toast.success("Cart cleared successfully!");
+      // toast.success("Cart cleared successfully!"); // Toast for clear action
       await fetchCartItems(); // Re-fetch to ensure sync (should be empty)
     } catch (err: any) {
       console.error("LoggedInCartProvider: Failed to clear cart:", err);

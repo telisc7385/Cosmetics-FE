@@ -29,7 +29,7 @@ const HotListClient = ({ products }: HotListClientProps) => {
 
   return (
     <section className="my-4 px-4 sm:px-10">
-      <div className="max-w-[80rem] mx-auto">
+      <div className="max-w-7xl mx-auto">
         <h2 className="text-xl font-bold mb-2">Hot List</h2>
         <p className="text-sm text-gray-500 mb-4">
           Check out the most popular and trending products right now.

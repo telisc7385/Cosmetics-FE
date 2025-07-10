@@ -1,22 +1,38 @@
 import Gallery from "@/components/ClientsideComponent/Gallery/Gallery";
 import SectionHeader from "@/components/CommonComponents/SectionHeader";
-import { GalleryImage } from "@/types/gallery";
+import { GalleryImage } from "@/types/gallery"; // Ensure this path is correct
 
 export const dynamic = "force-dynamic"; // ensures fresh data, disables caching
 
 type Props = {
-  gallery: GalleryImage[];
+  gallery?: GalleryImage[] | null; // Mark gallery as optional and potentially null
 };
 
 const GalleryPage = async ({ gallery }: Props) => {
-  // This ensures that if 'gallery' is null or undefined, 'images' defaults to an empty array,
-  // preventing the 'map' error in the Gallery component.
-  const images = (gallery || []).filter((img) => img.is_active);
+  // Ensure gallery is an array before attempting to filter.
+  // If gallery is null or undefined, default to an empty array.
+  // Then, filter based on is_active.
+  const images = (Array.isArray(gallery) ? gallery : []).filter(
+    (img) => img.is_active
+  );
+
+  // Optional: Add a loading state or a message if no images are found
+  if (images.length === 0) {
+    return (
+      <div className="h-auto bg-white px-4 md:px-[40px] max-w-7xl mx-auto text-center py-10">
+        <SectionHeader
+          title="Our Gallery"
+          subtitle="A glimpse into beauty, confidence, and satisfaction."
+        />
+        <p className="text-gray-600 mt-5">
+          No active gallery images found at the moment.
+        </p>
+      </div>
+    );
+  }
 
   return (
-    // --- CHANGE MADE HERE: Adjusted px for responsive padding ---
-    // px-4 for mobile (default), md:px-[40px] for tablet and laptop.
-    <div className="h-auto bg-white px-4 md:px-[40px] max-w-[84rem] mx-auto">
+    <div className="h-auto bg-white px-4 md:px-[40px] max-w-7xl mx-auto">
       <SectionHeader
         title="Our Gallery"
         subtitle="A glimpse into beauty, confidence, and satisfaction."

@@ -1,16 +1,17 @@
+// ProductDetailClient.tsx
 "use client";
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Product, ProductVariant } from "@/types/product";
-import ProductCard from "../CommonComponents/ProductCard/ProductCard";
+import ProductCard from "../CommonComponents/ProductCard/ProductCard"; // Keep this, it's for related products
 import { useAppSelector, useAppDispatch } from "@/store/hooks/hooks";
 import { selectIsLoggedIn } from "@/store/slices/authSlice";
 import { addToCart as addGuestCartItem } from "@/store/slices/cartSlice";
 import { useLoggedInCart } from "@/CartProvider/LoggedInCartProvider";
 import { CartItem } from "@/types/cart";
 import ProductTabs from "./ProductTabs";
-import toast from "react-hot-toast";
+import toast from "react-hot-toast"; // Keep toast import, for other errors if needed
 import Link from "next/link";
 
 type Props = {
@@ -97,7 +98,7 @@ export default function ProductDetailClient({
     }
     if (quantity > currentStock) {
       toast.error(`Only ${currentStock} items available.`);
-      setQuantity(currentStock);
+      setQuantity(currentStock); // Cap the quantity in the input field
       return;
     }
 
@@ -122,7 +123,7 @@ export default function ProductDetailClient({
     if (isLoggedIn) {
       try {
         await addLoggedInCartItem(item);
-        toast.success(`${quantity} ${item.name} added to cart!`);
+        // REMOVED: toast.success(`${quantity} ${item.name} added to cart!`);
       } catch {
         toast.error("Failed to add product to cart.");
       }
@@ -133,7 +134,7 @@ export default function ProductDetailClient({
           cartItemId: Date.now() * -1 - Math.random(),
         })
       );
-      toast.success(`${quantity} ${item.name} added to guest cart!`);
+      // REMOVED: toast.success(`${quantity} ${item.name} added to guest cart!`);
     }
   };
 
@@ -244,7 +245,7 @@ export default function ProductDetailClient({
             {/* 💰 PRICE BLOCK */}
             <div className="flex items-baseline space-x-2">
               <div className="text-2xl font-bold text-gray-800">
-                ₹{sellingPrice}
+                ₹{basePrice}
               </div>
               {priceDifferencePercent > 0 && (
                 <div className="text-green-600 font-semibold text-base">
@@ -253,13 +254,20 @@ export default function ProductDetailClient({
               )}
             </div>
 
-            {basePrice > sellingPrice && (
-              <div className="text-gray-500 text-base line-through">
-                MRP ₹{basePrice}
-              </div>
-            )}
-
-            <p className="text-gray-500 text-sm">Inclusive of all taxes</p>
+            {/* MODIFIED CODE HERE: Apply line-through only to the base price value */}
+            <div className="flex items-center gap-2">
+              {basePrice > 0 && (
+                <span className="text-gray-500 text-base">
+                  {" "}
+                  {/* Removed line-through from this span */}
+                  MRP ₹<span className="line-through">{sellingPrice}</span>{" "}
+                  {/* Applied line-through here */}
+                </span>
+              )}
+              <span className="text-gray-500 text-sm">
+                Inclusive of all taxes
+              </span>
+            </div>
 
             {currentStock === 0 ? (
               <div className="text-red-600 font-medium">Out of Stock</div>
@@ -348,9 +356,7 @@ export default function ProductDetailClient({
 
         {/* Related Products within the same max-w-7xl container */}
         {relatedProducts.length > 0 && (
-          <div className="px-4 py-10">
-            {" "}
-            {/* Removed redundant max-w-7xl mx-auto */}
+          <div className="py-10  sm:px-0">
             <h2 className="text-2xl font-semibold mb-4">
               You may also like from {product.category.name}
             </h2>

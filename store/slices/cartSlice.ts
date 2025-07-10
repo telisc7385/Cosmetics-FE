@@ -1,4 +1,3 @@
-// store/slices/cartSlice.ts
 "use client";
 
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
@@ -82,20 +81,23 @@ const cartSlice = createSlice({
       });
 
       if (existing) {
-        const newQuantity = existing.quantity + newItem.quantity;
-        if (newQuantity > existing.stock) {
-          existing.quantity = existing.stock; // Cap at stock limit
+        const potentialNewQuantity = existing.quantity + newItem.quantity;
+        if (potentialNewQuantity > existing.stock) {
+          // If adding exceeds stock, cap at stock and show stock limit message
+          const addedAmount = existing.stock - existing.quantity;
+          if (addedAmount > 0) {
+            existing.quantity = existing.stock; // Cap at stock limit
+            toast.success(`${addedAmount} ${existing.name} added to guest cart!`); // Show how many were actually added
+          }
           toast.error(`You can only add up to ${existing.stock} of ${existing.name} (stock limit reached).`);
         } else {
-          existing.quantity = newQuantity;
-          // Only show success if quantity actually increased
-          if (newItem.quantity > 0) {
-            // toast.success(`Increased quantity of ${existing.name} in cart!`);
-          }
+          // If adding does not exceed stock, just add and show success message
+          existing.quantity = potentialNewQuantity;
+          toast.success(`${newItem.quantity} ${existing.name} added to guest cart!`);
         }
         console.log("cartSlice: Updated quantity for existing item. New state.items:", state.items);
       } else {
-        // Check stock for the new item being added
+        // Adding a completely new item
         if (newItem.quantity > newItem.stock) {
           toast.error(`Cannot add ${newItem.quantity} of ${newItem.name}. Only ${newItem.stock} in stock.`);
           return; // Do not add the item if initial quantity exceeds stock
@@ -106,7 +108,7 @@ const cartSlice = createSlice({
           newItem.cartItemId = Date.now() * -1 - Math.random(); // Fallback if somehow missed
         }
         state.items.push(newItem);
-        // toast.success(`${newItem.name} added to cart!`);
+        toast.success(`${newItem.quantity} ${newItem.name} added to guest cart!`); // Show success for new item
         console.log("cartSlice: Added new item. New state.items:", state.items);
       }
 
@@ -124,7 +126,7 @@ const cartSlice = createSlice({
       const itemRemoved = state.items.find(item => item.cartItemId === action.payload);
       state.items = state.items.filter((item) => item.cartItemId !== action.payload);
       if (itemRemoved) {
-        // toast.error(`${itemRemoved.name} removed from cart.`);
+        toast.error(`${itemRemoved.name} removed from cart.`);
       }
       console.log("cartSlice: Removed item. New state.items:", state.items);
       if (typeof window !== 'undefined') {
@@ -142,6 +144,7 @@ const cartSlice = createSlice({
       if (item) {
         if (item.quantity < item.stock) { // Check against stock limit
           item.quantity += 1;
+          toast.success(`Increased quantity of ${item.name}!`); // Success on increment
           console.log("cartSlice: Incremented quantity. New state.items:", state.items);
         } else {
           toast.error(`You've reached the maximum quantity for ${item.name} (stock limit: ${item.stock}).`);
@@ -167,6 +170,8 @@ const cartSlice = createSlice({
             (cartItem) => cartItem.cartItemId !== action.payload
           );
           toast.error(`${item.name} removed from cart.`); // Toast for removal on decrement to zero
+        } else {
+            toast.success(`Decreased quantity of ${item.name}!`); // Success on decrement
         }
         console.log("cartSlice: Decremented quantity. New state.items:", state.items);
       }
@@ -184,7 +189,7 @@ const cartSlice = createSlice({
         localStorage.removeItem('guestCart');
         console.log("cartSlice: Guest cart cleared from localStorage.");
       }
-      toast.success("All items removed from cart."); // Toast for clearing cart
+     
     },
 
     // setCart is typically used to load a cart (e.g., from backend after login)

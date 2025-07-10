@@ -1,3 +1,4 @@
+// ProductCard.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -7,8 +8,8 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks/hooks";
 import { addToCart } from "@/store/slices/cartSlice";
 import { selectIsLoggedIn } from "@/store/slices/authSlice";
 import { useLoggedInCart } from "@/CartProvider/LoggedInCartProvider";
-import { Product, ProductVariant } from "@/types/cart"; // Assuming Product and ProductVariant types are correctly imported from here
-import toast from "react-hot-toast";
+import { Product, ProductVariant } from "@/types/product"; // Assuming Product and ProductVariant types are correctly imported from here
+import toast from "react-hot-toast"; // Keep toast import, for other errors if needed
 import { HiOutlineShoppingBag } from "react-icons/hi2";
 import { MdTune } from "react-icons/md";
 
@@ -82,7 +83,7 @@ const ProductCard = ({ product }: Props) => {
     const itemPayload = {
       id: product.id,
       name: product.name,
-      quantity: 1,
+      quantity: 1, // Product card adds 1 at a time
       sellingPrice: currentSellingPrice,
       basePrice: currentBasePrice,
       image: firstGeneralImage || "/placeholder.jpg",
@@ -97,22 +98,22 @@ const ProductCard = ({ product }: Props) => {
       return;
     }
 
-    if (isLoggedIn && itemStock > 0) {
+    if (isLoggedIn) {
       try {
         await addCartItem(itemPayload);
-        toast.success(`${product.name} added to cart!`);
+        // REMOVED: toast.success(`${product.name} added to cart!`);
       } catch (error) {
         toast.error("Failed to add product to cart.");
         return error;
       }
-    } else if (itemStock > 0) {
+    } else {
       dispatch(
         addToCart({
           ...itemPayload,
           cartItemId: Date.now() * -1 - Math.floor(Math.random() * 1000),
         })
       );
-      toast.success(`${product.name} added to cart!`);
+      // REMOVED: toast.success(`${product.name} added to cart!`);
     }
   };
 

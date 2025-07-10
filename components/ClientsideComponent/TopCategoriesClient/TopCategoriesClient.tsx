@@ -1,13 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react"; // Removed useRef
+import React, { useState, useEffect } from "react";
 import { Category } from "@/types/category";
 import { Product } from "@/types/product";
 import ProductCard from "../../CommonComponents/ProductCard/ProductCard";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination } from "swiper/modules";
-// Removed 'Swiper as SwiperCore' import as it was unused
-// import { Swiper as SwiperCore } from "swiper/types";
 
 import "swiper/css";
 import "swiper/css/autoplay";
@@ -73,10 +71,25 @@ export default function TopCategoriesClient({ categories }: Props) {
         .swiper-pagination {
           margin-top: 24px !important; /* Adds space between products and dots */
         }
+
+        /* Custom styling for SwiperSlide on mobile to control card size */
+        @media (max-width: 639px) {
+          .swiper-slide-product-card-mobile {
+            /* Now, the available width for two cards is (viewport width - 2 * slidesOffsetBefore/After - spaceBetween) */
+            /* So, (100% of parent width - (2 * 16px offset) - 10px spaceBetween) / 2 */
+            /* This works out to (100vw - 32px - 10px) / 2 = (100vw - 42px) / 2 = 50vw - 21px */
+            /* Since the Swiper itself has the offset, the calc() needs to fit within Swiper's inner width */
+            /* The actual width calculation for calc(50% - 2px) is correct relative to Swiper's internal width,
+               which is now padded by slidesOffsetBefore/After. */
+            width: calc(50% - 5px) !important;
+          }
+        }
       `}</style>
 
-      <section className="py-10 px-4 md:px-10 bg-gray-50">
-        <div className="max-w-[84rem] mx-auto">
+      <section className="py-10 max-w-7xl mx-auto bg-gray-50">
+        <div className="px-4 md:px-10">
+          {" "}
+          {/* Text and buttons maintain px-4 padding */}
           <div className="mb-5">
             <h2 className="text-3xl font-bold mb-2 text-[#213C66]">
               Top Category Picks
@@ -86,8 +99,6 @@ export default function TopCategoriesClient({ categories }: Props) {
             </p>
             <hr className="my-4" />
           </div>
-
-          {/* Categories - Centered Buttons */}
           <div className="mb-6 flex flex-wrap gap-3 justify-center">
             {categories.map((category) => (
               <button
@@ -103,44 +114,65 @@ export default function TopCategoriesClient({ categories }: Props) {
               </button>
             ))}
           </div>
-
-          {/* Product Slider - All Devices */}
-          {loading ? (
-            <p className="text-gray-600 text-center">Loading products...</p>
-          ) : filteredProducts.length > 0 ? (
-            <>
-              <Swiper
-                modules={[Autoplay, Pagination]}
-                spaceBetween={20}
-                pagination={{ clickable: true }}
-                autoplay={{
-                  delay: 3000,
-                  disableOnInteraction: false,
-                }}
-                loop={true}
-                breakpoints={{
-                  0: { slidesPerView: 2 }, // Mobile: 2 products
-                  640: { slidesPerView: 3 },
-                  768: { slidesPerView: 4 },
-                  1024: { slidesPerView: 5 },
-                }}
-                className="pb-4"
-              >
-                {filteredProducts.map((product) => (
-                  <SwiperSlide key={product.id}>
-                    <div className="py-4 px-2 mb-10">
-                      <ProductCard product={product} />
-                    </div>
-                  </SwiperSlide>
-                ))}
-              </Swiper>
-            </>
-          ) : (
-            <p className="text-gray-500 text-center">
-              No products found in this category.
-            </p>
-          )}
         </div>
+
+        {loading ? (
+          <p className="text-gray-600 text-center">Loading products...</p>
+        ) : filteredProducts.length > 0 ? (
+          <>
+            <Swiper
+              modules={[Autoplay, Pagination]}
+              spaceBetween={0}
+              pagination={{ clickable: true }}
+              autoplay={{
+                delay: 3000,
+                disableOnInteraction: false,
+              }}
+              loop={true}
+              breakpoints={{
+                // Mobile (0px to 639px): Add 16px space on left and right for cards
+                0: {
+                  slidesPerView: 2,
+                  slidesPerGroup: 2,
+                  centeredSlides: false,
+                  // ADDED PADDING TO THE SIDES OF THE CARDS FOR MOBILE VIEW
+                  slidesOffsetBefore: 16, // Adds 16px space before the first card
+                  slidesOffsetAfter: 16, // Adds 16px space after the last card
+                },
+                // Tablet (640px and up): Revert to 3 slides, original padding (relative to max-w-7xl)
+                640: {
+                  slidesPerView: 3,
+                  slidesOffsetBefore: 40,
+                  slidesOffsetAfter: 40,
+                  slidesPerGroup: 1,
+                },
+                768: {
+                  slidesPerView: 4,
+                  slidesOffsetBefore: 40,
+                  slidesOffsetAfter: 40,
+                },
+                1024: {
+                  slidesPerView: 5,
+                  slidesOffsetBefore: 40,
+                  slidesOffsetAfter: 40,
+                },
+              }}
+              className="pb-4"
+            >
+              {filteredProducts.map((product) => (
+                <SwiperSlide key={product.id}>
+                  <div className="py-4  mb-10 swiper-slide-product-card-mobile">
+                    <ProductCard product={product} />
+                  </div>
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          </>
+        ) : (
+          <p className="text-gray-500 text-center">
+            No products found in this category.
+          </p>
+        )}
       </section>
     </>
   );

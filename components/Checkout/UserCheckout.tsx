@@ -573,11 +573,11 @@ const UserCheckout = () => {
             >
               <div className="flex justify-between items-start">
                 <div>
-                  <p className="font-semibold text-gray-900 text-base">
+                  <p className="font-semibold text-[#213E5A] text-base">
                     {a.fullName}
                   </p>
-                  <p className="text-sm text-gray-700">{a.phone}</p>
-                  <p className="text-sm text-gray-700 mt-1">
+                  <p className="text-sm text-[#213E5A]">{a.phone}</p>
+                  <p className="text-sm text-[#213E5A] mt-1">
                     {a.addressLine}, {a.landmark && `${a.landmark}, `}
                     {a.city}, {a.state} - {a.pincode}
                   </p>
@@ -1072,7 +1072,7 @@ const UserCheckout = () => {
               <div>
                 <label
                   htmlFor="fullName"
-                  className="block text-sm font-medium text-gray-700"
+                  className="block text-sm font-medium text-[#213E5A]"
                 >
                   Full Name
                 </label>
@@ -1082,7 +1082,7 @@ const UserCheckout = () => {
                   name="fullName"
                   value={formData.fullName}
                   onChange={handleFormChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm focus:ring-[#213E5A] focus:border-[#213E5A]"
+                  className="mt-1 block w-full border text-[#213E5A] border-gray-300 rounded-md shadow-sm p-2 text-sm focus:ring-[#213E5A] focus:border-[#213E5A]"
                   required
                 />
               </div>
@@ -1099,7 +1099,7 @@ const UserCheckout = () => {
                   name="phone"
                   value={formData.phone}
                   onChange={handleFormChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm focus:ring-[#213E5A] focus:border-[#213E5A]"
+                  className="mt-1 block w-full text-[#213E5A] border border-gray-300 rounded-md shadow-sm p-2 text-sm focus:ring-[#213E5A] focus:border-[#213E5A]"
                   maxLength={10}
                   required
                 />
@@ -1118,7 +1118,7 @@ const UserCheckout = () => {
                     name="pincode"
                     value={formData.pincode}
                     onChange={handleFormChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm focus:ring-[#213E5A] focus:border-[#213E5A]"
+                    className="mt-1 block w-full text-[#213E5A] border border-gray-300 rounded-md shadow-sm p-2 text-sm focus:ring-[#213E5A] focus:border-[#213E5A]"
                     maxLength={6}
                     required
                   />
@@ -1136,7 +1136,7 @@ const UserCheckout = () => {
                     name="state"
                     value={formData.state}
                     onChange={handleFormChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm focus:ring-[#213E5A] focus:border-[#213E5A]"
+                    className="mt-1 block w-full border text-[#213E5A] border-gray-300 rounded-md shadow-sm p-2 text-sm focus:ring-[#213E5A] focus:border-[#213E5A]"
                     required
                   />
                 </div>
@@ -1154,7 +1154,7 @@ const UserCheckout = () => {
                   name="city"
                   value={formData.city}
                   onChange={handleFormChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm focus:ring-[#213E5A] focus:border-[#213E5A]"
+                  className="mt-1 block w-full border text-[#213E5A] border-gray-300 rounded-md shadow-sm p-2 text-sm focus:ring-[#213E5A] focus:border-[#213E5A]"
                   required
                 />
               </div>
@@ -1171,7 +1171,7 @@ const UserCheckout = () => {
                   value={formData.addressLine}
                   onChange={handleFormChange}
                   rows={3}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm focus:ring-[#213E5A] focus:border-[#213E5A]"
+                  className="mt-1 block w-full border text-[#213E5A] border-gray-300 rounded-md shadow-sm p-2 text-sm focus:ring-[#213E5A] focus:border-[#213E5A]"
                   required
                 ></textarea>
               </div>
@@ -1188,7 +1188,7 @@ const UserCheckout = () => {
                   name="landmark"
                   value={formData.landmark}
                   onChange={handleFormChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm focus:ring-[#213E5A] focus:border-[#213E5A]"
+                  className="mt-1 block w-full border text-[#213E5A] border-gray-300 rounded-md shadow-sm p-2 text-sm focus:ring-[#213E5A] focus:border-[#213E5A]"
                 />
               </div>
               <div className="flex justify-end space-x-3 mt-6">
