@@ -74,7 +74,7 @@ const MobileMenu = () => {
   };
 
   return (
-    <div className="relative z-50">
+    <div className="relative z-50 text-[#203B67] mt-2">
       <button onClick={() => setOpen(!open)} aria-label="Toggle Menu">
         {open ? <X size={24} /> : <Menu size={24} />}
       </button>

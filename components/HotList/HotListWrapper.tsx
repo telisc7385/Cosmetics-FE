@@ -51,12 +51,18 @@ export default function HotListWrapper() {
   }
 
   return (
-    <div className="py-5 px-4 md:px-10 max-w-[88rem] mx-auto">
+    // This div ensures all content within it (SectionHeader and keen-slider)
+    // is aligned and centered within the specified maximum width.
+    <div className="py-5 px-4 md:px-10 max-w-7xl mx-auto">
+      {/* The SectionHeader component should align its internal text based on its own implementation.
+          Its placement here ensures it respects the parent container's max-width and centering. */}
       <SectionHeader
         title="Hot List"
         subtitle="Out the most popular and trending products."
       />
 
+      {/* The keen-slider will lay out its slides (ProductCard components) within its own
+          dimensions, which are constrained by the parent max-w container. */}
       <div ref={sliderRef} className="keen-slider">
         {products.map((product) => (
           <div key={product.id} className="keen-slider__slide py-5">

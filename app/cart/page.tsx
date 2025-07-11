@@ -1,4 +1,3 @@
-// app/cart/page.tsx or components/CartPage.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -175,14 +174,16 @@ const CartPage = () => {
 
   return (
     <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 bg-[#F3F6F7]">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">Shopping Cart</h1>
+      {/* Reduced from text-2xl to text-xl */}
+      <h1 className="text-xl font-bold text-gray-800 mb-6">Shopping Cart</h1>
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Cart Items */}
-        <div className="w-full lg:w-2/3">
+        {/* Changed lg:w-2/3 to lg:w-3/5 to make the cart items section narrower on laptops */}
+        <div className="w-full lg:w-3/5">
           {items.map((item) => (
             <div
               key={item.cartItemId}
-              className="bg-white rounded-lg p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between border border-gray-200 shadow-sm mb-4"
+              className="bg-white rounded-lg p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between border border-gray-200 shadow-sm mb-4 relative" // Added relative for positioning trash icon
             >
               <div className="flex items-start sm:items-center w-full sm:w-auto mb-4 sm:mb-0">
                 {/* Link for Image */}
@@ -226,24 +227,28 @@ const CartPage = () => {
                         {item.name}
                       </h3>
                     )}
+                    {/* Display Stock instead of Brand Name */}
                     <p className="text-sm text-gray-500 mt-0.5">
-                      Brand: Sephora Collection
+                      Stock: {item.stock}
                     </p>
                     {item.variantId && (
                       <p className="text-xs text-gray-400">
-                        Variant ID: {item.variantId}
+                        {/* Variant ID: {item.variantId} */}
                       </p>
                     )}
                   </div>
-                  <button
-                    onClick={() => handleRemove(item.cartItemId)}
-                    className="text-red-500 hover:text-red-700 font-medium mt-3 text-left p-1 rounded-full hover:bg-red-50 transition-colors cursor-pointer"
-                    aria-label={`Remove ${item.name}`}
-                  >
-                    <FiTrash2 className="w-5 h-5" />
-                  </button>
+                  {/* Trash button moved outside this div */}
                 </div>
               </div>
+
+              {/* Trash button moved to top-right and removed hover bg */}
+              <button
+                onClick={() => handleRemove(item.cartItemId)}
+                className="absolute top-4 right-4 text-red-500 hover:text-red-700 font-medium p-1 rounded-full transition-colors cursor-pointer" // Removed hover:bg-red-50
+                aria-label={`Remove ${item.name}`}
+              >
+                <FiTrash2 className="w-5 h-5" />
+              </button>
 
               <div className="flex flex-col items-end sm:items-center gap-4 sm:flex-row w-full sm:w-auto justify-between sm:justify-end">
                 <div className="flex items-center space-x-2 border border-gray-300 rounded-md py-1 px-2">
@@ -253,7 +258,7 @@ const CartPage = () => {
                   >
                     -
                   </button>
-                  <span className="font-medium text-lg w-6 text-center">
+                  <span className="font-medium text-lg w-6 text-center text-[#213E5A]">
                     {item.quantity}
                   </span>
                   <button
@@ -272,7 +277,8 @@ const CartPage = () => {
         </div>
 
         {/* Order Summary */}
-        <div className="w-full lg:w-1/3 bg-white rounded-lg p-6 shadow-md border border-gray-200 self-start">
+        {/* Adjusted lg:w-1/3 to lg:w-2/5 to give it more relative space */}
+        <div className="w-full lg:w-2/5 bg-white rounded-lg p-6 shadow-md border border-gray-200 self-start">
           <div className="flex justify-end mb-4">
             <button
               onClick={handleClearCart}
@@ -282,7 +288,8 @@ const CartPage = () => {
             </button>
           </div>
 
-          <h2 className="text-xl font-bold text-gray-800 mb-4">
+          {/* Reduced from text-xl to text-lg */}
+          <h2 className="text-lg font-bold text-gray-800 mb-4">
             Order Summary
           </h2>
 

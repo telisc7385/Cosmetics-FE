@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { Funnel } from "lucide-react";
 
 import SidebarFiltersClient from "@/components/ServersideComponent/SidebarFilters/SidebarFilters";
 import ProductCard from "@/components/CommonComponents/ProductCard/ProductCard";
-import SortDropdown from "../SortDropdown.tsx/SortDropdown";
+import SortDropdown from "../SortDropdown.tsx/SortDropdown"; // Ensure this path is correct
 
 import { Category } from "@/types/category";
 import { Product } from "@/types/product";
@@ -110,7 +110,7 @@ const ShopPageClient: React.FC<Props> = ({ categories }) => {
   const totalPages = Math.ceil(sortedProducts.length / PRODUCTS_PER_PAGE);
 
   return (
-    <div className="min-h-screen container mx-auto">
+    <div className="min-h-screen container mx-auto bg-white">
       <div className="w-full h-[250px] relative rounded overflow-hidden">
         <Image
           src="/shopPage2.jpg"
@@ -166,32 +166,18 @@ const ShopPageClient: React.FC<Props> = ({ categories }) => {
             </div>
           )}
 
-          {/* Pagination Controls */}
-          {/* <div className="mt-6 flex gap-4 items-center">
-            <button
-              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-              className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
-            >
-              Previous
-            </button>
-            <span>
-              Page {currentPage} of {totalPages}
-            </span>
-            <button
-              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-              disabled={currentPage === totalPages}
-              className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
-            >
-              Next
-            </button>
-          </div> */}
+     
           {totalPages > 1 && (
             <div className="mt-6 flex gap-4 items-center">
               <button
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+                // Apply conditional styling based on disabled state
+                className={`px-3 py-1 rounded transition-colors duration-200 ${
+                  currentPage === 1
+                    ? "border border-[#213E5A] text-[#213E5A] opacity-50 cursor-not-allowed"
+                    : "bg-[#213E5A] text-white hover:bg-opacity-90"
+                }`}
               >
                 Previous
               </button>
@@ -203,7 +189,12 @@ const ShopPageClient: React.FC<Props> = ({ categories }) => {
                   setCurrentPage((prev) => Math.min(prev + 1, totalPages))
                 }
                 disabled={currentPage === totalPages}
-                className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+                // Apply conditional styling based on disabled state
+                className={`px-3 py-1 rounded transition-colors duration-200 ${
+                  currentPage === totalPages
+                    ? "border border-[#213E5A] text-[#213E5A] opacity-50 cursor-not-allowed"
+                    : "bg-[#213E5A] text-white hover:bg-opacity-90"
+                }`}
               >
                 Next
               </button>

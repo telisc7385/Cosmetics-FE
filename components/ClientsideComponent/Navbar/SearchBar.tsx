@@ -59,7 +59,7 @@ const SearchBar = () => {
   };
 
   return (
-    <div className="relative w-full max-w-sm mx-auto">
+    <div className="relative w-full max-w-sm mx-auto text-[#213E5A]">
       <form onSubmit={handleSearch}>
         <div className="relative">
           <input

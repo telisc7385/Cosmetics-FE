@@ -13,7 +13,7 @@ export default function FeaturedSlider({ products }: { products: Product[] }) {
   return (
     <div className="bg-[#e3e9f1] py-6 px-4 sm:px-6 lg:px-10">
       {/* --- CHANGE MADE HERE: Changed 'container mx-auto' to 'max-w-[84rem] mx-auto' --- */}
-      <div className="max-w-[84rem] mx-auto">
+      <div className="max-w-7xl mx-auto">
         <Swiper
           modules={[Navigation, Autoplay]}
           spaceBetween={30}

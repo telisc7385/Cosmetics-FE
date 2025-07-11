@@ -32,7 +32,7 @@ export default function TestimonialSlider({ testimonials }: Props) {
       <div className="max-w-full bg-[#b0c9e8] py-1 sm:py-4 overflow-hidden">
         {/* Inner div: This is the container for the Swiper content, limited to max-w-[84rem] and centered. */}
         {/* It also applies horizontal padding to the content within the full-width blue background. */}
-        <div className="max-w-[88rem] mx-auto px-4 sm:px-6 lg:px-10">
+        <div className="max-w-7xl mx-auto sm:px-6 lg:px-10">
           <Swiper
             modules={[Autoplay]}
             spaceBetween={30}

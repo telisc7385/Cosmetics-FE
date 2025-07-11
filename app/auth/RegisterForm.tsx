@@ -23,7 +23,8 @@ export default function RegisterForm({
     email: "",
     password: "",
     confirmPassword: "",
-    Bio: "",
+    // Bio is removed as step 3 is hidden
+    // Bio: "",
   });
 
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -66,27 +67,32 @@ export default function RegisterForm({
     return Object.keys(newErrors).length === 0;
   };
 
-  const validateStep3 = () => {
-    const newErrors: { [key: string]: string } = {};
-    if (!form.Bio.trim()) newErrors.Bio = "Bio is required";
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  // validateStep3 function is removed as step 3 is hidden
+  // const validateStep3 = () => {
+  //   const newErrors: { [key: string]: string } = {};
+  //   if (!form.Bio.trim()) newErrors.Bio = "Bio is required";
+  //   setErrors(newErrors);
+  //   return Object.keys(newErrors).length === 0;
+  // };
 
   const handleNext = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (step === 1 && !validateStep1()) return;
+    // Step 2 is now the final validation step before submission
     if (step === 2 && !validateStep2()) return;
-    if (step === 3 && !validateStep3()) return;
+    // validateStep3 is removed
 
-    if (step === 3) {
+    // If we are at step 2 (which is now the last step), submit the form
+    if (step === 2) {
+      // Changed from step === 3 to step === 2
       try {
         const formData = new FormData();
         const profile = {
           firstName: form.firstName,
           lastName: form.lastName,
-          bio: form.Bio,
+          // Bio is removed from the profile object as step 3 is hidden
+          // bio: form.Bio,
         };
         formData.append("email", form.email);
         formData.append("password", form.password);
@@ -120,6 +126,7 @@ export default function RegisterForm({
         toast.error("Something went wrong", { id: "register" });
       }
     } else {
+      // Move to the next step (from 1 to 2)
       setStep(step + 1);
     }
   };
@@ -131,22 +138,29 @@ export default function RegisterForm({
   return (
     <div className="px-4 sm:px-6 md:px-0">
       <div className="w-full max-w-3xl mx-auto p-4 md:p-4 border-[1px] border-gray-300 bg-white rounded-lg shadow-lg">
-        <h2 className="text-2xl font-semibold text-center mb-3">
+        <h2 className="text-2xl font-semibold text-center mb-3 text-[#213E5A] ">
           Create an Account!
         </h2>
 
-        <div className="flex items-center justify-between mb-5 px-4">
-          {["Personal Info", "Email Verify", "Bio"].map((label, idx) => (
-            <div key={idx} className="flex flex-col items-center text-center">
-              <div
-                className={`rounded-full w-8 h-8 flex items-center justify-center text-white font-bold ${
-                  step === idx + 1 ? "bg-[#214364]" : "bg-gray-300"
-                }`}
-              >
-                {idx + 1}
+        <div className="flex items-center justify-center gap-x-4 lg:gap-x-12 mb-5 px-4">
+          {/* Updated labels for steps */}
+          {["Personal Info", "Credentials"].map((label, idx, arr) => (
+            <React.Fragment key={idx}>
+              <div className="flex flex-col items-center text-center">
+                <div
+                  className={`rounded-full w-8 h-8 flex items-center justify-center text-white font-bold ${
+                    step === idx + 1 ? "bg-[#214364]" : "bg-gray-300"
+                  }`}
+                >
+                  {idx + 1}
+                </div>
+                <span className="text-sm mt-1 text-gray-700">{label}</span>
               </div>
-              <span className="text-sm mt-1 text-gray-700">{label}</span>
-            </div>
+              {/* Add divider if it's not the last item */}
+              {idx < arr.length - 1 && (
+                <div className="h-0.5 w-4 lg:w-8 bg-gray-300"></div>
+              )}
+            </React.Fragment>
           ))}
         </div>
 
@@ -155,7 +169,7 @@ export default function RegisterForm({
           {step === 1 && (
             <>
               <div>
-                <label className="block font-semibold mb-1">
+                <label className="block font-semibold mb-1 text-[#213E5A] ">
                   Personal Information :
                 </label>
                 <div className="flex gap-4">
@@ -166,7 +180,7 @@ export default function RegisterForm({
                       placeholder="First Name"
                       value={form.firstName}
                       onChange={handleInputChange}
-                      className={`w-full p-2 rounded border cursor-pointer ${
+                      className={`w-full p-2 rounded border cursor-pointer text-[#213E5A]  ${
                         errors.firstName
                           ? "border-red-500 bg-red-50"
                           : "border-gray-300"
@@ -178,14 +192,14 @@ export default function RegisterForm({
                       </p>
                     )}
                   </div>
-                  <div className="w-1/2">
+                  <div className="w-1/2 ">
                     <input
                       type="text"
                       name="lastName"
                       placeholder="Last Name"
                       value={form.lastName}
                       onChange={handleInputChange}
-                      className={`w-full p-2 rounded border cursor-pointer ${
+                      className={`w-full p-2 rounded border cursor-pointer text-[#213E5A]  ${
                         errors.lastName
                           ? "border-red-500 bg-red-50"
                           : "border-gray-300"
@@ -201,14 +215,14 @@ export default function RegisterForm({
               </div>
 
               <div>
-                <label className="block font-semibold mb-1">
+                <label className="block font-semibold mb-1 text-[#213E5A] ">
                   Profile Picture :
                 </label>
                 <input
                   type="file"
                   accept="image/*"
                   onChange={handleImageChange}
-                  className={`w-full p-2 border rounded cursor-pointer ${
+                  className={`w-full p-2 border rounded cursor-pointer text-[#213E5A]  ${
                     errors.image
                       ? "border-red-500 bg-red-50"
                       : "border-gray-300"
@@ -221,12 +235,12 @@ export default function RegisterForm({
             </>
           )}
 
-          {/* Step 2: Email + Password */}
+          {/* Step 2: Credentials (Email + Password) */}
           {step === 2 && (
             <>
               <div>
-                <label className="block font-semibold">
-                  Email Verification and Password :
+                <label className="block font-semibold text-[#213E5A] ">
+                  Credentials : {/* Changed label here */}
                 </label>
                 <input
                   type="email"
@@ -234,7 +248,7 @@ export default function RegisterForm({
                   placeholder="Enter your email"
                   value={form.email}
                   onChange={handleInputChange}
-                  className={`w-full p-2 border rounded cursor-pointer ${
+                  className={`w-full p-2 border rounded cursor-pointer text-[#213E5A]  ${
                     errors.email
                       ? "border-red-500 bg-red-50"
                       : "border-gray-300"
@@ -253,7 +267,7 @@ export default function RegisterForm({
                     placeholder="Password"
                     value={form.password}
                     onChange={handleInputChange}
-                    className={`w-full p-2 pr-10 rounded border cursor-pointer ${
+                    className={`w-full p-2 pr-10 rounded border cursor-pointer text-[#213E5A]  ${
                       errors.password
                         ? "border-red-500 bg-red-50"
                         : "border-gray-300"
@@ -280,7 +294,7 @@ export default function RegisterForm({
                     placeholder="Confirm Password"
                     value={form.confirmPassword}
                     onChange={handleInputChange}
-                    className={`w-full p-2 pr-10 rounded border cursor-pointer ${
+                    className={`w-full p-2 pr-10 rounded border cursor-pointer text-[#213E5A]  ${
                       errors.confirmPassword
                         ? "border-red-500 bg-red-50"
                         : "border-gray-300"
@@ -307,17 +321,19 @@ export default function RegisterForm({
             </>
           )}
 
-          {/* Step 3: Bio */}
-          {step === 3 && (
+          {/* Step 3: Bio - This entire block is now hidden */}
+          {/* {step === 3 && (
             <div>
-              <label className="block font-semibold mb-1">Bio :</label>
+              <label className="block font-semibold mb-1 text-[#213E5A] ">
+                Bio :
+              </label>
               <textarea
                 name="Bio"
                 placeholder="Enter your bio"
                 value={form.Bio}
                 onChange={handleInputChange}
                 rows={4}
-                className={`w-full p-2 border rounded resize-none cursor-pointer ${
+                className={`w-full p-2 border rounded resize-none cursor-pointer text-[#213E5A]  ${
                   errors.Bio ? "border-red-500 bg-red-50" : "border-gray-300"
                 }`}
               />
@@ -325,7 +341,7 @@ export default function RegisterForm({
                 <p className="text-sm text-red-500 mt-1">{errors.Bio}</p>
               )}
             </div>
-          )}
+          )} */}
 
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
             {step > 1 && (
@@ -341,7 +357,7 @@ export default function RegisterForm({
               type="submit"
               className="bg-[#214364] hover:bg-opacity-90 text-white font-semibold py-2 px-6 rounded cursor-pointer"
             >
-              {step < 3 ? "Next" : "Submit"}
+              {step < 2 ? "Next" : "Submit"}{" "}
             </button>
           </div>
         </form>

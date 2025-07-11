@@ -8,18 +8,22 @@ const PrivacyPolicyPage: React.FC = () => {
         <title>Privacy Policy - GlowUp Cosmetics</title>
       </Head>
 
-      <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 py-12 px-2 sm:px-6 lg:px-8 flex items-center justify-center">
         {/* Main container for the terms content */}
         {/* max-w-4xl for a wider content width on larger screens, mx-auto for centering */}
         {/* py-12 for increased vertical padding */}
         {/* bg-white for background, rounded-lg for rounded corners */}
         {/* shadow-md for a subtle shadow */}
-        <div className="w-full max-w-7xl bg-white shadow-md rounded-lg p-8 sm:p-10 lg:p-12">
-          <h1 className="text-4xl lg:text-5xl font-extrabold text-gray-900 mb-8 text-center">
+        <div className="w-full max-w-7xl bg-white shadow-md rounded-lg p-4 sm:p-10 lg:p-12">
+          {/* Page Title */}
+          {/* Reduced from text-4xl lg:text-5xl to text-3xl lg:text-4xl */}
+          <h1 className="text-3xl lg:text-4xl font-extrabold text-gray-900 mb-8 text-center">
             Privacy Statement
           </h1>
 
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+          {/* Section Heading */}
+          {/* Reduced from text-2xl to text-xl */}
+          <h2 className="text-xl font-bold text-gray-900 mb-4">
             SECTION 1 – WHAT DO WE DO WITH YOUR INFORMATION?
           </h2>
           <p className="mb-6 text-base text-gray-700 leading-relaxed">
@@ -33,10 +37,14 @@ const PrivacyPolicyPage: React.FC = () => {
             emails about our store, new products and other updates.
           </p>
 
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+          {/* Section Heading */}
+          {/* Reduced from text-2xl to text-xl */}
+          <h2 className="text-xl font-bold text-gray-900 mb-4">
             SECTION 2 – CONSENT
           </h2>
-          <h3 className="text-xl font-semibold text-gray-800 mb-3">
+          {/* Sub-heading */}
+          {/* Reduced from text-xl to text-lg */}
+          <h3 className="text-lg font-semibold text-gray-800 mb-3">
             How do you get my consent?
           </h3>
           <p className="mb-6 text-base text-gray-700 leading-relaxed">
@@ -49,7 +57,9 @@ const PrivacyPolicyPage: React.FC = () => {
             consent, or provide you with an opportunity to say no.
           </p>
 
-          <h3 className="text-xl font-semibold text-gray-800 mb-3">
+          {/* Sub-heading */}
+          {/* Reduced from text-xl to text-lg */}
+          <h3 className="text-lg font-semibold text-gray-800 mb-3">
             How do I withdraw my consent?
           </h3>
           <p className="mb-6 text-base text-gray-700 leading-relaxed">
@@ -65,7 +75,9 @@ const PrivacyPolicyPage: React.FC = () => {
             .
           </p>
 
-          <h3 className="text-xl font-semibold text-gray-800 mb-3">
+          {/* Sub-heading */}
+          {/* Reduced from text-xl to text-lg */}
+          <h3 className="text-lg font-semibold text-gray-800 mb-3">
             Location Access:
           </h3>
           <p className="mb-6 text-base text-gray-700 leading-relaxed">
@@ -106,7 +118,9 @@ const PrivacyPolicyPage: React.FC = () => {
             choices you may have in relation to its collection.
           </p>
 
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+          {/* Section Heading */}
+          {/* Reduced from text-2xl to text-xl */}
+          <h2 className="text-xl font-bold text-gray-900 mb-4">
             SECTION 3 – DISCLOSURE
           </h2>
           <p className="mb-6 text-base text-gray-700 leading-relaxed">
@@ -114,7 +128,9 @@ const PrivacyPolicyPage: React.FC = () => {
             to do so or if you violate our Terms of Service.
           </p>
 
-          <h3 className="text-xl font-semibold text-gray-800 mb-3">Payment:</h3>
+          {/* Sub-heading */}
+          {/* Reduced from text-xl to text-lg */}
+          <h3 className="text-lg font-semibold text-gray-800 mb-3">Payment:</h3>
           <p className="mb-6 text-base text-gray-700 leading-relaxed">
             If you choose a direct payment gateway to complete your purchase,
             then GlowUp Cosmetics stores your credit card data. It is encrypted
@@ -130,7 +146,9 @@ const PrivacyPolicyPage: React.FC = () => {
           </p>
 
           {/* Section 4 is missing in the provided text, so skipping to 5 */}
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+          {/* Section Heading */}
+          {/* Reduced from text-2xl to text-xl */}
+          <h2 className="text-xl font-bold text-gray-900 mb-4">
             SECTION 5 – THIRD-PARTY SERVICES
           </h2>
           <p className="mb-6 text-base text-gray-700 leading-relaxed">
@@ -159,14 +177,18 @@ const PrivacyPolicyPage: React.FC = () => {
             Terms of Service.
           </p>
 
-          <h3 className="text-xl font-semibold text-gray-800 mb-3">Links</h3>
+          {/* Sub-heading */}
+          {/* Reduced from text-xl to text-lg */}
+          <h3 className="text-lg font-semibold text-gray-800 mb-3">Links</h3>
           <p className="mb-6 text-base text-gray-700 leading-relaxed">
             When you click on links on our store, they may direct you away from
             our site. We are not responsible for the privacy practices of other
             sites and encourage you to read their privacy statements.
           </p>
 
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+          {/* Section Heading */}
+          {/* Reduced from text-2xl to text-xl */}
+          <h2 className="text-xl font-bold text-gray-900 mb-4">
             SECTION 6 – SECURITY
           </h2>
           <p className="mb-6 text-base text-gray-700 leading-relaxed">
@@ -181,7 +203,9 @@ const PrivacyPolicyPage: React.FC = () => {
             generally accepted industry standards.
           </p>
 
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+          {/* Section Heading */}
+          {/* Reduced from text-2xl to text-xl */}
+          <h2 className="text-xl font-bold text-gray-900 mb-4">
             SECTION 7 – COOKIES
           </h2>
           <p className="mb-6 text-base text-gray-700 leading-relaxed">
@@ -199,7 +223,9 @@ const PrivacyPolicyPage: React.FC = () => {
             may not be able to use some portions of this Service.
           </p>
 
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+          {/* Section Heading */}
+          {/* Reduced from text-2xl to text-xl */}
+          <h2 className="text-xl font-bold text-gray-900 mb-4">
             SECTION 8 – AGE OF CONSENT
           </h2>
           <p className="mb-6 text-base text-gray-700 leading-relaxed">
@@ -210,7 +236,9 @@ const PrivacyPolicyPage: React.FC = () => {
             this site.
           </p>
 
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+          {/* Section Heading */}
+          {/* Reduced from text-2xl to text-xl */}
+          <h2 className="text-xl font-bold text-gray-900 mb-4">
             SECTION 9 – CHANGES TO THIS PRIVACY POLICY
           </h2>
           <p className="mb-6 text-base text-gray-700 leading-relaxed">
@@ -225,7 +253,9 @@ const PrivacyPolicyPage: React.FC = () => {
             that we may continue to sell products to you.
           </p>
 
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+          {/* Section Heading */}
+          {/* Reduced from text-2xl to text-xl */}
+          <h2 className="text-xl font-bold text-gray-900 mb-4">
             QUESTIONS AND CONTACT INFORMATION
           </h2>
           <p className="text-base text-gray-700 leading-relaxed">

@@ -15,6 +15,48 @@ import {
 import { CartItem } from "@/types/cart";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import Lottie from "react-lottie-player"; // Import Lottie
+// Assuming your new Lottie animation data is at "@/public/shoppingCart.json"
+import ShoppingCart from "@/public/ShoppingCart.json";
+
+// Define EmptyCartAnimation component for GuestCheckout
+const EmptyCartAnimation = () => (
+  <div className="flex flex-col items-center justify-center py-10  animate-fadeIn">
+    <style jsx>{`
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .animate-fadeIn {
+        animation: fadeIn 0.8s ease-out forwards;
+      }
+    `}</style>
+    <Lottie
+      loop
+      animationData={ShoppingCart} // Changed to use the new animation data
+      play
+      style={{ width: 300, height: 300 }}
+    />
+    <p className="mt-6 text-xl font-semibold text-gray-700">
+      Your cart is empty!
+    </p>
+    <p className="mt-2 text-gray-500">
+      Looks like you haven&apos;t added anything to your cart yet.
+    </p>
+    <button
+      onClick={() => (window.location.href = "/shop")}
+      className="mt-6 px-6 py-3 bg-[#213E5A] text-white rounded-md shadow-lg hover:bg-[#1a324a] transition-all duration-300 transform hover:scale-105 cursor-pointer"
+    >
+      Start Shopping
+    </button>
+  </div>
+);
 
 const GuestCheckout = () => {
   const cartItems = useAppSelector(selectCartItems);
@@ -32,13 +74,18 @@ const GuestCheckout = () => {
     phone: "",
     pincode: "",
     state: "",
-    city: "",
+    _city: "", // Renamed to _city to avoid conflict with the getter
     addressLine: "",
     landmark: "",
     paymentMethod: "COD",
   });
 
   const [isPlacingOrder, setIsPlacingOrder] = useState(false); // 🔄 Loader state
+
+  // Use a getter for city to map to the state variable
+  const city = formData._city;
+  const setCity = (value: string) =>
+    setFormData((prev) => ({ ...prev, _city: value }));
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -57,7 +104,7 @@ const GuestCheckout = () => {
       !formData.fullName ||
       !formData.phone ||
       !formData.addressLine ||
-      !formData.city ||
+      !city || // Use the getter here
       !formData.state
     ) {
       toast.error("Please fill all required address fields.");
@@ -71,7 +118,8 @@ const GuestCheckout = () => {
 
     if (cartItems.length === 0) {
       toast.error("Your cart is empty. Please add items to place an order.");
-      return;
+      // No return here, as the cart empty page will be shown if cartItems.length === 0
+      return; // Added return here to prevent placing an empty order
     }
 
     const itemsForPayload = cartItems.map((item: CartItem) => ({
@@ -89,7 +137,7 @@ const GuestCheckout = () => {
         phone: formData.phone,
         pincode: formData.pincode,
         state: formData.state,
-        city: formData.city,
+        city: city, // Use the getter here
         addressLine: formData.addressLine,
         landmark: formData.landmark,
       },
@@ -130,10 +178,30 @@ const GuestCheckout = () => {
     }
   };
 
+  // If placing order, show loader
+  if (isPlacingOrder) {
+    return (
+      <div className="fixed inset-0 bg-white bg-opacity-75 flex items-center justify-center z-50">
+        <div className="flex flex-col items-center">
+          <Lottie
+            loop
+            animationData={ShoppingCart} // Or a different loader animation
+            play
+            style={{ width: 150, height: 150 }}
+          />
+          <p className="mt-4 text-xl font-semibold text-gray-700">
+            Placing your order, please wait...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Render EmptyCartAnimation if cart is empty after loader check
   if (cartItems.length === 0) {
     return (
-      <div className="flex items-center justify-center min-h-[400px] text-gray-600 text-xl font-medium px-4">
-        Your cart is empty. Please add items to proceed to checkout.
+      <div className="flex items-center justify-center min-h-[400px] px-4">
+        <EmptyCartAnimation />
       </div>
     );
   }
@@ -188,12 +256,12 @@ const GuestCheckout = () => {
             />
             <input
               type="text"
-              name="city"
+              name="city" // This needs to be 'city' in the input
               placeholder="City *"
               required
               className="w-full border border-gray-300 rounded px-3 py-2.5 text-gray-800 bg-white text-sm"
-              value={formData.city}
-              onChange={handleChange}
+              value={city} // Use the getter here
+              onChange={(e) => setCity(e.target.value)} // Use the setter here
             />
             <textarea
               name="addressLine"
@@ -334,7 +402,7 @@ const GuestCheckout = () => {
                       dispatch(decrementQuantity(item.cartItemId))
                     }
                     disabled={item.quantity <= 1}
-                    className={`px-2 py-1 rounded border text-sm ${
+                    className={`px-2 py-1 rounded border text-sm text-[#213E5A]  ${
                       item.quantity <= 1
                         ? "cursor-not-allowed bg-gray-200 text-gray-400"
                         : "hover:bg-gray-200"
@@ -342,14 +410,16 @@ const GuestCheckout = () => {
                   >
                     -
                   </button>
-                  <span className="text-sm font-medium">{item.quantity}</span>
+                  <span className="text-sm font-medium text-[#213E5A] ">
+                    {item.quantity}
+                  </span>
                   <button
                     onClick={() =>
                       item.quantity < item.stock &&
                       dispatch(incrementQuantity(item.cartItemId))
                     }
                     disabled={item.quantity >= item.stock}
-                    className={`px-2 py-1 rounded border text-sm ${
+                    className={`px-2 py-1 rounded border text-sm text-[#213E5A]  ${
                       item.quantity >= item.stock
                         ? "cursor-not-allowed bg-gray-200 text-gray-400"
                         : "hover:bg-gray-200"

@@ -1,4 +1,4 @@
-// LoggedInCartProvider.tsx
+// src/CartProvider/LoggedInCartProvider.tsx
 "use client";
 
 import React, {
@@ -51,6 +51,7 @@ const parseCartResponse = (response: CartApiResponse): CartItem[] => {
     ) {
       rawCartItems = response.items;
     } else {
+      // console.warn("LoggedInCartProvider: Unexpected GET /cart response structure. Please adjust parseCartResponse.", response); // Removed console.warn
       return [];
     }
 
@@ -71,6 +72,7 @@ const parseCartResponse = (response: CartApiResponse): CartItem[] => {
           item.variant.productId !== null);
 
       if (!cartItemIdExists || !productIdExists) {
+        // console.warn("LoggedInCartProvider: Skipping malformed cart item due to missing critical IDs (id or product/variant productId):", item); // Removed console.warn
         return false;
       }
       return true;
@@ -155,9 +157,6 @@ const parseCartResponse = (response: CartApiResponse): CartItem[] => {
             ? item.product.stock
             : 0; // Default to 0 if stock is missing
 
-        // *** CRITICAL ADDITION: Extracting and assigning the slug ***
-        const slug = item.product?.slug || item.variant?.product?.slug || null; // Ensure slug is assigned, or null if not found
-
         return {
           cartItemId: cartItemId,
           id: productId,
@@ -197,7 +196,6 @@ const parseCartResponse = (response: CartApiResponse): CartItem[] => {
               }
             : undefined,
           stock: stock, // Consolidated stock
-          slug: slug, // Assign the extracted slug here!
         };
       }
     );
@@ -322,6 +320,11 @@ export function LoggedInCartProvider({
       // Use the stock from itemToAdd, which should come from the ProductCard
       const availableStock = itemToAdd.stock;
 
+      if (availableStock === 0) {
+        toast.error(`${itemToAdd.name} is currently out of stock.`);
+        return;
+      }
+
       if (totalQuantityAfterAdd > availableStock) {
         toast.error(
           `Cannot add ${itemToAdd.quantity} more of ${itemToAdd.name}. ` +
@@ -375,7 +378,8 @@ export function LoggedInCartProvider({
 
         await apiCore("/cart/add", "POST", payload, token);
         await fetchCartItems(); // Re-fetch to get official IDs and state
-        // toast.success(`${itemToAdd.name} added to cart!`); // Success toast after API confirms
+        // --- ADDED THIS LINE: Now the success toast will show! ---
+        toast.success(`${itemToAdd.quantity} ${itemToAdd.name} added to cart!`);
       } catch (err: any) {
         console.error("LoggedInCartProvider: Failed to add cart item:", err);
         if (err.message && err.message.includes("401")) {
@@ -445,6 +449,7 @@ export function LoggedInCartProvider({
 
       const currentItem = items.find((item) => item.cartItemId === cartItemId);
       if (!currentItem) {
+        // console.warn("Attempted to increment non-existent item."); // Removed console.warn
         return;
       }
 
@@ -475,7 +480,7 @@ export function LoggedInCartProvider({
           { quantity: newQuantity },
           token
         );
-        // Removed await fetchCartItems(); here because optimistic update is enough unless something goes wrong
+        // --- THIS WAS THE PROBLEM! Removed await fetchCartItems(); ---
       } catch (err: any) {
         console.error(
           "LoggedInCartProvider: Failed to increment quantity:",
@@ -508,6 +513,7 @@ export function LoggedInCartProvider({
 
       const currentItem = items.find((item) => item.cartItemId === cartItemId);
       if (!currentItem) {
+        // console.warn("Attempted to decrement non-existent item."); // Removed console.warn
         return;
       }
 
@@ -544,7 +550,7 @@ export function LoggedInCartProvider({
             token
           );
         }
-        // Removed await fetchCartItems(); here because optimistic update is enough unless something goes wrong
+        // --- THIS WAS THE PROBLEM! Removed await fetchCartItems(); ---
       } catch (err: any) {
         console.error(
           "LoggedInCartProvider: Failed to decrement quantity:",
@@ -579,7 +585,7 @@ export function LoggedInCartProvider({
 
     try {
       await apiCore("/cart/clear", "DELETE", undefined, token);
-      // toast.success("Cart cleared successfully!");
+      // toast.success("Cart cleared successfully!"); // Toast for clear action
       await fetchCartItems(); // Re-fetch to ensure sync (should be empty)
     } catch (err: any) {
       console.error("LoggedInCartProvider: Failed to clear cart:", err);

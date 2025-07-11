@@ -12,18 +12,16 @@ const TermsPage: React.FC = () => {
       {/* Outer wrapper for the page background color */}
       {/* min-h-screen to ensure it takes full viewport height */}
       {/* bg-gray-50 for a very subtle off-white background */}
-      <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 py-12 px-2 sm:px-6 lg:px-8 flex items-center justify-center">
         {/* Main container for the terms content */}
-        {/* max-w-2xl for a narrower content width, mx-auto for centering */}
+        {/* max-w-7xl for a wider content width, mx-auto for centering */}
         {/* py-12 for increased vertical padding */}
         {/* bg-white for background, rounded-lg for rounded corners */}
         {/* shadow-md for a more subtle shadow */}
-        <div className="w-full max-w-7xl bg-white shadow-md rounded-lg p-8 sm:p-10 lg:p-12">
+        <div className="w-full max-w-7xl bg-white shadow-md rounded-lg p-4 sm:p-10 lg:p-12">
           {/* Page Title */}
-          {/* text-4xl for mobile, lg:text-5xl for larger screens for stronger impact */}
-          {/* font-extrabold for strong emphasis, text-gray-900 for dark text, mb-8 for spacing */}
-          {/* text-center to align title in the middle */}
-          <h1 className="text-4xl lg:text-5xl font-extrabold text-gray-900 mb-8 text-center">
+          {/* Reduced from text-4xl lg:text-5xl to text-3xl lg:text-4xl */}
+          <h1 className="text-3xl lg:text-4xl font-extrabold text-gray-900 mb-8 text-center">
             Terms & Conditions
           </h1>
 
@@ -131,8 +129,8 @@ const TermsPage: React.FC = () => {
           </p>
 
           {/* Section Heading: Changes to Terms and Conditions */}
-          {/* text-2xl for size, font-bold for weight, text-gray-900 for color, mb-4 for spacing */}
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+          {/* Reduced from text-2xl to text-xl */}
+          <h2 className="text-xl font-bold text-gray-900 mb-4">
             CHANGES TO THIS TERMS AND CONDITIONS
           </h2>
           <p className="mb-8 text-base text-gray-700 leading-relaxed">
@@ -143,7 +141,8 @@ const TermsPage: React.FC = () => {
           </p>
 
           {/* Section Heading: Contact Us */}
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">CONTACT US</h2>
+          {/* Reduced from text-2xl to text-xl */}
+          <h2 className="text-xl font-bold text-gray-900 mb-4">CONTACT US</h2>
           <p className="text-base text-gray-700 leading-relaxed">
             If you have any questions or suggestions about our Terms and
             Conditions, do not hesitate to contact us at{" "}
