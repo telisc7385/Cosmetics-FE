@@ -9,7 +9,7 @@ import HotListWrapper from "@/components/HotList/HotListWrapper";
 import NewsletterSignup from "@/components/ClientsideComponent/NewsletterSignup/NewsletterSignup";
 import SlidingBanner from "@/components/ServersideComponent/SlidingBanner/SlidingBanner";
 import TopCategoriesClient from "@/components/ClientsideComponent/TopCategoriesClient/TopCategoriesClient";
-import PromotionBanner from "@/components/ClientsideComponent/PromotionBanner/PromotionBanner";
+// import PromotionBanner from "@/components/ClientsideComponent/PromotionBanner/PromotionBanner";
 
 import { getBanners } from "@/api/getBannerApi";
 import { fetchCategories } from "@/api/fetchCategories";
@@ -51,7 +51,7 @@ export default async function HomePage() {
       <TestimonialsSection testimonials={testimonials} />
       <GalleryPage gallery={gallery} />
       <NewsletterSignup />
-      <PromotionBanner /> {/* Add the PromotionBanner here */}
+      {/* <PromotionBanner />  */}
     </div>
   );
 }

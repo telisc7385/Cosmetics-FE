@@ -1,15 +1,23 @@
 import { Product } from "./product";
 
+export interface SubSubCategory {
+  id: number;
+  name: string;
+}
+
+export interface SubCategory {
+  id: number;
+  name: string;
+  subsubcategories?: SubSubCategory[];
+}
+
 export interface Category {
-  subcategories?: Category[]; // ✅ changed from `any` to `Category[]`
-  description: string;
   products: Product[];
   id: number;
-  sequence_number: number;
   name: string;
-  createdAt: string;
-  isDeleted: boolean;
-  banner: string;
-  imageUrl: string;
-  publicId: string;
+  isDeleted?: boolean;
+  subcategories?: SubCategory[];
+  imageUrl: string;         // ✅ Already required, no change here
+  banner?: string;          // ✅ Add this optional banner field
+  description?: string;     // ✅ Add if you’re using `category.description` in any component
 }

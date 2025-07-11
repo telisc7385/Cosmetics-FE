@@ -79,9 +79,11 @@ const CartPage = () => {
   const [pincodeVerified, setPincodeVerified] = useState(false);
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
 
-  // Use useEffect to check localStorage on initial load
   useEffect(() => {
-    if (localStorage.getItem("verifiedPincode")) {
+    if (
+      typeof window !== "undefined" &&
+      localStorage.getItem("verifiedPincode")
+    ) {
       setPincodeVerified(true);
     }
   }, []);
@@ -113,7 +115,6 @@ const CartPage = () => {
     if (isLoggedIn) {
       try {
         await removeLoggedInItem(cartItemId);
-        // toast.error(`${itemToRemove.name} removed from cart.`); // Consider if you want this toast here, as the cart updates
       } catch (err: unknown) {
         console.error("Failed to remove item from cart:", err);
         toast.error(`Failed to remove ${itemToRemove.name}. Please try again.`);
@@ -130,10 +131,8 @@ const CartPage = () => {
     } else {
       dispatch(clearGuestCart());
     }
-    // toast.success("All items removed from cart.");
   };
 
-  // --- New Checkout Logic ---
   const handleCheckoutClick = () => {
     if (!pincodeVerified) {
       toast.error("Please verify your pincode first.");
@@ -141,15 +140,15 @@ const CartPage = () => {
     }
 
     if (isLoggedIn) {
-      router.push("/checkout"); // Directly go to UserCheckout if logged in
+      router.push("/checkout");
     } else {
-      setShowAuthPrompt(true); // Show the pop-up if not logged in
+      setShowAuthPrompt(true);
     }
   };
 
   const handleContinueAsGuest = () => {
-    setShowAuthPrompt(false); // Close the pop-up
-    router.push("/checkout"); // Redirect to GuestCheckout (handled by CheckoutPage.tsx)
+    setShowAuthPrompt(false);
+    router.push("/checkout");
   };
 
   const subtotal = items.reduce(
@@ -157,7 +156,7 @@ const CartPage = () => {
       total + item.sellingPrice * item.quantity,
     0
   );
-  const tax = 0; // Assuming tax is 0 as per your current code
+  const tax = 0;
   const total = subtotal + tax;
 
   if (loading && items.length === 0)
@@ -174,24 +173,20 @@ const CartPage = () => {
 
   return (
     <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 bg-[#F3F6F7]">
-      {/* Reduced from text-2xl to text-xl */}
       <h1 className="text-xl font-bold text-gray-800 mb-6">Shopping Cart</h1>
       <div className="flex flex-col lg:flex-row gap-8">
-        {/* Cart Items */}
-        {/* Changed lg:w-2/3 to lg:w-3/5 to make the cart items section narrower on laptops */}
         <div className="w-full lg:w-3/5">
           {items.map((item) => (
             <div
               key={item.cartItemId}
-              className="bg-white rounded-lg p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between border border-gray-200 shadow-sm mb-4 relative" // Added relative for positioning trash icon
+              className="bg-white rounded-lg p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between border border-gray-200 shadow-sm mb-4 relative"
             >
+              {/* Common Left Section (Image and main text container) */}
               <div className="flex items-start sm:items-center w-full sm:w-auto mb-4 sm:mb-0">
-                {/* Link for Image */}
-                {/* Image is clickable if item.slug exists */}
                 {item.slug ? (
                   <Link
                     href={`/product/${item.slug}`}
-                    className="flex-shrink-0 mr-6"
+                    className="flex-shrink-0 mr-6 flex flex-col items-center" // Added flex-col and items-center
                   >
                     <Image
                       src={item.image}
@@ -200,21 +195,78 @@ const CartPage = () => {
                       height={112}
                       className="w-28 h-28 object-cover rounded-md cursor-pointer"
                     />
+                    {/* Stock under image for mobile/tablet/laptop */}
+                    <p className="text-xs text-gray-500 mt-1">
+                      Stock: {item.stock}
+                    </p>
                   </Link>
                 ) : (
-                  // Renders Image without Link if slug is missing
-                  <Image
-                    src={item.image}
-                    alt={item.name}
-                    width={112}
-                    height={112}
-                    className="w-28 h-28 object-cover rounded-md mr-6 flex-shrink-0"
-                  />
+                  <div className="mr-6 flex-shrink-0 flex flex-col items-center">
+                    {" "}
+                    {/* Added flex-col and items-center */}
+                    <Image
+                      src={item.image}
+                      alt={item.name}
+                      width={112}
+                      height={112}
+                      className="w-28 h-28 object-cover rounded-md"
+                    />
+                    {/* Stock under image for mobile/tablet/laptop */}
+                    <p className="text-xs text-gray-500 mt-1">
+                      Stock: {item.stock}
+                    </p>
+                  </div>
                 )}
-                <div className="flex flex-col justify-between h-full">
+
+                {/* Mobile View Specific Layout */}
+                <div className="flex flex-col justify-between h-full w-full sm:hidden">
                   <div>
-                    {/* Link for Product Name */}
-                    {/* Product name is clickable if item.slug exists */}
+                    {item.slug ? (
+                      <Link href={`/product/${item.slug}`}>
+                        <h3 className="text-base font-semibold text-gray-900 line-clamp-2 hover:text-[#007BFF] transition-colors cursor-pointer">
+                          {item.name}
+                        </h3>
+                      </Link>
+                    ) : (
+                      <h3 className="text-base font-semibold text-gray-900 line-clamp-2">
+                        {item.name}
+                      </h3>
+                    )}
+                    <p className="text-sm font-semibold text-gray-900 mt-1">
+                      ₹{item.sellingPrice.toFixed(2)} / item
+                    </p>
+                  </div>
+                  <div className="flex items-center justify-between w-full mt-3">
+                    <div className="flex items-center space-x-1 border border-gray-300 rounded-md py-0.5 px-1">
+                      <button
+                        onClick={() => handleDecrement(item.cartItemId)}
+                        className="w-5 h-5 flex items-center justify-center text-gray-600 hover:bg-gray-100 rounded-sm cursor-pointer text-sm"
+                      >
+                        -
+                      </button>
+                      <span className="font-medium text-base w-4 text-center text-[#213E5A]">
+                        {item.quantity}
+                      </span>
+                      <button
+                        onClick={() => handleIncrement(item.cartItemId)}
+                        className="w-5 h-5 flex items-center justify-center text-gray-600 hover:bg-gray-100 rounded-sm cursor-pointer text-sm"
+                      >
+                        +
+                      </button>
+                    </div>
+                    <button
+                      onClick={() => handleRemove(item.cartItemId)}
+                      className="text-red-500 hover:text-red-700 font-medium p-1 rounded-full transition-colors cursor-pointer"
+                      aria-label={`Remove ${item.name}`}
+                    >
+                      <FiTrash2 className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Tablet/Laptop View Specific Layout for Title, Stock, and Quantity */}
+                <div className="hidden sm:flex flex-col justify-between h-full">
+                  <div>
                     {item.slug ? (
                       <Link href={`/product/${item.slug}`}>
                         <h3 className="text-lg font-semibold text-gray-900 line-clamp-2 hover:text-[#007BFF] transition-colors cursor-pointer">
@@ -222,53 +274,56 @@ const CartPage = () => {
                         </h3>
                       </Link>
                     ) : (
-                      // Renders H3 without Link if slug is missing
                       <h3 className="text-lg font-semibold text-gray-900 line-clamp-2">
                         {item.name}
                       </h3>
                     )}
-                    {/* Display Stock instead of Brand Name */}
-                    <p className="text-sm text-gray-500 mt-0.5">
-                      Stock: {item.stock}
+                    <p className="text-sm font-semibold text-gray-900 mt-1">
+                      ₹{item.sellingPrice.toFixed(2)} / item
                     </p>
                     {item.variantId && (
                       <p className="text-xs text-gray-400">
                         {/* Variant ID: {item.variantId} */}
                       </p>
                     )}
+                    {/* Increment/Decrement for Tablet/Laptop - adjusted size */}
+                    <div className="w-20 flex items-center border border-gray-300 rounded-md py-0.5 mt-2">
+                      {" "}
+                      {/* Reduced width (w-20) and vertical padding (py-0.5) */}
+                      <button
+                        onClick={() => handleDecrement(item.cartItemId)}
+                        className="w-7 h-5 flex items-center justify-center text-gray-600 hover:bg-gray-100 rounded-sm cursor-pointer text-base" // Reduced width (w-7), height (h-5), and font size (text-base)
+                      >
+                        -
+                      </button>
+                      <span className="font-medium text-base w-6 text-center text-[#213E5A]">
+                        {" "}
+                        {/* Reduced font size (text-base) */}
+                        {item.quantity}
+                      </span>
+                      <button
+                        onClick={() => handleIncrement(item.cartItemId)}
+                        className="w-7 h-5 flex items-center justify-center text-gray-600 hover:bg-gray-100 rounded-sm cursor-pointer text-base" // Reduced width (w-7), height (h-5), and font size (text-base)
+                      >
+                        +
+                      </button>
+                    </div>
                   </div>
-                  {/* Trash button moved outside this div */}
                 </div>
               </div>
 
-              {/* Trash button moved to top-right and removed hover bg */}
-              <button
-                onClick={() => handleRemove(item.cartItemId)}
-                className="absolute top-4 right-4 text-red-500 hover:text-red-700 font-medium p-1 rounded-full transition-colors cursor-pointer" // Removed hover:bg-red-50
-                aria-label={`Remove ${item.name}`}
-              >
-                <FiTrash2 className="w-5 h-5" />
-              </button>
+              {/* Tablet/Laptop View: Trash icon and Price - positioned to the right */}
+              <div className="hidden sm:flex flex-col items-end gap-4">
+                {/* Trash button for larger screens (sm and up) - absolute positioning */}
+                <button
+                  onClick={() => handleRemove(item.cartItemId)}
+                  className="absolute top-4 right-4 text-red-500 hover:text-red-700 font-medium p-1 rounded-full transition-colors cursor-pointer"
+                  aria-label={`Remove ${item.name}`}
+                >
+                  <FiTrash2 className="w-5 h-5" />
+                </button>
 
-              <div className="flex flex-col items-end sm:items-center gap-4 sm:flex-row w-full sm:w-auto justify-between sm:justify-end">
-                <div className="flex items-center space-x-2 border border-gray-300 rounded-md py-1 px-2">
-                  <button
-                    onClick={() => handleDecrement(item.cartItemId)}
-                    className="w-6 h-6 flex items-center justify-center text-gray-600 hover:bg-gray-100 rounded-sm cursor-pointer"
-                  >
-                    -
-                  </button>
-                  <span className="font-medium text-lg w-6 text-center text-[#213E5A]">
-                    {item.quantity}
-                  </span>
-                  <button
-                    onClick={() => handleIncrement(item.cartItemId)}
-                    className="w-6 h-6 flex items-center justify-center text-gray-600 hover:bg-gray-100 rounded-sm cursor-pointer"
-                  >
-                    +
-                  </button>
-                </div>
-                <div className="text-lg font-semibold text-gray-900 w-20 text-right sm:text-left">
+                <div className="text-lg font-semibold text-gray-900 w-20 text-right mt-auto">
                   ₹{(item.sellingPrice * item.quantity).toFixed(2)}
                 </div>
               </div>
@@ -277,7 +332,6 @@ const CartPage = () => {
         </div>
 
         {/* Order Summary */}
-        {/* Adjusted lg:w-1/3 to lg:w-2/5 to give it more relative space */}
         <div className="w-full lg:w-2/5 bg-white rounded-lg p-6 shadow-md border border-gray-200 self-start">
           <div className="flex justify-end mb-4">
             <button
@@ -288,7 +342,6 @@ const CartPage = () => {
             </button>
           </div>
 
-          {/* Reduced from text-xl to text-lg */}
           <h2 className="text-lg font-bold text-gray-800 mb-4">
             Order Summary
           </h2>
@@ -296,9 +349,7 @@ const CartPage = () => {
           <div className="mb-4">
             <PincodeVerifier
               onVerified={(data) => {
-                // This callback is triggered when PincodeVerifier successfully verifies
-                // or when it loads a previously verified pincode from localStorage
-                setPincodeVerified(!!data.pincode); // Set true if pincode exists, false otherwise (e.g., if cleared)
+                setPincodeVerified(!!data.pincode);
               }}
             />
           </div>

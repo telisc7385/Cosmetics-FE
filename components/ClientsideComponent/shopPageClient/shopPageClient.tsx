@@ -122,13 +122,20 @@ const ShopPageClient: React.FC<Props> = ({ categories }) => {
         />
       </div>
 
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mt-1 py-2 px-4">
-        <div className="bg-[#966ad7] border sm:w-1/5 w-full border-gray-300 rounded h-12 flex items-center px-4 shadow-sm">
+      <div className="flex flex-row justify-between items-center gap-2 mt-1 py-2 px-4">
+        {/* Filter box */}
+        <div className="bg-[#966ad7] border w-1/2 sm:w-1/5 h-12 border-gray-300 rounded flex items-center px-4 shadow-sm">
           <h1 className="text-base flex gap-1 font-semibold text-white">
             <Funnel /> Filter
           </h1>
         </div>
-        <SortDropdown sortOrder={sortOrder} setSortOrder={setSortOrder} />
+
+        {/* SortDropdown wrapper */}
+        <div className="w-1/2 sm:w-1/5">
+          <div className="w-1/2 sm:w-1/5">
+            <SortDropdown sortOrder={sortOrder} setSortOrder={setSortOrder} />
+          </div>
+        </div>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6 px-4">

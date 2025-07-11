@@ -1,4 +1,3 @@
-
 "use client";
 
 import React from "react";
@@ -7,12 +6,11 @@ import { selectIsLoggedIn } from "@/store/slices/authSlice";
 import UserCheckout from "@/components/Checkout/UserCheckout";
 import GuestCheckout from "@/components/Checkout/GuestCheckout";
 
-
 const CheckoutPage = () => {
   const isLoggedIn = useAppSelector(selectIsLoggedIn);
 
   return (
-    <main className="min-h-screen bg-gray-100 p-6">
+    <main className="min-h-screen bg-gray-100 p-3">
       {isLoggedIn ? <UserCheckout /> : <GuestCheckout />}
     </main>
   );

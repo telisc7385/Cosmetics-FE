@@ -1,9 +1,8 @@
-// app/checkout/GuestCheckout.tsx or components/Checkout/GuestCheckout.tsx
 "use client";
 
 import React, { useState } from "react";
 import Image from "next/image";
-import Link from "next/link"; // Import Link
+import Link from "next/link";
 import { useAppSelector, useAppDispatch } from "@/store/hooks/hooks";
 import {
   selectCartItems,
@@ -15,13 +14,12 @@ import {
 import { CartItem } from "@/types/cart";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import Lottie from "react-lottie-player"; // Import Lottie
-// Assuming your new Lottie animation data is at "@/public/shoppingCart.json"
+import Lottie from "react-lottie-player";
 import ShoppingCart from "@/public/ShoppingCart.json";
+import { Trash2 } from "lucide-react"; // ✅ Import Trash Icon
 
-// Define EmptyCartAnimation component for GuestCheckout
 const EmptyCartAnimation = () => (
-  <div className="flex flex-col items-center justify-center py-10  animate-fadeIn">
+  <div className="flex flex-col items-center justify-center py-10 animate-fadeIn">
     <style jsx>{`
       @keyframes fadeIn {
         from {
@@ -39,7 +37,7 @@ const EmptyCartAnimation = () => (
     `}</style>
     <Lottie
       loop
-      animationData={ShoppingCart} // Changed to use the new animation data
+      animationData={ShoppingCart}
       play
       style={{ width: 300, height: 300 }}
     />
@@ -74,15 +72,14 @@ const GuestCheckout = () => {
     phone: "",
     pincode: "",
     state: "",
-    _city: "", // Renamed to _city to avoid conflict with the getter
+    _city: "",
     addressLine: "",
     landmark: "",
     paymentMethod: "COD",
   });
 
-  const [isPlacingOrder, setIsPlacingOrder] = useState(false); // 🔄 Loader state
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
 
-  // Use a getter for city to map to the state variable
   const city = formData._city;
   const setCity = (value: string) =>
     setFormData((prev) => ({ ...prev, _city: value }));
@@ -95,32 +92,18 @@ const GuestCheckout = () => {
   };
 
   const handlePlaceOrder = async () => {
-    if (!formData.email) {
-      toast.error("Email is required.");
-      return;
-    }
-
+    if (!formData.email) return toast.error("Email is required.");
     if (
       !formData.fullName ||
       !formData.phone ||
       !formData.addressLine ||
-      !city || // Use the getter here
+      !city ||
       !formData.state
-    ) {
-      toast.error("Please fill all required address fields.");
-      return;
-    }
-
-    if (!/^\d{10}$/.test(formData.phone)) {
-      toast.error("Please enter a valid 10-digit phone number.");
-      return;
-    }
-
-    if (cartItems.length === 0) {
-      toast.error("Your cart is empty. Please add items to place an order.");
-      // No return here, as the cart empty page will be shown if cartItems.length === 0
-      return; // Added return here to prevent placing an empty order
-    }
+    )
+      return toast.error("Please fill all required address fields.");
+    if (!/^\d{10}$/.test(formData.phone))
+      return toast.error("Please enter a valid 10-digit phone number.");
+    if (cartItems.length === 0) return toast.error("Your cart is empty.");
 
     const itemsForPayload = cartItems.map((item: CartItem) => ({
       quantity: item.quantity,
@@ -137,7 +120,7 @@ const GuestCheckout = () => {
         phone: formData.phone,
         pincode: formData.pincode,
         state: formData.state,
-        city: city, // Use the getter here
+        city: city,
         addressLine: formData.addressLine,
         landmark: formData.landmark,
       },
@@ -146,7 +129,7 @@ const GuestCheckout = () => {
       paymentMethod: formData.paymentMethod,
     };
 
-    setIsPlacingOrder(true); // Start loader
+    setIsPlacingOrder(true);
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BASE_URL}/guest/checkout`,
@@ -167,25 +150,23 @@ const GuestCheckout = () => {
       toast.success("Order placed successfully!");
       router.push(`/thank-you?orderId=${data.order.id}`);
     } catch (error: unknown) {
-      console.error("Order error:", error);
       const message =
         error instanceof Error
           ? error.message
           : "Unexpected error placing order.";
       toast.error(message);
     } finally {
-      setIsPlacingOrder(false); // Stop loader
+      setIsPlacingOrder(false);
     }
   };
 
-  // If placing order, show loader
   if (isPlacingOrder) {
     return (
       <div className="fixed inset-0 bg-white bg-opacity-75 flex items-center justify-center z-50">
         <div className="flex flex-col items-center">
           <Lottie
             loop
-            animationData={ShoppingCart} // Or a different loader animation
+            animationData={ShoppingCart}
             play
             style={{ width: 150, height: 150 }}
           />
@@ -197,7 +178,6 @@ const GuestCheckout = () => {
     );
   }
 
-  // Render EmptyCartAnimation if cart is empty after loader check
   if (cartItems.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-[400px] px-4">
@@ -215,124 +195,121 @@ const GuestCheckout = () => {
         <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center tracking-wide">
           Guest Checkout
         </h2>
-        <div className="space-y-5">
-          <form className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-3">
-            <input
-              type="email"
-              name="email"
-              placeholder="Email *"
-              required
-              className="w-full border border-gray-300 rounded px-3 py-2.5 text-gray-800 bg-white text-sm"
-              value={formData.email}
-              onChange={handleChange}
-            />
-            <input
-              type="text"
-              name="fullName"
-              placeholder="Full Name *"
-              required
-              className="w-full border border-gray-300 rounded px-3 py-2.5 text-gray-800 bg-white text-sm"
-              value={formData.fullName}
-              onChange={handleChange}
-            />
-            <input
-              type="text"
-              name="phone"
-              placeholder="Phone *"
-              required
-              className="w-full border border-gray-300 rounded px-3 py-2.5 text-gray-800 bg-white text-sm"
-              value={formData.phone}
-              onChange={handleChange}
-              maxLength={10}
-            />
-            <input
-              type="text"
-              name="state"
-              placeholder="State *"
-              required
-              className="w-full border border-gray-300 rounded px-3 py-2.5 text-gray-800 bg-white text-sm"
-              value={formData.state}
-              onChange={handleChange}
-            />
-            <input
-              type="text"
-              name="city" // This needs to be 'city' in the input
-              placeholder="City *"
-              required
-              className="w-full border border-gray-300 rounded px-3 py-2.5 text-gray-800 bg-white text-sm"
-              value={city} // Use the getter here
-              onChange={(e) => setCity(e.target.value)} // Use the setter here
-            />
-            <textarea
-              name="addressLine"
-              placeholder="Address Line *"
-              rows={2}
-              required
-              className="col-span-full border border-gray-300 rounded px-3 py-2.5 text-gray-800 bg-white text-sm"
-              value={formData.addressLine}
-              onChange={handleChange}
-            />
-            <input
-              type="text"
-              name="landmark"
-              placeholder="Landmark (Optional)"
-              className="col-span-full border border-gray-300 rounded px-3 py-2.5 text-gray-800 bg-white text-sm"
-              value={formData.landmark}
-              onChange={handleChange}
-            />
-            <div className="col-span-full mt-3">
-              <label className="block text-gray-700 text-xs font-medium mb-1">
-                Select Payment Method:
-              </label>
-              <select
-                name="paymentMethod"
-                value={formData.paymentMethod}
-                onChange={(e) =>
-                  setFormData({ ...formData, paymentMethod: e.target.value })
-                }
-                className="w-full border border-gray-300 rounded px-3 py-2.5 text-gray-700 bg-white text-sm"
-              >
-                <option value="COD">Cash on Delivery</option>
-                <option value="Razorpay">Pay Online (Razorpay)</option>
-              </select>
-            </div>
-
-            <button
-              type="button"
-              onClick={handlePlaceOrder}
-              disabled={isPlacingOrder}
-              className="col-span-full mt-5 text-white font-bold py-3 rounded bg-[#213E5A] hover:bg-[#1A334B] text-lg flex items-center justify-center gap-2"
+        <form className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-3 space-y-0">
+          <input
+            type="email"
+            name="email"
+            placeholder="Email *"
+            required
+            className="w-full border border-gray-300 rounded px-3 py-2.5 text-gray-800 bg-white text-sm"
+            value={formData.email}
+            onChange={handleChange}
+          />
+          <input
+            type="text"
+            name="fullName"
+            placeholder="Full Name *"
+            required
+            className="w-full border border-gray-300 rounded px-3 py-2.5 text-gray-800 bg-white text-sm"
+            value={formData.fullName}
+            onChange={handleChange}
+          />
+          <input
+            type="text"
+            name="phone"
+            placeholder="Phone *"
+            required
+            className="w-full border border-gray-300 rounded px-3 py-2.5 text-gray-800 bg-white text-sm"
+            value={formData.phone}
+            onChange={handleChange}
+            maxLength={10}
+          />
+          <input
+            type="text"
+            name="state"
+            placeholder="State *"
+            required
+            className="w-full border border-gray-300 rounded px-3 py-2.5 text-gray-800 bg-white text-sm"
+            value={formData.state}
+            onChange={handleChange}
+          />
+          <input
+            type="text"
+            name="city"
+            placeholder="City *"
+            required
+            className="w-full border border-gray-300 rounded px-3 py-2.5 text-gray-800 bg-white text-sm"
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+          />
+          <textarea
+            name="addressLine"
+            placeholder="Address Line *"
+            rows={2}
+            required
+            className="col-span-full border border-gray-300 rounded px-3 py-2.5 text-gray-800 bg-white text-sm"
+            value={formData.addressLine}
+            onChange={handleChange}
+          />
+          <input
+            type="text"
+            name="landmark"
+            placeholder="Landmark (Optional)"
+            className="col-span-full border border-gray-300 rounded px-3 py-2.5 text-gray-800 bg-white text-sm"
+            value={formData.landmark}
+            onChange={handleChange}
+          />
+          <div className="col-span-full mt-3">
+            <label className="block text-gray-700 text-xs font-medium mb-1">
+              Select Payment Method:
+            </label>
+            <select
+              name="paymentMethod"
+              value={formData.paymentMethod}
+              onChange={(e) =>
+                setFormData({ ...formData, paymentMethod: e.target.value })
+              }
+              className="w-full border border-gray-300 rounded px-3 py-2.5 text-gray-700 bg-white text-sm"
             >
-              {isPlacingOrder ? (
-                <>
-                  <svg
-                    className="animate-spin h-5 w-5 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8v4l3.536-3.536A9 9 0 1021 12h-2a7 7 0 11-7-7v4z"
-                    ></path>
-                  </svg>
-                  Placing Order...
-                </>
-              ) : (
-                "Place Order"
-              )}
-            </button>
-          </form>
-        </div>
+              <option value="COD">Cash on Delivery</option>
+              <option value="Razorpay">Pay Online (Razorpay)</option>
+            </select>
+          </div>
+          <button
+            type="button"
+            onClick={handlePlaceOrder}
+            disabled={isPlacingOrder}
+            className="col-span-full mt-5 text-white font-bold py-3 rounded bg-[#213E5A] hover:bg-[#1A334B] text-lg flex items-center justify-center gap-2"
+          >
+            {isPlacingOrder ? (
+              <>
+                <svg
+                  className="animate-spin h-5 w-5 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v4l3.536-3.536A9 9 0 1021 12h-2a7 7 0 11-7-7v4z"
+                  ></path>
+                </svg>
+                Placing Order...
+              </>
+            ) : (
+              "Place Order"
+            )}
+          </button>
+        </form>
       </div>
 
       <div className="w-full lg:w-2/5 bg-white shadow-xl p-6 md:p-8 lg:p-10">
@@ -345,7 +322,6 @@ const GuestCheckout = () => {
               key={item.cartItemId}
               className="flex gap-3 items-center p-2 rounded bg-gray-50 border"
             >
-              {/* Conditional Link for Image */}
               {item.slug ? (
                 <Link href={`/product/${item.slug}`} className="flex-shrink-0">
                   <Image
@@ -368,7 +344,6 @@ const GuestCheckout = () => {
               <div className="flex-grow">
                 <div className="flex justify-between items-start">
                   <div>
-                    {/* Conditional Link for Product Name */}
                     {item.slug ? (
                       <Link href={`/product/${item.slug}`}>
                         <p className="font-semibold text-gray-900 text-base hover:text-[#007BFF] transition-colors cursor-pointer">
@@ -389,9 +364,9 @@ const GuestCheckout = () => {
                   </div>
                   <button
                     onClick={() => dispatch(removeFromCart(item.cartItemId))}
-                    className="text-gray-400 hover:text-red-600 transition text-sm"
+                    className="text-gray-400 hover:text-red-600 transition"
                   >
-                    ✕
+                    <Trash2 size={16} />
                   </button>
                 </div>
 
@@ -402,7 +377,7 @@ const GuestCheckout = () => {
                       dispatch(decrementQuantity(item.cartItemId))
                     }
                     disabled={item.quantity <= 1}
-                    className={`px-2 py-1 rounded border text-sm text-[#213E5A]  ${
+                    className={`px-2 py-1 rounded border text-sm text-[#213E5A] ${
                       item.quantity <= 1
                         ? "cursor-not-allowed bg-gray-200 text-gray-400"
                         : "hover:bg-gray-200"
@@ -410,7 +385,7 @@ const GuestCheckout = () => {
                   >
                     -
                   </button>
-                  <span className="text-sm font-medium text-[#213E5A] ">
+                  <span className="text-sm font-medium text-[#213E5A]">
                     {item.quantity}
                   </span>
                   <button
@@ -419,7 +394,7 @@ const GuestCheckout = () => {
                       dispatch(incrementQuantity(item.cartItemId))
                     }
                     disabled={item.quantity >= item.stock}
-                    className={`px-2 py-1 rounded border text-sm text-[#213E5A]  ${
+                    className={`px-2 py-1 rounded border text-sm text-[#213E5A] ${
                       item.quantity >= item.stock
                         ? "cursor-not-allowed bg-gray-200 text-gray-400"
                         : "hover:bg-gray-200"

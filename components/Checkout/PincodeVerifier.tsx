@@ -11,7 +11,7 @@ type PincodeData = {
 };
 
 type Props = {
-  onVerified?: (data: PincodeData) => void; // Made optional
+  onVerified?: (data: PincodeData) => void;
 };
 
 const PincodeVerifier = ({ onVerified }: Props) => {
@@ -19,7 +19,6 @@ const PincodeVerifier = ({ onVerified }: Props) => {
   const [verifying, setVerifying] = useState(false);
   const [verifiedData, setVerifiedData] = useState<PincodeData | null>(null);
 
-  // Use useEffect to load the saved pincode from localStorage on component mount
   useEffect(() => {
     const savedPincode = localStorage.getItem("verifiedPincode");
     const savedCity = localStorage.getItem("verifiedCity");
@@ -33,12 +32,11 @@ const PincodeVerifier = ({ onVerified }: Props) => {
       };
       setEnteredPincode(savedPincode);
       setVerifiedData(data);
-      // Conditionally call onVerified only if it exists
       if (onVerified) {
         onVerified(data);
       }
     }
-  }, [onVerified]); //   onVerified to dependency array
+  }, [onVerified]);
 
   const handleVerify = async () => {
     if (!enteredPincode || enteredPincode.length !== 6) {
@@ -65,15 +63,14 @@ const PincodeVerifier = ({ onVerified }: Props) => {
       };
 
       setVerifiedData(pincodeInfo);
-      // Conditionally call onVerified only if it exists
       if (onVerified) {
         onVerified(pincodeInfo);
       }
+
       toast.success(
         `Delivery available in ${pincodeInfo.city}, ${pincodeInfo.state}`
-      ); // Use pincodeInfo for toast
+      );
 
-      // Save verified pincode data to localStorage
       localStorage.setItem("verifiedPincode", pincodeInfo.pincode);
       localStorage.setItem("verifiedCity", pincodeInfo.city);
       localStorage.setItem("verifiedState", pincodeInfo.state);
@@ -82,7 +79,6 @@ const PincodeVerifier = ({ onVerified }: Props) => {
         err instanceof Error ? err.message : "Verification failed";
       toast.error(message);
       setVerifiedData(null);
-      // Clear localStorage if verification fails
       localStorage.removeItem("verifiedPincode");
       localStorage.removeItem("verifiedCity");
       localStorage.removeItem("verifiedState");
@@ -97,10 +93,8 @@ const PincodeVerifier = ({ onVerified }: Props) => {
     localStorage.removeItem("verifiedPincode");
     localStorage.removeItem("verifiedCity");
     localStorage.removeItem("verifiedState");
-    // Optionally, inform the parent that verification is cleared
-    // Conditionally call onVerified only if it exists
     if (onVerified) {
-      onVerified({ pincode: "", city: "", state: "" }); // Pass empty data
+      onVerified({ pincode: "", city: "", state: "" });
     }
   };
 
@@ -112,7 +106,8 @@ const PincodeVerifier = ({ onVerified }: Props) => {
       <p className="text-sm text-gray-500 mb-3">
         Enter your area pincode to check delivery availability
       </p>
-      <div className="flex gap-2">
+
+      <div className="flex gap-2 items-center">
         <input
           type="text"
           placeholder="Enter pincode"
@@ -123,21 +118,23 @@ const PincodeVerifier = ({ onVerified }: Props) => {
         <button
           type="button"
           onClick={handleVerify}
-          disabled={verifying || verifiedData !== null} // Disable if already verified
+          disabled={verifying || verifiedData !== null}
           className="bg-[#1A324A] text-white px-4 py-2 rounded-md hover:bg-[#142835] disabled:opacity-50 hover:cursor-pointer"
         >
           {verifying ? "Checking..." : "Apply"}
         </button>
-        {verifiedData && (
-          <button
-            type="button"
-            onClick={handleClearVerification}
-            className="text-red-500 hover:text-red-700 font-medium ml-2"
-          >
-            Clear
-          </button>
-        )}
       </div>
+
+      {/* Clear button under the input - shown on all devices */}
+      {verifiedData && (
+        <button
+          type="button"
+          onClick={handleClearVerification}
+          className="text-red-500 hover:text-red-700 font-medium mt-2"
+        >
+          Clear
+        </button>
+      )}
 
       {verifiedData && (
         <p className="text-green-600 text-sm mt-2">

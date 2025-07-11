@@ -188,7 +188,6 @@ export default function BannerSlider({ banners }: { banners: BannerItem[] }) {
               viewBox="0 0 24 24"
               stroke="#007BFF"
               strokeWidth="2"
-              className="rotate-180"
             >
               <path
                 strokeLinecap="round"

@@ -63,14 +63,13 @@ const ProductCard = ({ product }: Props) => {
       ? secondGeneralImage
       : firstGeneralImage || "/placeholder.jpg";
 
-  // Calculate prices based on selected variant or product default
-  const currentSellingPrice = selectedVariant
-    ? Number(selectedVariant.selling_price ?? 0)
-    : Number(product.sellingPrice ?? 0);
+  const currentSellingPrice = Number(
+    selectedVariant?.selling_price || product.sellingPrice || 0
+  );
 
-  const currentBasePrice = selectedVariant
-    ? Number(selectedVariant.base_price ?? 0)
-    : Number(product.basePrice ?? 0);
+  const currentBasePrice = Number(
+    selectedVariant?.base_price || product.basePrice || 0
+  );
 
   const handleAddToCart = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
@@ -154,16 +153,24 @@ const ProductCard = ({ product }: Props) => {
           </h3>
         </Link>
 
-        {/* Price Display - Centered */}
         <div className="flex flex-row items-baseline gap-1 justify-center mt-1">
-          {/* Selling Price (now `currentBasePrice` based on your code) */}
-          <div className="text-base font-bold text-[#213E5A]">
-            ₹{currentBasePrice.toFixed(2)}
-          </div>
-          {/* Base Price with strikethrough (now `currentSellingPrice`) */}
-          <div className="text-xs text-gray-400 line-through">
-            ₹{currentSellingPrice.toFixed(2)}
-          </div>
+          {!isNaN(currentBasePrice) && currentBasePrice > 0 ? (
+            <div className="text-base font-bold text-[#213E5A]">
+              ₹{currentBasePrice.toFixed(2)}
+            </div>
+          ) : (
+            <div className="text-base font-semibold text-gray-500">
+              Price Unavailable
+            </div>
+          )}
+
+          {!isNaN(currentSellingPrice) &&
+            currentSellingPrice > currentBasePrice &&
+            currentSellingPrice > 0 && (
+              <div className="text-xs text-gray-400 line-through">
+                ₹{currentSellingPrice.toFixed(2)}
+              </div>
+            )}
         </div>
 
         {/* Buttons - centered below the price */}

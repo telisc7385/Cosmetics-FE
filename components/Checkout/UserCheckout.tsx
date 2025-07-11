@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { JSX, useEffect, useState } from "react";
 import { useLoggedInCart } from "@/CartProvider/LoggedInCartProvider"; // Ensure this path is correct
 import Image from "next/image";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { useAppSelector } from "@/store/hooks/hooks";
 import { selectToken } from "@/store/slices/authSlice";
-import Link from "next/link"; // Import Link for navigation
+import Link from "next/link";
 import {
   apiCore,
   LoggedInOrderPayload,
@@ -16,16 +16,19 @@ import {
   FetchAddressesResponse,
   SingleAddressResponse,
   AddressInput,
-} from "@/api/ApiCore";
+} from "@/api/ApiCore"; // Ensure ApiCore types are correctly defined
 import { Minus, Plus, Trash2 } from "lucide-react";
+import { FaTrashAlt } from "react-icons/fa";
+import { CiEdit } from "react-icons/ci";
 
-// Coupon types
+// Coupon types from your /coupon API response
 interface Coupon {
   id: number;
   name: string;
   code: string;
-  discount: number; // This is the discount percentage
+  discount: number; // This is the discount percentage (e.g., 10 for 10%)
   expiresAt: string; // ISO string format
+  // Other fields like userId, cartId, used, createdAt, user, cart are not directly used in frontend logic here.
 }
 
 interface CouponApiResponse {
@@ -33,12 +36,13 @@ interface CouponApiResponse {
   data: Coupon[];
 }
 
-// Updated type for coupon redeem response to include calculated amounts
+// Type for the /coupon/redeem API response
+// These MUST be the actual calculated monetary values from your backend
 interface CouponRedeemResponse {
   success: boolean;
   message: string;
-  discountAmount: number; // The actual calculated discount amount in currency
-  updatedTotalAmount: number; // The new total after discount
+  discountAmount: number; // The actual calculated discount amount in currency (e.g., 50.00)
+  updatedTotalAmount: number; // The new total after discount in currency (e.g., 950.00)
   couponCode: string; // The code that was applied
 }
 
@@ -46,58 +50,57 @@ const UserCheckout = () => {
   const {
     items,
     error: cartError,
-    loading: cartLoading, // Use this loading state
+    loading: cartLoading,
     incrementItemQuantity,
     decrementItemQuantity,
     removeCartItem,
     clearCart,
-    cartId, // This should be a number from useLoggedInCart, or null during loading/if not present
+    cartId,
   } = useLoggedInCart();
   const router = useRouter();
   const token = useAppSelector(selectToken);
 
-  // Calculate subtotal from current cart items
-  const initialSubtotal = items.reduce(
+  // Calculate subtotal from current cart items.
+  const initialSubtotal = (items || []).reduce(
     (sum, item) => sum + item.quantity * item.sellingPrice,
     0
   );
-  const shippingCharges = 0; // Shipping is set to 0
 
-  // State for coupons
-  const [showCouponSection, setShowCouponSection] = useState(false);
+  const shippingCharges: number = 0;
+
+  // State for coupons and amounts
+  const [showCouponSection, setShowCouponSection] = useState<boolean>(false);
   const [availableCoupons, setAvailableCoupons] = useState<Coupon[]>([]);
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
   const [discountAmount, setDiscountAmount] = useState<number>(0);
-  const [copiedCouponCode, setCopiedCouponCode] = useState<string | null>(null);
-  const [isPlacingOrder, setIsPlacingOrder] = useState(false); // New state for order placement animation
-
-  // Initialize finalTotalAmount with a calculated value
   const [finalTotalAmount, setFinalTotalAmount] = useState<number>(
-    initialSubtotal + shippingCharges
+    Number(initialSubtotal) + Number(shippingCharges)
   );
+  const [copiedCouponCode, setCopiedCouponCode] = useState<string | null>(null);
+  const [isPlacingOrder, setIsPlacingOrder] = useState<boolean>(false); // State for order placement animation
 
-  // Recalculate final total if subtotal or shipping changes, or if coupon is removed.
+  // Recalculate final total if subtotal, shipping, or coupon status changes.
   useEffect(() => {
-    if (!appliedCoupon) {
-      setDiscountAmount(0); // Ensure discount is 0 if no coupon is applied
-      setFinalTotalAmount(initialSubtotal + shippingCharges);
+    if (!appliedCoupon || discountAmount === 0) {
+      setFinalTotalAmount(Number(initialSubtotal) + Number(shippingCharges));
     }
-  }, [initialSubtotal, shippingCharges, appliedCoupon]);
+  }, [initialSubtotal, shippingCharges, appliedCoupon, discountAmount]);
 
   // State for address management
   const [address, setAddress] = useState<LocalAddressItem[]>([]);
   const [selectedBillingAddressId, setSelectedBillingAddressId] = useState<
     string | null
-  >(null); // Primary selection
+  >(null);
   const [selectedDeliveryAddressId, setSelectedDeliveryAddressId] = useState<
     string | null
   >(null);
-  const [useBillingAsDelivery, setUseBillingAsDelivery] = useState(true); // New: Checkbox for using billing as delivery
-  const [addressIsLoading, setAddressIsLoading] = useState(true);
+  const [useBillingAsDelivery, setUseBillingAsDelivery] =
+    useState<boolean>(true);
+  const [addressIsLoading, setAddressIsLoading] = useState<boolean>(true);
   const [addressHasError, setAddressHasError] = useState<string | null>(null);
 
   // State for address modal
-  const [showModal, setShowModal] = useState(false); // 'showModal' is now used in the JSX below
+  const [showModal, setShowModal] = useState<boolean>(false);
   const [editingAddress, setEditingAddress] = useState<LocalAddressItem | null>(
     null
   );
@@ -133,7 +136,6 @@ const UserCheckout = () => {
         setAddress(fetchedAddresses);
 
         if (fetchedAddresses.length > 0) {
-          // Determine initial billing address
           const storedSelectedBillingId = localStorage.getItem(
             "selectedBillingAddressId"
           );
@@ -146,23 +148,21 @@ const UserCheckout = () => {
               : defaultBillingAddr?.id;
           setSelectedBillingAddressId(initialBillingId || null);
 
-          // Determine initial useBillingAsDelivery state
           const storedUseBillingAsDelivery = localStorage.getItem(
             "useBillingAsDelivery"
           );
           const initialUseBillingAsDelivery =
-            storedUseBillingAsDelivery === "true"; // Convert string to boolean
+            storedUseBillingAsDelivery === "true";
           setUseBillingAsDelivery(initialUseBillingAsDelivery);
 
-          // Determine initial delivery address based on useBillingAsDelivery
           if (initialUseBillingAsDelivery && initialBillingId) {
-            setSelectedDeliveryAddressId(initialBillingId); // If using billing as delivery, set delivery ID to billing ID
+            setSelectedDeliveryAddressId(initialBillingId);
           } else {
             const storedSelectedDeliveryId = localStorage.getItem(
               "selectedDeliveryAddressId"
             );
             const defaultDeliveryAddr =
-              fetchedAddresses.find((a) => a.isDefault) || fetchedAddresses[0]; // Can be same default or specific delivery default
+              fetchedAddresses.find((a) => a.isDefault) || fetchedAddresses[0];
             const initialDeliveryId =
               storedSelectedDeliveryId &&
               fetchedAddresses.some((a) => a.id === storedSelectedDeliveryId)
@@ -171,10 +171,9 @@ const UserCheckout = () => {
             setSelectedDeliveryAddressId(initialDeliveryId || null);
           }
         } else {
-          // setAddressHasError("No addresses found. Please add new addresses.");
           setSelectedBillingAddressId(null);
           setSelectedDeliveryAddressId(null);
-          setUseBillingAsDelivery(true); // Reset to default true if no addresses
+          setUseBillingAsDelivery(true);
         }
       } catch (err: unknown) {
         const error = err as Error;
@@ -189,7 +188,6 @@ const UserCheckout = () => {
 
   // Effect to store selected address IDs and checkbox state in local storage
   useEffect(() => {
-    // Always store selected billing ID
     if (selectedBillingAddressId) {
       localStorage.setItem(
         "selectedBillingAddressId",
@@ -199,15 +197,12 @@ const UserCheckout = () => {
       localStorage.removeItem("selectedBillingAddressId");
     }
 
-    // Store the checkbox state
     localStorage.setItem("useBillingAsDelivery", String(useBillingAsDelivery));
 
-    // If "use billing as delivery" is checked, ensure delivery address mirrors billing.
     if (useBillingAsDelivery && selectedBillingAddressId) {
       setSelectedDeliveryAddressId(selectedBillingAddressId);
-      localStorage.removeItem("selectedDeliveryAddressId"); // Remove independent delivery ID
+      localStorage.removeItem("selectedDeliveryAddressId");
     } else if (!useBillingAsDelivery) {
-      // Only store independent delivery ID if not using billing as delivery
       if (selectedDeliveryAddressId) {
         localStorage.setItem(
           "selectedDeliveryAddressId",
@@ -224,18 +219,16 @@ const UserCheckout = () => {
   ]);
 
   // Handler for toggling "Use Billing as Delivery"
-  const handleToggleUseBillingAsDelivery = () => {
+  const handleToggleUseBillingAsDelivery = (): void => {
     const newToggleState = !useBillingAsDelivery;
     setUseBillingAsDelivery(newToggleState);
     if (newToggleState) {
-      // If setting to true, automatically set delivery to billing
       setSelectedDeliveryAddressId(selectedBillingAddressId);
     }
-    // If setting to false, the delivery address can be selected independently now (its state won't be changed here unless needed)
   };
 
   // Opens the modal for creating a new address
-  const openCreateModal = () => {
+  const openCreateModal = (): void => {
     setFormData({
       fullName: "",
       phone: "",
@@ -250,7 +243,7 @@ const UserCheckout = () => {
   };
 
   // Opens the modal for editing an existing address
-  const openEditModal = (addr: LocalAddressItem) => {
+  const openEditModal = (addr: LocalAddressItem): void => {
     setFormData({
       fullName: addr.fullName,
       phone: addr.phone,
@@ -265,19 +258,20 @@ const UserCheckout = () => {
   };
 
   // Handles deleting an address
-  const deleteAddress = async (id: string) => {
+  const deleteAddress = async (id: string): Promise<void> => {
     if (!confirm("Are you sure you want to delete this address?")) return;
     if (!token) {
       toast.error("You must be logged in to delete addresses.");
       return;
     }
     try {
-      // Adjusted `apiCore` call to use `unknown` and then type check for specific error messages
-      const result = await apiCore<
-        { message: string } | { error: string } // Expected response types
-      >(`/address/${id}`, "DELETE", undefined, token);
+      const result = await apiCore<{ message: string } | { error: string }>(
+        `/address/${id}`,
+        "DELETE",
+        undefined,
+        token
+      );
 
-      // Check if the result indicates an error message
       if ("error" in result && typeof result.error === "string") {
         throw new Error(result.error);
       }
@@ -285,15 +279,12 @@ const UserCheckout = () => {
       const remainingAddresses = address.filter((a) => a.id !== id);
       setAddress(remainingAddresses);
 
-      // Adjust selected billing address if the deleted one was selected
       if (selectedBillingAddressId === id) {
         const newBillingId =
           remainingAddresses.length > 0 ? remainingAddresses[0].id : null;
         setSelectedBillingAddressId(newBillingId);
-        // If useBillingAsDelivery is true, delivery will update via useEffect
       }
 
-      // Adjust selected delivery address if the deleted one was selected and independent
       if (!useBillingAsDelivery && selectedDeliveryAddressId === id) {
         const newDeliveryId =
           remainingAddresses.length > 0 ? remainingAddresses[0].id : null;
@@ -302,7 +293,7 @@ const UserCheckout = () => {
 
       toast.success("Address deleted successfully!");
     } catch (err: unknown) {
-      const error = err as { message?: string } | Error; // Type assertion for potential error objects
+      const error = err as { message?: string } | Error;
       if (error.message && error.message.includes("P2003")) {
         toast.error(
           "This address cannot be deleted as it is associated with existing orders. Please contact support."
@@ -318,28 +309,36 @@ const UserCheckout = () => {
 
   // Handles changes in the address form
   const handleFormChange = (
-    // 'handleFormChange' is now used in the AddressModal JSX
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  ): void => {
     const { name, value } = e.target;
+    // Allow only digits for phone and pincode
     if ((name === "phone" || name === "pincode") && !/^\d*$/.test(value))
       return;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   // Handles submission of the address form (create/update)
-  const handleFormSubmit = async (e: React.FormEvent) => {
-    // 'handleFormSubmit' is now used in the AddressModal JSX
+  const handleFormSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
-    if (!token) return toast.error("You must be logged in to save addresses.");
+    if (!token) {
+      toast.error("You must be logged in to save addresses.");
+      return;
+    }
 
     const { fullName, phone, pincode, city, state, addressLine } = formData;
-    if (!fullName || !phone || !pincode || !city || !state || !addressLine)
-      return toast.error("Please fill all required address fields.");
-    if (!/^\d{10}$/.test(phone))
-      return toast.error("Please enter a valid 10-digit phone number.");
-    if (!/^\d{6}$/.test(pincode))
-      return toast.error("Please enter a valid 6-digit pincode.");
+    if (!fullName || !phone || !pincode || !city || !state || !addressLine) {
+      toast.error("Please fill all required address fields.");
+      return;
+    }
+    if (!/^\d{10}$/.test(phone)) {
+      toast.error("Please enter a valid 10-digit phone number.");
+      return;
+    }
+    if (!/^\d{6}$/.test(pincode)) {
+      toast.error("Please enter a valid 6-digit pincode.");
+      return;
+    }
 
     try {
       if (editingAddress) {
@@ -349,6 +348,7 @@ const UserCheckout = () => {
           formData,
           token
         );
+        // Map over previous addresses to update the one that was edited
         setAddress((prev) =>
           prev.map((a) => (a.id === res.updated?.id ? res.updated : a))
         );
@@ -360,14 +360,14 @@ const UserCheckout = () => {
           formData,
           token
         );
-        const added = res.address!;
+        const added = res.address!; // Assuming `address` property holds the new address
         setAddress((prev) => [...prev, added]);
 
-        // If no billing address is selected, set this new one as billing
+        // If no billing address is selected, set the new one as default
         if (!selectedBillingAddressId) {
           setSelectedBillingAddressId(added.id);
         }
-        // If not using billing as delivery AND no delivery address is selected, set this new one as delivery.
+        // If not using billing as delivery and no delivery address is selected, set new one as default
         if (!useBillingAsDelivery && !selectedDeliveryAddressId) {
           setSelectedDeliveryAddressId(added.id);
         }
@@ -383,7 +383,7 @@ const UserCheckout = () => {
   };
 
   // Fetches available coupons from the backend
-  const fetchCoupons = async () => {
+  const fetchCoupons = async (): Promise<void> => {
     if (!token) {
       toast.error("Please log in to fetch coupons.");
       return;
@@ -407,8 +407,8 @@ const UserCheckout = () => {
     }
   };
 
-  // Copies coupon code to clipboard (kept for potential future use or if CheckCircle logic needs it)
-  const handleCopyCoupon = (code: string) => {
+  // Copies coupon code to clipboard
+  const handleCopyCoupon = (code: string): void => {
     navigator.clipboard.writeText(code);
     setCopiedCouponCode(code);
     toast.success("Coupon code copied!");
@@ -416,7 +416,7 @@ const UserCheckout = () => {
   };
 
   // Applies a selected coupon
-  const handleApplyCoupon = async (coupon: Coupon) => {
+  const handleApplyCoupon = async (coupon: Coupon): Promise<void> => {
     if (!token) {
       toast.error("Please log in to apply coupons.");
       return;
@@ -442,23 +442,31 @@ const UserCheckout = () => {
         code: coupon.code,
         cartId: cartId,
       };
+      // Expecting backend to return actual calculated discount and total amounts
       const response = await apiCore<CouponRedeemResponse>(
         "/coupon/redeem",
         "POST",
         payload,
         token
       );
+
       if (response.success) {
         setAppliedCoupon(coupon); // Store the full coupon object
-        setDiscountAmount(response.discountAmount); // Use discount from API response
-        setFinalTotalAmount(response.updatedTotalAmount); // Use total from API response
+
+        // CRITICAL: Ensure `response.discountAmount` and `response.updatedTotalAmount` are numbers.
+        // Use Number() to explicitly cast in case the API sends them as string or if they might be null/undefined.
+        setDiscountAmount(Number(response.discountAmount));
+        setFinalTotalAmount(Number(response.updatedTotalAmount));
+
         toast.success(`Coupon "${coupon.name}" applied successfully!`);
-        setShowCouponSection(false); // Hide coupon list after application
+        setShowCouponSection(false); // Hide coupon list after successful application
       } else {
+        // Handle API-specific messages for failed coupon application
         toast.error(response.message || "Failed to apply coupon.");
         setDiscountAmount(0); // Reset discount on failure
         setAppliedCoupon(null);
-        setFinalTotalAmount(initialSubtotal + shippingCharges); // Recalculate to original total
+        // Recalculate total to ensure it reflects current subtotal if coupon failed.
+        setFinalTotalAmount(Number(initialSubtotal) + Number(shippingCharges));
       }
     } catch (error: unknown) {
       const err = error as Error;
@@ -466,29 +474,35 @@ const UserCheckout = () => {
       console.error("Error applying coupon:", err);
       setDiscountAmount(0); // Reset discount on error
       setAppliedCoupon(null);
-      setFinalTotalAmount(initialSubtotal + shippingCharges); // Recalculate to original total
+      // Recalculate total to ensure it reflects current subtotal if error
+      setFinalTotalAmount(Number(initialSubtotal) + Number(shippingCharges));
     }
   };
 
   // Removes the currently applied coupon
-  const handleRemoveCoupon = () => {
+  const handleRemoveCoupon = (): void => {
     setAppliedCoupon(null);
     setDiscountAmount(0);
-    setFinalTotalAmount(initialSubtotal + shippingCharges); // Reset total
+    // When coupon is removed, revert total to subtotal + shipping.
+    setFinalTotalAmount(Number(initialSubtotal) + Number(shippingCharges));
   };
 
   // Handles placing the order
-  const handlePlaceOrder = async () => {
+  const handlePlaceOrder = async (): Promise<void> => {
     if (isPlacingOrder) return; // Prevent multiple clicks
 
-    if (!selectedBillingAddressId)
-      return toast.error("Please select a billing address.");
-    if (!selectedDeliveryAddressId)
-      return toast.error("Please select a delivery address.");
-    if (items.length === 0)
-      return toast.error(
-        "Your cart is empty. Please add items to place an order."
-      );
+    if (!selectedBillingAddressId) {
+      toast.error("Please select a billing address.");
+      return;
+    }
+    if (!selectedDeliveryAddressId) {
+      toast.error("Please select a delivery address.");
+      return;
+    }
+    if (items.length === 0) {
+      toast.error("Your cart is empty. Please add items to place an order.");
+      return;
+    }
     if (!token) {
       router.push("/login");
       return;
@@ -514,8 +528,9 @@ const UserCheckout = () => {
         price: item.sellingPrice,
         variantId: item.variantId || null,
       })),
-      discountAmount: discountAmount,
-      totalAmount: finalTotalAmount,
+      // Ensure discountAmount and finalTotalAmount are sent as numbers to the backend
+      discountAmount: Number(discountAmount),
+      totalAmount: Number(finalTotalAmount),
       paymentMethod,
       addressId: selectedDeliveryAddressId, // This is the delivery address
       billingAddressId: selectedBillingAddressId, // This is the billing address
@@ -530,8 +545,8 @@ const UserCheckout = () => {
         token
       );
       toast.success("Order placed successfully!");
-      clearCart();
-      router.push(`/thank-you?orderId=${order.id || ""}`);
+      clearCart(); // Clear cart after successful order
+      router.push(`/thank-you?orderId=${order.id || ""}`); // Redirect to thank you page
     } catch (err: unknown) {
       const error = err as Error;
       toast.error(error.message || "There was an error placing your order.");
@@ -547,7 +562,7 @@ const UserCheckout = () => {
     selected: string | null,
     onSelect: (id: string) => void,
     type: "Delivery" | "Billing"
-  ) => (
+  ): JSX.Element => (
     <div className="space-y-3">
       {addresses.length === 0 && !addressIsLoading ? (
         <div
@@ -588,18 +603,18 @@ const UserCheckout = () => {
                       e.stopPropagation();
                       openEditModal(a);
                     }}
-                    className="py-1 px-2 text-[#213E5A] hover:text-[#1a324a] text-xs rounded-md cursor-pointer" // Added cursor-pointer
+                    className="py-1 px-2 text-[#213E5A] hover:text-[#1a324a] text-xs rounded-md cursor-pointer"
                   >
-                    Edit
+                    <CiEdit className="text-blue-500 size-5" />
                   </button>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       deleteAddress(a.id);
                     }}
-                    className="py-1 px-2 text-red-500 hover:text-red-600 text-xs rounded-md cursor-pointer" // Added cursor-pointer
+                    className="py-1 px-2 text-red-500 hover:text-red-600 text-xs rounded-md cursor-pointer"
                   >
-                    Delete
+                    <FaTrashAlt className="text-red-500 size-4" />
                   </button>
                 </div>
               </div>
@@ -607,7 +622,7 @@ const UserCheckout = () => {
           ))}
           <button
             onClick={openCreateModal}
-            className="mt-3 text-[#213E5A] hover:text-[#1a324a] font-medium text-sm py-1.5 px-3 rounded-md border border-[#213E5A] hover:border-[#1a324a] cursor-pointer" // Added cursor-pointer
+            className="mt-3 text-[#213E5A] hover:text-[#1a324a] font-medium text-sm py-1.5 px-3 rounded-md border border-[#213E5A] hover:border-[#1a324a] cursor-pointer"
           >
             + Add New {type} Address
           </button>
@@ -617,7 +632,7 @@ const UserCheckout = () => {
   );
 
   return (
-    <div className="font-sans flex flex-col lg:flex-row gap-8 p-8 bg-[#F3F6F7] min-h-screen max-w-7xl mx-auto">
+    <div className="font-sans flex flex-col lg:flex-row gap-8 p-3 sm:p-8 bg-[#F3F6F7] min-h-screen max-w-7xl mx-auto">
       {/* Custom CSS for loading animation */}
       <style jsx>{`
         /* Cart type loader */
@@ -723,7 +738,7 @@ const UserCheckout = () => {
       `}</style>
 
       {/* Billing Address Selection & Delivery Address Selection & Payment Method */}
-      <div className="w-full lg:w-1/2 bg-white p-8 rounded-lg shadow-md">
+      <div className="w-full lg:w-1/2 bg-white p-3 rounded-lg shadow-md">
         <h2 className="text-2xl font-bold text-gray-800 mb-6">
           Billing Information
         </h2>
@@ -757,11 +772,11 @@ const UserCheckout = () => {
               id="useBillingAsDelivery"
               checked={useBillingAsDelivery}
               onChange={handleToggleUseBillingAsDelivery}
-              className="h-4 w-4 text-[#213E5A] focus:ring-[#213E5A] border-gray-300 rounded cursor-pointer" // Added cursor-pointer
+              className="h-4 w-4 text-[#213E5A] focus:ring-[#213E5A] border-gray-300 rounded cursor-pointer"
             />
             <label
               htmlFor="useBillingAsDelivery"
-              className="ml-2 block text-sm font-medium text-gray-900 cursor-pointer" // Added cursor-pointer
+              className="ml-2 block text-sm font-medium text-gray-900 cursor-pointer"
             >
               Same as billing address
             </label>
@@ -802,7 +817,7 @@ const UserCheckout = () => {
             onChange={(e) =>
               setPaymentMethod(e.target.value as "COD" | "RAZORPAY")
             }
-            className="w-full text-[#213E5A] border border-gray-300 px-3 py-2 rounded-md focus:ring-[#213E5A] focus:border-[#213E5A] appearance-none text-sm cursor-pointer" // Added cursor-pointer
+            className="w-full text-[#213E5A] border border-gray-300 px-3 py-2 rounded-md focus:ring-[#213E5A] focus:border-[#213E5A] appearance-none text-sm cursor-pointer"
           >
             <option value="COD">Cash on Delivery (COD)</option>
             <option value="RAZORPAY">Pay Online (Razorpay)</option>
@@ -812,10 +827,11 @@ const UserCheckout = () => {
 
       {/* Cart Summary & Order Summary */}
       <div className="w-full lg:w-1/2 flex flex-col gap-8">
-        <div className="bg-white p-8 rounded-lg shadow-md">
+        <div className="bg-white p-3 rounded-lg shadow-md">
           <h2 className="text-2xl font-bold text-gray-800 mb-6">
             Product Summary
           </h2>
+
           {cartLoading ? (
             <p className="text-gray-600">Loading cart...</p>
           ) : cartError ? (
@@ -855,36 +871,37 @@ const UserCheckout = () => {
                         )}
                       </div>
                       <p className="text-sm font-bold text-gray-900 whitespace-nowrap ml-3">
-                        ₹{(item.quantity * item.sellingPrice).toFixed(2)}
+                        ₹
+                        {/* Ensure item.quantity and item.sellingPrice are numbers before multiplication */}
+                        {(
+                          (item.quantity || 0) * (item.sellingPrice || 0)
+                        ).toFixed(2)}
                       </p>
                     </div>
                     <div className="flex items-center mt-3 space-x-1">
-                      {/* Decrement button */}
-                      <button
-                        onClick={() => decrementItemQuantity(item.cartItemId)}
-                        disabled={item.quantity <= 1} // Disable if quantity is 1 or less
-                        className="p-0.5 rounded-full border border-gray-300 bg-gray-50 hover:bg-gray-100 disabled:opacity-50 text-gray-700 transition-colors cursor-pointer"
-                      >
-                        <Minus size={14} />
-                      </button>
-                      <span className="px-1.5 py-0.5 font-medium text-gray-800 border border-gray-300 rounded-md text-xs">
-                        {item.quantity}
-                      </span>
-                      {/* Increment button - Disabled if quantity equals or exceeds stock */}
                       <button
                         onClick={() => incrementItemQuantity(item.cartItemId)}
-                        disabled={item.quantity >= item.stock} // Disable if quantity reaches available stock
+                        disabled={item.quantity >= item.stock}
                         className="p-0.5 rounded-full border border-gray-300 bg-gray-50 hover:bg-gray-100 disabled:opacity-50 text-gray-700 transition-colors cursor-pointer"
                       >
                         <Plus size={14} />
                       </button>
+                      <span className="px-1.5 py-0.5 font-medium text-gray-800 border border-gray-300 rounded-md text-xs">
+                        {item.quantity}
+                      </span>
+                      <button
+                        onClick={() => decrementItemQuantity(item.cartItemId)}
+                        disabled={item.quantity <= 1}
+                        className="p-0.5 rounded-full border border-gray-300 bg-gray-50 hover:bg-gray-100 disabled:opacity-50 text-gray-700 transition-colors cursor-pointer"
+                      >
+                        <Minus size={14} />
+                      </button>
 
-                      {/* Delete button */}
                       <button
                         onClick={() => removeCartItem(item.cartItemId)}
-                        className="ml-auto p-0.5 rounded-full text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors cursor-pointer"
+                        className="ml-auto text-red-500 hover:text-red-700 transition-colors cursor-pointer"
                       >
-                        <Trash2 size={14} />
+                        <Trash2 size={18} />
                       </button>
                     </div>
                   </div>
@@ -892,316 +909,278 @@ const UserCheckout = () => {
               ))}
             </ul>
           )}
-
-          {/* This is the key change: Moved the "Back To Shop" button outside the conditional block */}
-          <div className="flex justify-center w-full mt-6">
-            <Link href={"/shop"} className="w-1/">
-              <button className="w-full border border-1 px-6 py-2 rounded-sm  bg-[#213E5A] text-white hover:bg-white hover hover:text-[#213E5A] hover:cursor-pointer">
-                Back To Shop
-              </button>
-            </Link>
-          </div>
-
-          {/* Coupon Section */}
-          <div className="mt-8 pt-6 border-t border-gray-200">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-semibold text-gray-700">Coupons</h3>
-              <button
-                onClick={() => {
-                  setShowCouponSection(!showCouponSection);
-                  if (!showCouponSection) {
-                    fetchCoupons(); // Fetch coupons when expanding
-                  }
-                }}
-                className="text-[#213E5A] hover:text-[#1a324a] font-medium text-sm cursor-pointer"
-              >
-                {showCouponSection ? "Hide Coupons" : "View Available Coupons"}
-              </button>
-            </div>
-
-            {appliedCoupon ? (
-              <div className="border border-green-500 bg-green-50 p-3 rounded-md flex justify-between items-center text-green-700">
-                <span>
-                  Applied:{" "}
-                  <span className="font-semibold">
-                    {appliedCoupon.code} ({appliedCoupon.discount}%)
-                  </span>
-                </span>
-                <button
-                  onClick={handleRemoveCoupon}
-                  className="text-sm font-medium hover:underline"
-                >
-                  Remove
-                </button>
-              </div>
-            ) : (
-              showCouponSection && (
-                <div>
-                  {availableCoupons.length > 0 ? (
-                    <ul className="space-y-2">
-                      {availableCoupons.map((coupon) => (
-                        <li
-                          key={coupon.id}
-                          className="border border-gray-200 bg-gray-50 p-3 rounded-md flex justify-between items-center"
-                        >
-                          <div>
-                            <p className="font-semibold text-gray-800">
-                              {coupon.name}
-                            </p>
-                            <p className="text-sm text-gray-600">
-                              Code:{" "}
-                              <span className="font-mono bg-gray-200 px-1 py-0.5 rounded text-xs">
-                                {coupon.code}
-                              </span>
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              Discount: {coupon.discount}%
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              Expires:{" "}
-                              {new Date(coupon.expiresAt).toLocaleDateString()}
-                            </p>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <button
-                              onClick={() => handleCopyCoupon(coupon.code)}
-                              className="text-xs text-[#213E5A] hover:underline"
-                            >
-                              {copiedCouponCode === coupon.code
-                                ? "Copied!"
-                                : "Copy"}
-                            </button>
-                            <button
-                              onClick={() => handleApplyCoupon(coupon)}
-                              className="bg-[#213E5A] text-white text-xs px-3 py-1.5 rounded-md hover:bg-[#1a324a] transition-colors"
-                            >
-                              Apply
-                            </button>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-gray-600 text-center">
-                      No coupons available at the moment.
-                    </p>
-                  )}
-                </div>
-              )
-            )}
-          </div>
-
-          {/* Order Summary */}
-          <div className="mt-8 pt-6 border-t border-gray-200">
-            <h3 className="text-xl font-bold text-gray-800 mb-4">
-              Order Summary
-            </h3>
-            <div className="space-y-2 text-sm text-gray-700">
-              <div className="flex justify-between">
-                <span>Subtotal:</span>
-                <span className="font-medium">
-                  ₹{initialSubtotal.toFixed(2)}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span>Shipping:</span>
-                <span className="font-medium">
-                  ₹{shippingCharges.toFixed(2)}
-                </span>
-              </div>
-              {appliedCoupon && (
-                <div className="flex justify-between text-green-600">
-                  <span>Coupon Discount:</span>
-                  <span className="font-medium">
-                    -₹{discountAmount.toFixed(2)}
-                  </span>
-                </div>
-              )}
-              <div className="flex justify-between text-lg font-bold text-gray-900 pt-2 border-t border-gray-200">
-                <span>Total Amount:</span>
-                <span>₹{finalTotalAmount.toFixed(2)}</span>
-              </div>
-            </div>
-            <button
-              onClick={handlePlaceOrder}
-              disabled={
-                isPlacingOrder ||
-                items.length === 0 ||
-                cartLoading ||
-                addressIsLoading ||
-                !selectedBillingAddressId ||
-                !selectedDeliveryAddressId
-              }
-              className={`w-full mt-6 py-3 rounded-lg text-white font-semibold transition-all duration-300 flex items-center justify-center gap-2
-                ${
-                  isPlacingOrder ||
-                  items.length === 0 ||
-                  cartLoading ||
-                  addressIsLoading ||
-                  !selectedBillingAddressId ||
-                  !selectedDeliveryAddressId
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-[#213E5A] hover:bg-[#1a324a] cursor-pointer"
-                }`}
-            >
-              {isPlacingOrder ? (
-                <>
-                  <div className="cart-loader running w-12 h-8 relative">
-                    <div className="wheel left"></div>
-                    <div className="wheel right"></div>
-                    <div className="product"></div>
-                  </div>
-                  Placing Order...
-                </>
+          <hr className="my-6 border-gray-200" />
+          <h3
+            className="text-lg font-semibold text-gray-800 cursor-pointer flex justify-between items-center"
+            onClick={() => {
+              setShowCouponSection(!showCouponSection);
+              if (!showCouponSection) fetchCoupons(); // Fetch coupons when opening
+            }}
+          >
+            Apply Coupon
+            <Plus
+              size={18}
+              className={`transition-transform ${
+                showCouponSection ? "rotate-45" : "rotate-0"
+              }`}
+            />
+          </h3>
+          {showCouponSection && (
+            <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+              {availableCoupons.length === 0 ? (
+                <p className="text-gray-600 text-sm">No coupons available.</p>
               ) : (
-                "Place Order"
+                <ul className="space-y-2">
+                  {availableCoupons.map((coupon) => (
+                    <li
+                      key={coupon.id}
+                      className="flex justify-between items-center p-2 border border-gray-300 rounded-md bg-white shadow-sm"
+                    >
+                      <div>
+                        <p className="font-semibold text-gray-800 text-sm">
+                          {coupon.name}
+                        </p>
+                        <p className="text-xs text-gray-600">
+                          Code:{" "}
+                          <span className="font-mono bg-gray-100 px-1 py-0.5 rounded">
+                            {coupon.code}
+                          </span>
+                          {/* Use handleCopyCoupon and display copiedCouponCode */}
+                          <button
+                            onClick={() => handleCopyCoupon(coupon.code)}
+                            className="ml-2 px-2 py-0.5 text-xs bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+                          >
+                            {copiedCouponCode === coupon.code
+                              ? "Copied!"
+                              : "Copy"}
+                          </button>
+                        </p>
+                        <p className="text-xs text-green-600">
+                          Discount: {coupon.discount}%{" "}
+                          {/* Display percentage from /coupon API */}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Expires:{" "}
+                          {new Date(coupon.expiresAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                      {appliedCoupon?.id === coupon.id ? (
+                        <button
+                          onClick={handleRemoveCoupon}
+                          className="px-3 py-1 bg-red-500 text-white text-xs rounded-md hover:bg-red-600 transition-colors"
+                        >
+                          Remove
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleApplyCoupon(coupon)}
+                          className="px-3 py-1 bg-[#213E5A] text-white text-xs rounded-md hover:bg-[#1a324a] transition-colors"
+                        >
+                          Apply
+                        </button>
+                      )}
+                    </li>
+                  ))}
+                </ul>
               )}
-            </button>
+            </div>
+          )}
+        </div>
+
+        <div className="bg-white p-3 rounded-lg shadow-md">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">
+            Order Summary
+          </h2>
+          <div className="space-y-3 text-sm">
+            <div className="flex justify-between">
+              <span className="text-gray-700">
+                Subtotal ({items.length} items)
+              </span>
+              <span className="font-medium text-gray-900">
+                {/* Use Number() to explicitly cast to a number before toFixed */}
+                ₹{Number(initialSubtotal).toFixed(2)}
+              </span>
+            </div>
+            {appliedCoupon && (
+              <div className="flex justify-between text-green-600">
+                <span>Coupon Discount ({appliedCoupon.code})</span>
+                <span className="font-medium">
+                  {/* `discountAmount` should be the actual calculated currency value from /coupon/redeem */}
+                  - ₹{Number(discountAmount).toFixed(2)}
+                </span>
+              </div>
+            )}
+            <div className="flex justify-between">
+              <span className="text-gray-700">Shipping</span>
+              <span className="font-medium text-gray-900">
+                {/* Ensure shippingCharges is a number */}
+                {shippingCharges === 0
+                  ? "FREE"
+                  : `₹${Number(shippingCharges).toFixed(2)}`}
+              </span>
+            </div>
+            <div className="flex justify-between border-t border-gray-200 pt-3 text-lg font-bold">
+              <span>Total</span>
+              <span>
+                {/* `finalTotalAmount` should be the updated total from /coupon/redeem */}
+                ₹{Number(finalTotalAmount).toFixed(2)}
+              </span>
+            </div>
           </div>
+          <button
+            onClick={handlePlaceOrder}
+            disabled={
+              isPlacingOrder ||
+              items.length === 0 ||
+              cartLoading ||
+              addressIsLoading ||
+              !selectedBillingAddressId ||
+              !selectedDeliveryAddressId
+            }
+            className={`w-full py-3 mt-6 rounded-md font-semibold flex items-center justify-center transition-colors ${
+              isPlacingOrder ||
+              items.length === 0 ||
+              cartLoading ||
+              addressIsLoading ||
+              !selectedBillingAddressId ||
+              !selectedDeliveryAddressId
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                : "bg-[#213E5A] hover:bg-[#1a324a] text-white cursor-pointer"
+            }`}
+          >
+            {isPlacingOrder ? (
+              <>
+                <div className="cart-loader running mr-3">
+                  <div className="wheel left"></div>
+                  <div className="wheel right"></div>
+                  <div className="product"></div>
+                </div>
+                Placing Order...
+              </>
+            ) : (
+              "Place Order"
+            )}
+          </button>
         </div>
       </div>
-
       {/* Address Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center p-4 z-50">
-          <div className="bg-white p-6 rounded-lg shadow-xl max-w-lg w-full relative">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg p-6 max-w-lg w-full shadow-lg relative">
+            <h2 className="text-xl font-bold mb-4">
               {editingAddress ? "Edit Address" : "Add New Address"}
-            </h3>
-            <form onSubmit={handleFormSubmit} className="space-y-4">
+            </h2>
+            <form
+              onSubmit={handleFormSubmit}
+              className="grid grid-cols-1 md:grid-cols-2 gap-4"
+            >
               <div>
-                <label
-                  htmlFor="fullName"
-                  className="block text-sm font-medium text-[#213E5A]"
-                >
+                <label className="block text-sm font-medium text-gray-700">
                   Full Name
                 </label>
                 <input
                   type="text"
-                  id="fullName"
                   name="fullName"
                   value={formData.fullName}
                   onChange={handleFormChange}
-                  className="mt-1 block w-full border text-[#213E5A] border-gray-300 rounded-md shadow-sm p-2 text-sm focus:ring-[#213E5A] focus:border-[#213E5A]"
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-[#213E5A] focus:border-[#213E5A]"
                   required
                 />
               </div>
               <div>
-                <label
-                  htmlFor="phone"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Phone Number
+                <label className="block text-sm font-medium text-gray-700">
+                  Phone
                 </label>
                 <input
-                  type="text"
-                  id="phone"
+                  type="tel"
                   name="phone"
                   value={formData.phone}
                   onChange={handleFormChange}
-                  className="mt-1 block w-full text-[#213E5A] border border-gray-300 rounded-md shadow-sm p-2 text-sm focus:ring-[#213E5A] focus:border-[#213E5A]"
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-[#213E5A] focus:border-[#213E5A]"
+                  required
                   maxLength={10}
+                  pattern="\d{10}"
+                  title="Phone number must be 10 digits"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Pincode
+                </label>
+                <input
+                  type="text"
+                  name="pincode"
+                  value={formData.pincode}
+                  onChange={handleFormChange}
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-[#213E5A] focus:border-[#213E5A]"
+                  required
+                  maxLength={6}
+                  pattern="\d{6}"
+                  title="Pincode must be 6 digits"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  State
+                </label>
+                <input
+                  type="text"
+                  name="state"
+                  value={formData.state}
+                  onChange={handleFormChange}
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-[#213E5A] focus:border-[#213E5A]"
                   required
                 />
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label
-                    htmlFor="pincode"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Pincode
-                  </label>
-                  <input
-                    type="text"
-                    id="pincode"
-                    name="pincode"
-                    value={formData.pincode}
-                    onChange={handleFormChange}
-                    className="mt-1 block w-full text-[#213E5A] border border-gray-300 rounded-md shadow-sm p-2 text-sm focus:ring-[#213E5A] focus:border-[#213E5A]"
-                    maxLength={6}
-                    required
-                  />
-                </div>
-                <div>
-                  <label
-                    htmlFor="state"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    State
-                  </label>
-                  <input
-                    type="text"
-                    id="state"
-                    name="state"
-                    value={formData.state}
-                    onChange={handleFormChange}
-                    className="mt-1 block w-full border text-[#213E5A] border-gray-300 rounded-md shadow-sm p-2 text-sm focus:ring-[#213E5A] focus:border-[#213E5A]"
-                    required
-                  />
-                </div>
-              </div>
-              <div>
-                <label
-                  htmlFor="city"
-                  className="block text-sm font-medium text-gray-700"
-                >
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700">
                   City
                 </label>
                 <input
                   type="text"
-                  id="city"
                   name="city"
                   value={formData.city}
                   onChange={handleFormChange}
-                  className="mt-1 block w-full border text-[#213E5A] border-gray-300 rounded-md shadow-sm p-2 text-sm focus:ring-[#213E5A] focus:border-[#213E5A]"
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-[#213E5A] focus:border-[#213E5A]"
                   required
                 />
               </div>
-              <div>
-                <label
-                  htmlFor="addressLine"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Address Line (House No., Street, Area)
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Address Line
                 </label>
                 <textarea
-                  id="addressLine"
                   name="addressLine"
                   value={formData.addressLine}
                   onChange={handleFormChange}
                   rows={3}
-                  className="mt-1 block w-full border text-[#213E5A] border-gray-300 rounded-md shadow-sm p-2 text-sm focus:ring-[#213E5A] focus:border-[#213E5A]"
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-[#213E5A] focus:border-[#213E5A]"
                   required
                 ></textarea>
               </div>
-              <div>
-                <label
-                  htmlFor="landmark"
-                  className="block text-sm font-medium text-gray-700"
-                >
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700">
                   Landmark (Optional)
                 </label>
                 <input
                   type="text"
-                  id="landmark"
                   name="landmark"
                   value={formData.landmark}
                   onChange={handleFormChange}
-                  className="mt-1 block w-full border text-[#213E5A] border-gray-300 rounded-md shadow-sm p-2 text-sm focus:ring-[#213E5A] focus:border-[#213E5A]"
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-[#213E5A] focus:border-[#213E5A]"
                 />
               </div>
-              <div className="flex justify-end space-x-3 mt-6">
+              <div className="md:col-span-2 flex justify-end space-x-3 mt-4">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#213E5A]"
+                  className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-[#213E5A] border border-transparent rounded-md text-sm font-medium text-white shadow-sm hover:bg-[#1a324a] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#213E5A]"
+                  className="px-4 py-2 bg-[#213E5A] text-white rounded-md hover:bg-[#1a324a] transition-colors"
                 >
                   {editingAddress ? "Update Address" : "Add Address"}
                 </button>
