@@ -1,12 +1,15 @@
 "use client";
 
-import { getNewArrivalProducts } from "@/api/fetchNewArrivalProducts";
-import ProductCard from "../CommonComponents/ProductCard/ProductCard";
-import { Product } from "@/types/product";
-import SectionHeader from "../CommonComponents/SectionHeader";
-import { useKeenSlider } from "keen-slider/react";
-import "keen-slider/keen-slider.min.css";
 import { useEffect, useState } from "react";
+import { getNewArrivalProducts } from "@/api/fetchNewArrivalProducts";
+import { Product } from "@/types/product";
+import ProductCard from "../CommonComponents/ProductCard/ProductCard";
+import SectionHeader from "../CommonComponents/SectionHeader";
+
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay, Pagination } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/pagination";
 
 export default function HotListWrapper() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -14,29 +17,9 @@ export default function HotListWrapper() {
 
   useEffect(() => {
     getNewArrivalProducts()
-      .then((res) => {
-        setProducts(res || []);
-      })
+      .then((res) => setProducts(res || []))
       .finally(() => setLoading(false));
   }, []);
-
-  const [sliderRef] = useKeenSlider<HTMLDivElement>({
-    // --- CHANGE MADE HERE: Set loop to true to enable continuous looping ---
-    loop: true, // Now the slider will loop endlessly
-    mode: "free",
-    slides: {
-      perView: 2, // Show 2 cards on mobile
-      spacing: 15,
-    },
-    breakpoints: {
-      "(min-width: 768px)": {
-        slides: { perView: 3, spacing: 20 },
-      },
-      "(min-width: 1024px)": {
-        slides: { perView: 5, spacing: 20 },
-      },
-    },
-  });
 
   if (loading) {
     return <div className="text-center py-8">Loading...</div>;
@@ -51,25 +34,42 @@ export default function HotListWrapper() {
   }
 
   return (
-    // This div ensures all content within it (SectionHeader and keen-slider)
-    // is aligned and centered within the specified maximum width.
-    <div className="py-5 px-4 md:px-10 max-w-7xl mx-auto">
-      {/* The SectionHeader component should align its internal text based on its own implementation.
-          Its placement here ensures it respects the parent container's max-width and centering. */}
+    <div className="px-4 md:px-10 max-w-7xl mx-auto">
       <SectionHeader
         title="Hot List"
         subtitle="Out the most popular and trending products."
       />
 
-      {/* The keen-slider will lay out its slides (ProductCard components) within its own
-          dimensions, which are constrained by the parent max-w container. */}
-      <div ref={sliderRef} className="keen-slider">
+      <Swiper
+        modules={[Autoplay, Pagination]}
+        loop={true}
+        autoplay={{
+          delay: 2500,
+          disableOnInteraction: false,
+          pauseOnMouseEnter: false,
+        }}
+        pagination={{
+          clickable: true,
+          el: ".hotlist-pagination",
+        }}
+        spaceBetween={16}
+        slidesPerView={2}
+        breakpoints={{
+          640: { slidesPerView: 2 },
+          768: { slidesPerView: 3 },
+          1024: { slidesPerView: 5 },
+          1280: { slidesPerView: 5 },
+        }}
+        className="py-4"
+      >
         {products.map((product) => (
-          <div key={product.id} className="keen-slider__slide py-5">
+          <SwiperSlide key={product.id} className="py-0 my-2">
             <ProductCard product={product} />
-          </div>
+          </SwiperSlide>
         ))}
-      </div>
+      </Swiper>
+
+      <div className="hotlist-pagination mt-4 flex justify-center space-x-2" />
     </div>
   );
 }

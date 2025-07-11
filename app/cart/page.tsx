@@ -48,7 +48,7 @@ const EmptyCartAnimation = () => (
     <p className="mt-6 text-xl font-semibold text-gray-700">
       Your cart is empty!
     </p>
-    <p className="mt-2 text-gray-500">
+    <p className="mt-2 text-gray-500 w-72 text-center md:w-full">
       Looks like you haven&apos;t added anything to your cart yet.
     </p>
     <button
@@ -179,21 +179,21 @@ const CartPage = () => {
           {items.map((item) => (
             <div
               key={item.cartItemId}
-              className="bg-white rounded-lg p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between border border-gray-200 shadow-sm mb-4 relative"
+              className="bg-white rounded-lg p-2 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between border border-gray-200 shadow-sm mb-4 relative" // Reduced padding for mobile
             >
               {/* Common Left Section (Image and main text container) */}
-              <div className="flex items-start sm:items-center w-full sm:w-auto mb-4 sm:mb-0">
+              <div className="flex items-start sm:items-center w-full sm:w-auto mb-1 sm:mb-0">
                 {item.slug ? (
                   <Link
                     href={`/product/${item.slug}`}
-                    className="flex-shrink-0 mr-6 flex flex-col items-center" // Added flex-col and items-center
+                    className="flex-shrink-0 mr-4 sm:mr-6 flex flex-col items-center" // Reduced margin for mobile
                   >
                     <Image
                       src={item.image}
                       alt={item.name}
-                      width={112}
-                      height={112}
-                      className="w-28 h-28 object-cover rounded-md cursor-pointer"
+                      width={80} // Reduced image size for mobile
+                      height={80} // Reduced image size for mobile
+                      className="w-20 h-20 object-cover rounded-md cursor-pointer sm:w-28 sm:h-28" // Responsive image size
                     />
                     {/* Stock under image for mobile/tablet/laptop */}
                     <p className="text-xs text-gray-500 mt-1">
@@ -201,15 +201,14 @@ const CartPage = () => {
                     </p>
                   </Link>
                 ) : (
-                  <div className="mr-6 flex-shrink-0 flex flex-col items-center">
+                  <div className="mr-4 sm:mr-6 flex-shrink-0 flex flex-col items-center">
                     {" "}
-                    {/* Added flex-col and items-center */}
                     <Image
                       src={item.image}
                       alt={item.name}
-                      width={112}
-                      height={112}
-                      className="w-28 h-28 object-cover rounded-md"
+                      width={80} // Reduced image size for mobile
+                      height={80} // Reduced image size for mobile
+                      className="w-20 h-20 object-cover rounded-md sm:w-28 sm:h-28" // Responsive image size
                     />
                     {/* Stock under image for mobile/tablet/laptop */}
                     <p className="text-xs text-gray-500 mt-1">
@@ -218,22 +217,26 @@ const CartPage = () => {
                   </div>
                 )}
 
-                {/* Mobile View Specific Layout */}
+                {/* Mobile View Specific Layout - visible only on 'sm' breakpoint and below */}
                 <div className="flex flex-col justify-between h-full w-full sm:hidden">
                   <div>
                     {item.slug ? (
                       <Link href={`/product/${item.slug}`}>
-                        <h3 className="text-base font-semibold text-gray-900 line-clamp-2 hover:text-[#007BFF] transition-colors cursor-pointer">
+                        <h3 className="text-sm font-semibold text-gray-900 line-clamp-2 hover:text-[#007BFF] transition-colors cursor-pointer">
                           {item.name}
                         </h3>
                       </Link>
                     ) : (
-                      <h3 className="text-base font-semibold text-gray-900 line-clamp-2">
+                      <h3 className="text-sm font-semibold text-gray-900 line-clamp-2">
                         {item.name}
                       </h3>
                     )}
-                    <p className="text-sm font-semibold text-gray-900 mt-1">
-                      ₹{item.sellingPrice.toFixed(2)} / item
+                    {/* Selling price specifically for mobile view */}
+                    <p className="text-xs text-gray-700 mt-1">
+                      Price: ₹{item.sellingPrice.toFixed(2)}
+                    </p>
+                    <p className="text-xs  text-gray-900 mt-1">
+                      Total: ₹{(item.sellingPrice * item.quantity).toFixed(2)}
                     </p>
                   </div>
                   <div className="flex items-center justify-between w-full mt-3">
@@ -244,7 +247,9 @@ const CartPage = () => {
                       >
                         -
                       </button>
-                      <span className="font-medium text-base w-4 text-center text-[#213E5A]">
+                      <span className="font-medium text-sm w-4 text-center text-[#213E5A]">
+                        {" "}
+                        {/* Reduced font size here */}
                         {item.quantity}
                       </span>
                       <button
@@ -264,7 +269,7 @@ const CartPage = () => {
                   </div>
                 </div>
 
-                {/* Tablet/Laptop View Specific Layout for Title, Stock, and Quantity */}
+                {/* Tablet/Laptop View Specific Layout for Title, Stock, and Quantity - hidden on 'sm' breakpoint and below */}
                 <div className="hidden sm:flex flex-col justify-between h-full">
                   <div>
                     {item.slug ? (

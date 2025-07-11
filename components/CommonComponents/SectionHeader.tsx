@@ -4,18 +4,28 @@ interface SectionHeaderProps {
   title: string;
   subtitle?: string;
   showDivider?: boolean;
+  // Added new optional props for custom classes
+  titleClass?: string;
+  subtitleClass?: string;
 }
 
 const SectionHeader: React.FC<SectionHeaderProps> = ({
   title,
   subtitle,
   showDivider = true,
+  // Destructure the new props
+  titleClass = "text-3xl font-bold", // Default classes for title
+  subtitleClass = "text-base", // Default classes for subtitle
 }) => {
   return (
-    <div className="">
-      <h2 className="text-[#213E5A] text-3xl font-bold mb-2">{title}</h2>
-      {subtitle && <p className="text-[#213E5A] mb-2">{subtitle}</p>}
-      {showDivider && <hr className="mb-3 mt-3" />}
+    <div className="text-center mb-4 px-4">
+      {" "}
+      {/* Added px-4 for better mobile padding and text-center for alignment */}
+      <h2 className={`text-[#213E5A] mb-2 ${titleClass}`}>{title}</h2>
+      {subtitle && (
+        <p className={`text-[#213E5A] mb-2 ${subtitleClass}`}>{subtitle}</p>
+      )}
+      {showDivider && <hr className=" mt-3" />}
     </div>
   );
 };

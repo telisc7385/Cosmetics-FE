@@ -4,11 +4,16 @@ import NavItems from "@/components/ClientsideComponent/Navbar/NavItems";
 import SearchBar from "@/components/ClientsideComponent/Navbar/SearchBar";
 import NavbarIconsWrapper from "@/components/ClientsideComponent/Navbar/NavbarIconsWrapper";
 import MobileMenu from "@/components/ClientsideComponent/Navbar/MobileMenu";
-import { getCompanySettings } from "@/api/CompanyApi";
+import { CompanySettings } from "@/api/CompanyApi"; // Import CompanySettings
 
-const Navbar = async () => {
-  const settingsRes = await getCompanySettings();
-  const logoUrl = settingsRes?.result?.[0]?.logo || "/logo1.png";
+// Define props interface for Navbar
+interface NavbarProps {
+  companyDetails?: CompanySettings;
+}
+
+// Accept companyDetails as a prop
+const Navbar = async ({ companyDetails }: NavbarProps) => {
+  const logoUrl = companyDetails?.logo || "/logo1.png";
 
   return (
     <nav className="w-full bg-[#f3f6f7] shadow p-2 sticky top-0 z-50 px-6">
@@ -19,6 +24,7 @@ const Navbar = async () => {
             <Image src={logoUrl} alt="Logo" width={120} height={40} />
           </Link>
           <div className="flex justify-center flex-1">
+            {/* NavItems does not directly use logo, but it can be passed if needed for other company info */}
             <NavItems />
           </div>
           <div className="flex items-center gap-4">
@@ -35,7 +41,8 @@ const Navbar = async () => {
           <div className="flex items-center gap-4">
             <SearchBar />
             <NavbarIconsWrapper />
-            <MobileMenu />
+            {/* Pass companyDetails to MobileMenu */}
+            <MobileMenu companyDetails={companyDetails} />
           </div>
         </div>
 
@@ -47,7 +54,8 @@ const Navbar = async () => {
             </Link>
             <div className="flex items-center gap-4">
               <NavbarIconsWrapper />
-              <MobileMenu />
+              {/* Pass companyDetails to MobileMenu */}
+              <MobileMenu companyDetails={companyDetails} />
             </div>
           </div>
           <div className="mt-2">

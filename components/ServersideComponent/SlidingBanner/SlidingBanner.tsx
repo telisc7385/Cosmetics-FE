@@ -12,7 +12,7 @@ const SlidingBanner = () => {
             {[...Array(10)].map((_, i) => (
               <span
                 key={`${index}-${i}`}
-                className="inline-block text-[20px] sm:text-[20px] md:text-[24px] lg:text-[22px] xl:text-[32px] 2xl:text-[36px] font-bold outline-text"
+                className="inline-block text-[22px] sm:text-[20px] md:text-[24px] lg:text-[22px] xl:text-[32px] 2xl:text-[36px] font-bold outline-text"
               >
                 {message}
               </span>

@@ -1,3 +1,4 @@
+// components/CategorySlider.client.tsx (or your path to CategorySlider)
 "use client";
 import Image from "next/image";
 import Link from "next/link";
@@ -5,7 +6,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
-import SectionHeader from "../CommonComponents/SectionHeader";
+import SectionHeader from "../CommonComponents/SectionHeader"; // Adjust path if necessary
 
 interface Category {
   id: number;
@@ -21,18 +22,16 @@ const bgColors = ["#e6ffe6", "#cce0ff", "#ffb3b3", "#CCE6FF", "#FFCCCC"];
 
 export default function CategorySlider({ categories }: Props) {
   return (
-    // The section already has responsive padding (px-4 sm:px-6 md:px-10)
     <section className="w-full px-4 sm:px-6 md:px-10">
-      {/* This div needs a max-width and centering for the content inside CategorySlider itself */}
       <div className="max-w-8xl mx-auto">
-        {/* 🔠 Section Header - Ensure its internal content is centered or aligns with container */}
         <SectionHeader
           title="Featured Categories"
-          subtitle="Discover a variety of product categories tailored to your needs.."
-          // Assuming SectionHeader is responsive and aligns its content properly
+          subtitle="Discover a variety of product categories tailored to your needs."
+          // 👇 THESE ARE THE PROPS CAUSING THE TYPE ERROR IF NOT DEFINED IN SectionHeaderProps
+          titleClass="text-2xl sm:text-3xl lg:text-4xl" // Smaller on mobile (text-2xl)
+          subtitleClass="text-sm sm:text-base lg:text-lg" // Smaller on mobile (text-sm)
         />
 
-        {/* 🚀 Swiper Slider */}
         <Swiper
           spaceBetween={24}
           slidesPerView={1}
@@ -44,15 +43,12 @@ export default function CategorySlider({ categories }: Props) {
           navigation={true}
           modules={[Navigation, Autoplay]}
           breakpoints={{
-            // Mobile (0px and up) - 1 slide per view, card width adjusted
             0: {
-              slidesPerView: 1, // Only 1 full card visible at a time on mobile
+              slidesPerView: 1,
             },
-            // Tablet (640px and up) - 3 slides per view, card width adjusted
             640: {
               slidesPerView: 3,
             },
-            // Laptop (1024px and up) - 5 slides per view, original card width for laptop
             1024: {
               slidesPerView: 5,
             },
@@ -62,12 +58,11 @@ export default function CategorySlider({ categories }: Props) {
             <SwiperSlide key={cat.id}>
               <Link href={`/category/${cat.id}`} passHref>
                 <div
-                  className="flex-shrink-0 
+                  className="flex-shrink-0
                              w-[calc(100%-20px)] sm:w-[200px] lg:w-[260px] /* Responsive width for card */
-                             h-[420px] bg-white rounded-lg group cursor-pointer relative overflow-hidden 
-                             transition-all duration-300 mx-auto" // mx-auto for centering within slide
+                             h-[420px] bg-white rounded-lg group cursor-pointer relative overflow-hidden
+                             transition-all duration-300 mx-auto"
                 >
-                  {/* 🔵 Background Bubble */}
                   <div
                     className={`
                       absolute
@@ -75,7 +70,7 @@ export default function CategorySlider({ categories }: Props) {
                       left-1/2
                       -translate-x-1/2
                       z-0
-                      w-[120px] sm:w-[150px] lg:w-[180px] /* Responsive width for bubble */
+                      w-[180px] sm:w-[150px] lg:w-[180px] /* Increased width for bubble on mobile (w-[180px]) */
                       h-[80px] sm:h-[100px] lg:h-[120px] /* Responsive height for bubble */
                       rounded-sm
                       transition-all duration-500 ease-in-out
@@ -88,7 +83,6 @@ export default function CategorySlider({ categories }: Props) {
                     }}
                   />
 
-                  {/* 🖼 Main Image */}
                   <div className="relative z-10 flex justify-center h-[300px] sm:h-[280px] items-start pt-6">
                     <Image
                       src={cat.imageUrl}
@@ -99,7 +93,6 @@ export default function CategorySlider({ categories }: Props) {
                     />
                   </div>
 
-                  {/* 🔤 Category Name */}
                   <h3 className="relative z-10 mt-20 text-center text-base font-semibold text-black">
                     {cat.name}
                   </h3>

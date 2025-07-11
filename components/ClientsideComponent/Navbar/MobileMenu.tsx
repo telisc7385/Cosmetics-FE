@@ -7,19 +7,29 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 import { getNavbarData, NavbarItem } from "@/api/NavbarApi";
-import { getCompanySettings } from "@/api/CompanyApi";
+import { CompanySettings } from "@/api/CompanyApi"; // Import CompanySettings
 import { fetchCategories } from "@/api/fetchCategories";
-import { Category} from "@/types/category";
+import { Category } from "@/types/category";
 
-const MobileMenu = () => {
+// Define props interface for MobileMenu
+interface MobileMenuProps {
+  companyDetails?: CompanySettings;
+}
+
+// Accept companyDetails as a prop
+const MobileMenu = ({ companyDetails }: MobileMenuProps) => {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [navItems, setNavItems] = useState<NavbarItem[]>([]);
-  const [logo, setLogo] = useState<string>("/logo1.png");
+  // No longer need to fetch logo here, use prop
+  // const [logo, setLogo] = useState<string>("/logo1.png");
   const [categories, setCategories] = useState<Category[]>([]);
   const [showCategories, setShowCategories] = useState(false);
   const [expandedCatId, setExpandedCatId] = useState<number | null>(null);
   const [expandedSubCatId, setExpandedSubCatId] = useState<number | null>(null);
+
+  // Use the logo from companyDetails prop, or fallback
+  const logo = companyDetails?.logo || "/logo1.png";
 
   useEffect(() => {
     const fetchNav = async () => {
@@ -33,16 +43,8 @@ const MobileMenu = () => {
       }
     };
 
-    const fetchLogo = async () => {
-      try {
-        const settings = await getCompanySettings();
-        if (settings?.result?.[0]?.logo) {
-          setLogo(settings.result[0].logo);
-        }
-      } catch (err) {
-        console.error("Failed to load logo:", err);
-      }
-    };
+    // Remove fetchLogo here as it's now passed via props
+    // const fetchLogo = async () => { /* ... */ };
 
     const fetchCats = async () => {
       try {
@@ -56,7 +58,7 @@ const MobileMenu = () => {
     };
 
     fetchNav();
-    fetchLogo();
+    // fetchLogo(); // Remove this line
     fetchCats();
   }, []);
 

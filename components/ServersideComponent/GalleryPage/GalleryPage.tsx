@@ -32,7 +32,7 @@ const GalleryPage = async ({ gallery }: Props) => {
   }
 
   return (
-    <div className="h-auto bg-white px-4 md:px-[40px] max-w-7xl mx-auto">
+    <div className="h-auto bg-white px-4 pt-10 md:px-[40px] max-w-7xl mx-auto">
       <SectionHeader
         title="Our Gallery"
         subtitle="A glimpse into beauty, confidence, and satisfaction."

@@ -38,10 +38,10 @@ export default function FeaturedSlider({ products }: { products: Product[] }) {
 
                 {/* Product Info */}
                 <div className="w-full lg:w-1/2 text-center lg:text-left">
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-[#213e5a]">
                     {product.category?.name}
                   </p>
-                  <h3 className="text-xl sm:text-2xl font-bold mt-1">
+                  <h3 className="text-xl text-[#213e5a] sm:text-2xl font-bold mt-1">
                     {product.name}
                   </h3>
                   <p className="text-[#e60076] font-semibold text-lg sm:text-xl mt-2">
