@@ -25,7 +25,7 @@ const FeaturesBanner = () => {
             key={item.id}
             className="flex flex-col items-center text-center w-full sm:w-[45%] md:w-[22%] lg:w-[22%] xl:w-[22%] px-2"
           >
-            <div className="bg-[#10626b] rounded-full p-4 mb-4 flex items-center justify-center shadow-lg w-30 h-30 flex-shrink-0 group perspective">
+            <div className="bg-[#10626b] rounded-full p-4 mb-4 flex items-center justify-center shadow-lg w-25 h-25 flex-shrink-0 group perspective">
               <div className="transition-transform duration-700 ease-in-out group-hover:rotate-y-360">
                 <Image
                   src={item.image || "/placeholder.png"}
