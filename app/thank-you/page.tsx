@@ -499,33 +499,37 @@ const ThankYouPage = () => {
           </div>
         </div>
 
-        <div className="mt-8 text-center space-y-4 sm:space-y-0 sm:flex sm:justify-center sm:space-x-4">
-          <button
-            onClick={handleDownloadInvoice}
-            className="inline-flex items-center text-[#213E5A] border border-[#213E5A] bg-white font-semibold py-1.5 px-3 rounded-lg text-base transition-all duration-300 transform hover:-translate-y-1 hover:bg-[#213E5A] hover:text-white shadow-md w-full sm:w-auto"
-            disabled={!order.order_info.invoice_url}
-          >
-            <svg
-              className="w-6 h-6 mr-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+        <div className="mt-8 flex flex-col items-center space-y-4 sm:flex-row sm:justify-center sm:space-y-0 sm:space-x-4">
+          <div className="flex flex-col items-center w-full sm:w-auto">
+            <button
+              onClick={handleDownloadInvoice}
+              className="inline-flex items-center justify-center text-[#213E5A] border border-[#213E5A] bg-white font-semibold py-1.5 px-3 rounded-lg text-base transition-all duration-300 transform hover:-translate-y-1 hover:bg-[#213E5A] hover:text-white shadow-md w-full sm:w-auto"
+              disabled={!order.order_info.invoice_url}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-              />
-            </svg>
-            Download Invoice
-          </button>
-          {!order.order_info.invoice_url && (
-            <p className="text-sm text-red-500 mt-2">Invoice not available.</p>
-          )}
+              <svg
+                className="w-6 h-6 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+              Download Invoice
+            </button>
+            {!order.order_info.invoice_url && (
+              <p className="text-sm text-red-500 mt-2 sm:mt-0">
+                Invoice not available.
+              </p>
+            )}
+          </div>
           <Link
             href="/"
-            className="block bg-[#213E5A] text-white py-1.5 px-3 rounded-lg text-base font-semibold transition-transform duration-300 transform hover:-translate-y-1 w-full sm:w-auto"
+            className="block bg-[#213E5A] text-white py-1.5 px-3 rounded-lg text-base font-semibold transition-transform duration-300 transform hover:-translate-y-1 w-full sm:w-auto text-center"
           >
             Continue Shopping
           </Link>
