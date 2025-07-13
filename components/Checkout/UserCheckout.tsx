@@ -1019,7 +1019,7 @@ const UserCheckout = () => {
                   : `₹${Number(shippingCharges).toFixed(2)}`}
               </span>
             </div>
-            <div className="flex justify-between border-t border-gray-200 pt-3 text-lg font-bold">
+            <div className="flex text-gray-700 justify-between border-t border-gray-200 pt-3 text-lg font-bold">
               <span>Total</span>
               <span>
                 {/* `finalTotalAmount` should be the updated total from /coupon/redeem */}
