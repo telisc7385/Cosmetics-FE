@@ -41,9 +41,10 @@ interface CouponApiResponse {
 interface CouponRedeemResponse {
   success: boolean;
   message: string;
-  discountAmount: number; // The actual calculated discount amount in currency (e.g., 50.00)
-  updatedTotalAmount: number; // The new total after discount in currency (e.g., 950.00)
-  couponCode: string; // The code that was applied
+  data: {
+    couponCode: string;
+    discount: number; // The actual calculated discount amount in currency (e.g., 50.00)
+  };
 }
 
 const UserCheckout = () => {
@@ -81,7 +82,13 @@ const UserCheckout = () => {
 
   // Recalculate final total if subtotal, shipping, or coupon status changes.
   useEffect(() => {
-    if (!appliedCoupon || discountAmount === 0) {
+    // If there's an applied coupon and a discount amount, use them.
+    // Otherwise, calculate total based on subtotal and shipping.
+    if (appliedCoupon && discountAmount > 0) {
+      setFinalTotalAmount(
+        Number(initialSubtotal) + Number(shippingCharges) - discountAmount
+      );
+    } else {
       setFinalTotalAmount(Number(initialSubtotal) + Number(shippingCharges));
     }
   }, [initialSubtotal, shippingCharges, appliedCoupon, discountAmount]);
@@ -388,11 +395,21 @@ const UserCheckout = () => {
       toast.error("Please log in to fetch coupons.");
       return;
     }
+    // Only fetch if cartId is available and valid
+    if (typeof cartId !== "number" || cartId <= 0) {
+      toast.error(
+        "Cannot fetch coupons: Invalid Cart ID. Please ensure your cart is loaded."
+      );
+      console.error("Attempted to fetch coupons with invalid cartId:", cartId);
+      return;
+    }
+
     try {
+      // For GET request, send cartId as a query parameter
       const response = await apiCore<CouponApiResponse>(
         "/coupon",
-        "GET",
-        undefined,
+        "POST", // Use GET method as specified
+        {cartid:cartId}, // No request body for GET with query parameters
         token
       );
       if (response.success) {
@@ -453,10 +470,13 @@ const UserCheckout = () => {
       if (response.success) {
         setAppliedCoupon(coupon); // Store the full coupon object
 
-        // CRITICAL: Ensure `response.discountAmount` and `response.updatedTotalAmount` are numbers.
-        // Use Number() to explicitly cast in case the API sends them as string or if they might be null/undefined.
-        setDiscountAmount(Number(response.discountAmount));
-        setFinalTotalAmount(Number(response.updatedTotalAmount));
+        // CRITICAL: Use response.data.discount for the actual calculated discount amount.
+        setDiscountAmount(Number(response.data.discount));
+
+        // Recalculate final total based on the new discount
+        setFinalTotalAmount(
+          Number(initialSubtotal) + Number(shippingCharges) - Number(response.data.discount)
+        );
 
         toast.success(`Coupon "${coupon.name}" applied successfully!`);
         setShowCouponSection(false); // Hide coupon list after successful application
@@ -896,12 +916,11 @@ const UserCheckout = () => {
                       >
                         <Minus size={14} />
                       </button>
-
                       <button
                         onClick={() => removeCartItem(item.cartItemId)}
-                        className="ml-auto text-red-500 hover:text-red-700 transition-colors cursor-pointer"
+                        className="ml-auto p-1 rounded-full text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
                       >
-                        <Trash2 size={18} />
+                        <Trash2 size={16} />
                       </button>
                     </div>
                   </div>
@@ -909,76 +928,81 @@ const UserCheckout = () => {
               ))}
             </ul>
           )}
-          <hr className="my-6 border-gray-200" />
-          <h3
-            className="text-lg font-semibold text-gray-800 cursor-pointer flex justify-between items-center"
-            onClick={() => {
-              setShowCouponSection(!showCouponSection);
-              if (!showCouponSection) fetchCoupons(); // Fetch coupons when opening
-            }}
-          >
-            Apply Coupon
-            <Plus
-              size={18}
-              className={`transition-transform ${
-                showCouponSection ? "rotate-45" : "rotate-0"
-              }`}
-            />
-          </h3>
+        </div>
+
+        {/* Coupon Section */}
+        <div className="bg-white p-3 rounded-lg shadow-md">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">Coupons</h2>
+          {!appliedCoupon ? (
+            <button
+              onClick={() => {
+                setShowCouponSection(!showCouponSection);
+                if (!showCouponSection) {
+                  fetchCoupons(); // Fetch coupons when the section is expanded
+                }
+              }}
+              className="w-full bg-[#213E5A] text-white py-2 rounded-md hover:bg-[#1a324a] transition-colors font-semibold"
+            >
+              {showCouponSection ? "Hide Coupons" : "Apply Coupon"}
+            </button>
+          ) : (
+            <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded-md p-3">
+              <div>
+                <p className="font-semibold text-green-700">
+                  Applied: {appliedCoupon.name} ({appliedCoupon.code})
+                </p>
+                <p className="text-sm text-green-600">
+                  Discount: ₹{discountAmount.toFixed(2)}
+                </p>
+              </div>
+              <button
+                onClick={handleRemoveCoupon}
+                className="ml-3 py-1 px-3 bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition-colors text-sm font-medium"
+              >
+                Remove
+              </button>
+            </div>
+          )}
+
           {showCouponSection && (
-            <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+            <div className="mt-4 border-t pt-4 border-gray-200">
               {availableCoupons.length === 0 ? (
-                <p className="text-gray-600 text-sm">No coupons available.</p>
+                <p className="text-gray-600">No available coupons at the moment.</p>
               ) : (
-                <ul className="space-y-2">
+                <ul className="space-y-3">
                   {availableCoupons.map((coupon) => (
                     <li
                       key={coupon.id}
-                      className="flex justify-between items-center p-2 border border-gray-300 rounded-md bg-white shadow-sm"
+                      className="border border-gray-200 rounded-lg p-3 flex justify-between items-center bg-gray-50"
                     >
                       <div>
-                        <p className="font-semibold text-gray-800 text-sm">
-                          {coupon.name}
-                        </p>
-                        <p className="text-xs text-gray-600">
-                          Code:{" "}
-                          <span className="font-mono bg-gray-100 px-1 py-0.5 rounded">
-                            {coupon.code}
-                          </span>
-                          {/* Use handleCopyCoupon and display copiedCouponCode */}
-                          <button
-                            onClick={() => handleCopyCoupon(coupon.code)}
-                            className="ml-2 px-2 py-0.5 text-xs bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
-                          >
-                            {copiedCouponCode === coupon.code
-                              ? "Copied!"
-                              : "Copy"}
-                          </button>
-                        </p>
-                        <p className="text-xs text-green-600">
-                          Discount: {coupon.discount}%{" "}
-                          {/* Display percentage from /coupon API */}
+                        <p className="font-semibold text-gray-800">{coupon.name}</p>
+                        <p className="text-sm text-gray-600">Code: {coupon.code}</p>
+                        <p className="text-sm text-gray-600">
+                          Discount: {coupon.discount}%
                         </p>
                         <p className="text-xs text-gray-500">
-                          Expires:{" "}
-                          {new Date(coupon.expiresAt).toLocaleDateString()}
+                          Expires: {new Date(coupon.expiresAt).toLocaleDateString()}
                         </p>
                       </div>
-                      {appliedCoupon?.id === coupon.id ? (
+                      <div className="flex items-center space-x-2">
                         <button
-                          onClick={handleRemoveCoupon}
-                          className="px-3 py-1 bg-red-500 text-white text-xs rounded-md hover:bg-red-600 transition-colors"
+                          onClick={() => handleCopyCoupon(coupon.code)}
+                          className={`py-1 px-3 text-xs rounded-md transition-colors ${
+                            copiedCouponCode === coupon.code
+                              ? "bg-blue-500 text-white"
+                              : "bg-blue-100 text-blue-700 hover:bg-blue-200"
+                          }`}
                         >
-                          Remove
+                          {copiedCouponCode === coupon.code ? "Copied!" : "Copy"}
                         </button>
-                      ) : (
                         <button
                           onClick={() => handleApplyCoupon(coupon)}
-                          className="px-3 py-1 bg-[#213E5A] text-white text-xs rounded-md hover:bg-[#1a324a] transition-colors"
+                          className="py-1 px-3 bg-[#213E5A] text-white text-xs rounded-md hover:bg-[#1a324a] transition-colors"
                         >
                           Apply
                         </button>
-                      )}
+                      </div>
                     </li>
                   ))}
                 </ul>
@@ -987,70 +1011,41 @@ const UserCheckout = () => {
           )}
         </div>
 
+        {/* Order Summary */}
         <div className="bg-white p-3 rounded-lg shadow-md">
           <h2 className="text-2xl font-bold text-gray-800 mb-6">
             Order Summary
           </h2>
-          <div className="space-y-3 text-sm">
+          <div className="space-y-2 text-gray-700 text-base">
             <div className="flex justify-between">
-              <span className="text-gray-700">
-                Subtotal ({items.length} items)
-              </span>
-              <span className="font-medium text-gray-900">
-                {/* Use Number() to explicitly cast to a number before toFixed */}
-                ₹{Number(initialSubtotal).toFixed(2)}
-              </span>
+              <span>Subtotal:</span>
+              <span className="font-medium">₹{initialSubtotal.toFixed(2)}</span>
             </div>
-            {appliedCoupon && (
-              <div className="flex justify-between text-green-600">
-                <span>Coupon Discount ({appliedCoupon.code})</span>
-                <span className="font-medium">
-                  {/* `discountAmount` should be the actual calculated currency value from /coupon/redeem */}
-                  - ₹{Number(discountAmount).toFixed(2)}
-                </span>
-              </div>
-            )}
             <div className="flex justify-between">
-              <span className="text-gray-700">Shipping</span>
-              <span className="font-medium text-gray-900">
-                {/* Ensure shippingCharges is a number */}
-                {shippingCharges === 0
-                  ? "FREE"
-                  : `₹${Number(shippingCharges).toFixed(2)}`}
-              </span>
+              <span>Shipping:</span>
+              <span className="font-medium">₹{shippingCharges.toFixed(2)}</span>
             </div>
-            <div className="flex text-gray-700 justify-between border-t border-gray-200 pt-3 text-lg font-bold">
-              <span>Total</span>
-              <span>
-                {/* `finalTotalAmount` should be the updated total from /coupon/redeem */}
-                ₹{Number(finalTotalAmount).toFixed(2)}
-              </span>
+            <div className="flex justify-between text-green-700">
+              <span>Coupon Discount:</span>
+              <span className="font-medium">- ₹{discountAmount.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between border-t border-gray-200 pt-3 text-lg font-bold text-gray-900">
+              <span>Total:</span>
+              <span>₹{finalTotalAmount.toFixed(2)}</span>
             </div>
           </div>
           <button
             onClick={handlePlaceOrder}
-            disabled={
-              isPlacingOrder ||
-              items.length === 0 ||
-              cartLoading ||
-              addressIsLoading ||
-              !selectedBillingAddressId ||
-              !selectedDeliveryAddressId
-            }
-            className={`w-full py-3 mt-6 rounded-md font-semibold flex items-center justify-center transition-colors ${
-              isPlacingOrder ||
-              items.length === 0 ||
-              cartLoading ||
-              addressIsLoading ||
-              !selectedBillingAddressId ||
-              !selectedDeliveryAddressId
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                : "bg-[#213E5A] hover:bg-[#1a324a] text-white cursor-pointer"
+            disabled={isPlacingOrder || items.length === 0 || !selectedDeliveryAddressId || !selectedBillingAddressId}
+            className={`mt-6 w-full py-3 rounded-md font-bold text-white transition-colors flex items-center justify-center gap-2 ${
+              isPlacingOrder || items.length === 0 || !selectedDeliveryAddressId || !selectedBillingAddressId
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-[#213E5A] hover:bg-[#1a324a]"
             }`}
           >
             {isPlacingOrder ? (
               <>
-                <div className="cart-loader running mr-3">
+                <div className="cart-loader running">
                   <div className="wheel left"></div>
                   <div className="wheel right"></div>
                   <div className="product"></div>
@@ -1063,128 +1058,149 @@ const UserCheckout = () => {
           </button>
         </div>
       </div>
-      {/* Address Modal */}
+
+      {/* Address Modal (remains unchanged) */}
       {showModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg p-6 max-w-lg w-full shadow-lg relative">
-            <h2 className="text-xl font-bold mb-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-lg p-6 relative">
+            <h3 className="text-2xl font-bold mb-6 text-gray-800">
               {editingAddress ? "Edit Address" : "Add New Address"}
-            </h2>
-            <form
-              onSubmit={handleFormSubmit}
-              className="grid grid-cols-1 md:grid-cols-2 gap-4"
+            </h3>
+            <button
+              onClick={() => setShowModal(false)}
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition-colors"
             >
+              &times;
+            </button>
+            <form onSubmit={handleFormSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="fullName"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Full Name
                 </label>
                 <input
                   type="text"
+                  id="fullName"
                   name="fullName"
                   value={formData.fullName}
                   onChange={handleFormChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-[#213E5A] focus:border-[#213E5A]"
+                  className="w-full border border-gray-300 px-3 py-2 rounded-md focus:ring-[#213E5A] focus:border-[#213E5A] text-sm"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Phone
+                <label
+                  htmlFor="phone"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Phone Number
                 </label>
                 <input
                   type="tel"
+                  id="phone"
                   name="phone"
                   value={formData.phone}
                   onChange={handleFormChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-[#213E5A] focus:border-[#213E5A]"
-                  required
+                  className="w-full border border-gray-300 px-3 py-2 rounded-md focus:ring-[#213E5A] focus:border-[#213E5A] text-sm"
                   maxLength={10}
-                  pattern="\d{10}"
-                  title="Phone number must be 10 digits"
+                  required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="pincode"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Pincode
                 </label>
                 <input
                   type="text"
+                  id="pincode"
                   name="pincode"
                   value={formData.pincode}
                   onChange={handleFormChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-[#213E5A] focus:border-[#213E5A]"
-                  required
+                  className="w-full border border-gray-300 px-3 py-2 rounded-md focus:ring-[#213E5A] focus:border-[#213E5A] text-sm"
                   maxLength={6}
-                  pattern="\d{6}"
-                  title="Pincode must be 6 digits"
+                  required
                 />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label
+                    htmlFor="city"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    City
+                  </label>
+                  <input
+                    type="text"
+                    id="city"
+                    name="city"
+                    value={formData.city}
+                    onChange={handleFormChange}
+                    className="w-full border border-gray-300 px-3 py-2 rounded-md focus:ring-[#213E5A] focus:border-[#213E5A] text-sm"
+                    required
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="state"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    State
+                  </label>
+                  <input
+                    type="text"
+                    id="state"
+                    name="state"
+                    value={formData.state}
+                    onChange={handleFormChange}
+                    className="w-full border border-gray-300 px-3 py-2 rounded-md focus:ring-[#213E5A] focus:border-[#213E5A] text-sm"
+                    required
+                  />
+                </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  State
-                </label>
-                <input
-                  type="text"
-                  name="state"
-                  value={formData.state}
-                  onChange={handleFormChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-[#213E5A] focus:border-[#213E5A]"
-                  required
-                />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  City
-                </label>
-                <input
-                  type="text"
-                  name="city"
-                  value={formData.city}
-                  onChange={handleFormChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-[#213E5A] focus:border-[#213E5A]"
-                  required
-                />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  Address Line
+                <label
+                  htmlFor="addressLine"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                  Address Line (House No., Building, Street, Area)
                 </label>
                 <textarea
+                  id="addressLine"
                   name="addressLine"
                   value={formData.addressLine}
                   onChange={handleFormChange}
                   rows={3}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-[#213E5A] focus:border-[#213E5A]"
+                  className="w-full border border-gray-300 px-3 py-2 rounded-md focus:ring-[#213E5A] focus:border-[#213E5A] text-sm"
                   required
                 ></textarea>
               </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700">
+              <div>
+                <label
+                  htmlFor="landmark"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Landmark (Optional)
                 </label>
                 <input
                   type="text"
+                  id="landmark"
                   name="landmark"
                   value={formData.landmark}
                   onChange={handleFormChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-[#213E5A] focus:border-[#213E5A]"
+                  className="w-full border border-gray-300 px-3 py-2 rounded-md focus:ring-[#213E5A] focus:border-[#213E5A] text-sm"
                 />
               </div>
-              <div className="md:col-span-2 flex justify-end space-x-3 mt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-[#213E5A] text-white rounded-md hover:bg-[#1a324a] transition-colors"
-                >
-                  {editingAddress ? "Update Address" : "Add Address"}
-                </button>
-              </div>
+              <button
+                type="submit"
+                className="w-full bg-[#213E5A] text-white py-2 rounded-md hover:bg-[#1a324a] transition-colors font-semibold"
+              >
+                {editingAddress ? "Update Address" : "Add Address"}
+              </button>
             </form>
           </div>
         </div>
