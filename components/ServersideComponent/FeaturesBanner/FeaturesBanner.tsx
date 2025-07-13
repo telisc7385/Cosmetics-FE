@@ -18,7 +18,7 @@ const FeaturesBanner = () => {
   }, []);
 
   return (
-    <div className="bg-red-200 my-12 py-6 px-4">
+    <div className="bg-[#f9fafb] my-12 py-6 px-4">
       <div className="max-w-7xl mx-auto flex flex-wrap justify-center gap-x-8 gap-y-12">
         {features.map((item) => (
           <div

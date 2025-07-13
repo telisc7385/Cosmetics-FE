@@ -1,4 +1,4 @@
-// components/CategorySlider.client.tsx (or your path to CategorySlider)
+// components/CategorySlider.client.tsx
 "use client";
 import Image from "next/image";
 import Link from "next/link";
@@ -27,9 +27,8 @@ export default function CategorySlider({ categories }: Props) {
         <SectionHeader
           title="Featured Categories"
           subtitle="Discover a variety of product categories tailored to your needs."
-          // 👇 THESE ARE THE PROPS CAUSING THE TYPE ERROR IF NOT DEFINED IN SectionHeaderProps
-          titleClass="text-2xl sm:text-3xl lg:text-4xl" // Smaller on mobile (text-2xl)
-          subtitleClass="text-sm sm:text-base lg:text-lg" // Smaller on mobile (text-sm)
+          titleClass="text-2xl sm:text-3xl lg:text-4xl"
+          subtitleClass="text-sm sm:text-base lg:text-lg"
         />
 
         <Swiper
@@ -59,23 +58,23 @@ export default function CategorySlider({ categories }: Props) {
               <Link href={`/category/${cat.id}`} passHref>
                 <div
                   className="flex-shrink-0
-                             w-[calc(100%-20px)] sm:w-[200px] lg:w-[260px] /* Responsive width for card */
+                             w-[calc(100%-20px)] sm:w-[200px] lg:w-[260px]
                              h-[420px] bg-white rounded-lg group cursor-pointer relative overflow-hidden
                              transition-all duration-300 mx-auto"
                 >
                   <div
                     className={`
                       absolute
-                      bottom-[80px]
+                      bottom-[80px] sm:bottom-[100px] md:bottom-[120px] lg:bottom-[80px] /* Tablet view shifted up */
                       left-1/2
                       -translate-x-1/2
                       z-0
-                      w-[180px] sm:w-[150px] lg:w-[180px] /* Increased width for bubble on mobile (w-[180px]) */
-                      h-[80px] sm:h-[100px] lg:h-[120px] /* Responsive height for bubble */
+                      w-[220px] sm:w-[150px] lg:w-[180px]
+                      h-[80px] sm:h-[100px] lg:h-[120px]
                       rounded-sm
                       transition-all duration-500 ease-in-out
-                      group-hover:w-[180px] sm:group-hover:w-[200px] lg:group-hover:w-[220px] /* Hover responsive width */
-                      group-hover:h-[120px] sm:group-hover:h-[150px] lg:group-hover:h-[180px] /* Hover responsive height */
+                      group-hover:w-[220px] sm:group-hover:w-[200px] lg:group-hover:w-[220px]
+                      group-hover:h-[120px] sm:group-hover:h-[150px] lg:group-hover:h-[180px]
                       group-hover:rounded-[10px]
                     `}
                     style={{
