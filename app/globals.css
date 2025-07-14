@@ -137,3 +137,33 @@ body {
   border-radius: 1rem;
   animation: glowing-border 5s linear infinite;
 }
+/*  */
+/* Swiper Custom Pagination Dots */
+.swiper-pagination-bullet-custom {
+  width: 7px; /* Adjust size as needed */
+  height: 7px; /* Adjust size as needed */
+  background-color: #d1d5db; /* Light gray for inactive dots */
+  opacity: 1; /* Ensure they are fully visible */
+  border-radius: 50%; /* Make them perfectly round */
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  cursor: pointer;
+  margin: 0 4px; /* Space between dots */
+}
+
+.swiper-pagination-bullet-custom-active {
+  background-color: #213e5a; /* Your brand color for active dot */
+  transform: scale(1.2); /* Slightly enlarge active dot */
+}
+
+/* Ensure the pagination container doesn't hide them */
+.swiper-pagination-custom {
+  position: absolute;
+  bottom: 90px; /* Increased from 60px to 90px to move them further up */
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10; /* Ensure dots are above other content if necessary */
+  pointer-events: auto; /* Make sure they are clickable */
+}

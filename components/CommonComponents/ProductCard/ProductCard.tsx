@@ -1,4 +1,3 @@
-// ProductCard.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -8,8 +7,8 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks/hooks";
 import { addToCart } from "@/store/slices/cartSlice";
 import { selectIsLoggedIn } from "@/store/slices/authSlice";
 import { useLoggedInCart } from "@/CartProvider/LoggedInCartProvider";
-import { Product, ProductVariant } from "@/types/product"; // Assuming Product and ProductVariant types are correctly imported from here
-import toast from "react-hot-toast"; // Keep toast import, for other errors if needed
+import { Product, ProductVariant } from "@/types/product";
+import toast from "react-hot-toast";
 import { HiOutlineShoppingBag } from "react-icons/hi2";
 import { MdTune } from "react-icons/md";
 
@@ -66,7 +65,6 @@ const ProductCard = ({ product }: Props) => {
   const currentSellingPrice = Number(
     selectedVariant?.selling_price || product.sellingPrice || 0
   );
-
   const currentBasePrice = Number(
     selectedVariant?.base_price || product.basePrice || 0
   );
@@ -82,7 +80,7 @@ const ProductCard = ({ product }: Props) => {
     const itemPayload = {
       id: product.id,
       name: product.name,
-      quantity: 1, // Product card adds 1 at a time
+      quantity: 1,
       sellingPrice: currentSellingPrice,
       basePrice: currentBasePrice,
       image: firstGeneralImage || "/placeholder.jpg",
@@ -100,7 +98,6 @@ const ProductCard = ({ product }: Props) => {
     if (isLoggedIn) {
       try {
         await addCartItem(itemPayload);
-        // REMOVED: toast.success(`${product.name} added to cart!`);
       } catch (error) {
         toast.error("Failed to add product to cart.");
         return error;
@@ -110,9 +107,9 @@ const ProductCard = ({ product }: Props) => {
         addToCart({
           ...itemPayload,
           cartItemId: Date.now() * -1 - Math.floor(Math.random() * 1000),
+          productId: product.id, // ✅ Added to fix the TypeScript error
         })
       );
-      // REMOVED: toast.success(`${product.name} added to cart!`);
     }
   };
 
@@ -150,9 +147,8 @@ const ProductCard = ({ product }: Props) => {
 
       {/* Product Details Section */}
       <div className="flex flex-col flex-grow w-full">
-        {/* Product Title */}
         <Link href={`/product/${product.slug}`}>
-          <h3 className="text-sm font-semibold text-gray-800 line-clamp-2 min-h-[36px] mb-2">
+          <h3 className="text-sm font-semibold text-gray-800 line-clamp-1 mb-2">
             {product.name}
           </h3>
         </Link>
@@ -160,7 +156,7 @@ const ProductCard = ({ product }: Props) => {
         {/* Price Information */}
         <div className="flex flex-row items-baseline gap-2 justify-center mb-3">
           {!isNaN(currentBasePrice) && currentBasePrice > 0 ? (
-            <div className="text-lg font-bold text-[#213E5A]">
+            <div className="text-base font-bold text-[#213E5A]">
               ₹{currentBasePrice.toFixed(2)}
             </div>
           ) : (
@@ -172,19 +168,17 @@ const ProductCard = ({ product }: Props) => {
           {!isNaN(currentSellingPrice) &&
             currentSellingPrice > currentBasePrice &&
             currentSellingPrice > 0 && (
-              <div className="text-sm text-gray-400 line-through">
+              <div className="text-xs text-gray-400 line-through">
                 ₹{currentSellingPrice.toFixed(2)}
               </div>
             )}
         </div>
 
-        {/* Buttons - centered below the price, pushed to bottom */}
+        {/* Buttons */}
         <div className="flex justify-center mt-auto w-full">
           {product.variants && product.variants.length > 0 ? (
             <Link href={`/product/${product.slug}`}>
               <button className="flex items-center justify-center gap-1 bg-[#213E5A] text-white text-[11px] px-3 py-1.5 rounded-full hover:bg-opacity-90 transition-all duration-300 shadow-sm hover:shadow-md max-w-[150px]">
-                {" "}
-                {/* Added max-w-[150px] */}
                 <MdTune className="text-base" /> Variant Options
               </button>
             </Link>
@@ -194,7 +188,6 @@ const ProductCard = ({ product }: Props) => {
               onClick={handleAddToCart}
               disabled={isOutOfStock}
               className={`flex items-center justify-center gap-1 bg-[#213E5A] text-white text-[11px] px-3 py-1.5 rounded-full transition-all duration-300 shadow-sm hover:shadow-md max-w-[150px] ${
-                /* Added max-w-[150px] */
                 isOutOfStock
                   ? "opacity-50 cursor-not-allowed bg-gray-400"
                   : "hover:bg-opacity-90 cursor-pointer"

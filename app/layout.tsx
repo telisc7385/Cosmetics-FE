@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Josefin_Sans } from "next/font/google";
+import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/ServersideComponent/Navbar/NavbarComponent";
-
 import { Toaster } from "react-hot-toast";
 import Footer from "@/components/ServersideComponent/Footer/Footer";
 import { fetchTopCategories } from "@/api/fetchTopCategories";
 import ReduxProviderWrapper from "@/CartProvider/ReduxProviderWrapper";
-import { getCompanySettings, CompanySettings } from "@/api/CompanyApi"; // Import CompanyApi and CompanySettings
+import { getCompanySettings, CompanySettings } from "@/api/CompanyApi";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,8 +18,8 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const josefinSans = Josefin_Sans({
-  variable: "--font-josefin-sans",
+const playfairDisplay = Playfair_Display({
+  variable: "--font-playfair-display",
   subsets: ["latin"],
   display: "swap",
 });
@@ -32,11 +31,8 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   const topCategories = await fetchTopCategories();
-
   const companySettingsRes = await getCompanySettings();
   const companyDetails: CompanySettings | undefined =
     companySettingsRes?.result?.[0];
@@ -44,14 +40,12 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${josefinSans.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${playfairDisplay.variable} font-serif antialiased`}
       >
         <ReduxProviderWrapper>
           <Toaster position="top-center" />
-
           <Navbar companyDetails={companyDetails} />
           <main className="pt-0 bg-white">{children}</main>
-
           <Footer
             topCategories={topCategories}
             companyDetails={companyDetails}

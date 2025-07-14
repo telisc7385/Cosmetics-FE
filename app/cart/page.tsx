@@ -156,7 +156,7 @@ const CartPage = () => {
       total + item.sellingPrice * item.quantity,
     0
   );
-  const tax = 0;
+  const tax = 0; // Tax is currently fixed at 0.
   const total = subtotal + tax;
 
   if (loading && items.length === 0)
@@ -179,21 +179,21 @@ const CartPage = () => {
           {items.map((item) => (
             <div
               key={item.cartItemId}
-              className="bg-white rounded-lg p-2 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between border border-gray-200 shadow-sm mb-4 relative" // Reduced padding for mobile
+              className="bg-white rounded-lg p-2 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between border border-gray-200 shadow-sm mb-4 relative"
             >
               {/* Common Left Section (Image and main text container) */}
               <div className="flex items-start sm:items-center w-full sm:w-auto mb-1 sm:mb-0">
                 {item.slug ? (
                   <Link
                     href={`/product/${item.slug}`}
-                    className="flex-shrink-0 mr-4 sm:mr-6 flex flex-col items-center" // Reduced margin for mobile
+                    className="flex-shrink-0 mr-4 sm:mr-6 flex flex-col items-center"
                   >
                     <Image
                       src={item.image}
                       alt={item.name}
-                      width={80} // Reduced image size for mobile
-                      height={80} // Reduced image size for mobile
-                      className="w-20 h-20 object-cover rounded-md cursor-pointer sm:w-28 sm:h-28" // Responsive image size
+                      width={80}
+                      height={80}
+                      className="w-20 h-20 object-cover rounded-md cursor-pointer sm:w-28 sm:h-28"
                     />
                     {/* Stock under image for mobile/tablet/laptop */}
                     <p className="text-xs text-gray-500 mt-1">
@@ -206,9 +206,9 @@ const CartPage = () => {
                     <Image
                       src={item.image}
                       alt={item.name}
-                      width={80} // Reduced image size for mobile
-                      height={80} // Reduced image size for mobile
-                      className="w-20 h-20 object-cover rounded-md sm:w-28 sm:h-28" // Responsive image size
+                      width={80}
+                      height={80}
+                      className="w-20 h-20 object-cover rounded-md sm:w-28 sm:h-28"
                     />
                     {/* Stock under image for mobile/tablet/laptop */}
                     <p className="text-xs text-gray-500 mt-1">
@@ -235,7 +235,7 @@ const CartPage = () => {
                     <p className="text-xs text-gray-700 mt-1">
                       Price: ₹{item.sellingPrice.toFixed(2)}
                     </p>
-                    <p className="text-xs  text-gray-900 mt-1">
+                    <p className="text-xs text-gray-900 mt-1">
                       Total: ₹{(item.sellingPrice * item.quantity).toFixed(2)}
                     </p>
                   </div>
@@ -297,7 +297,7 @@ const CartPage = () => {
                       {/* Reduced width (w-20) and vertical padding (py-0.5) */}
                       <button
                         onClick={() => handleDecrement(item.cartItemId)}
-                        className="w-7 h-5 flex items-center justify-center text-gray-600 hover:bg-gray-100 rounded-sm cursor-pointer text-base" // Reduced width (w-7), height (h-5), and font size (text-base)
+                        className="w-7 h-5 flex items-center justify-center text-gray-600 hover:bg-gray-100 rounded-sm cursor-pointer text-base"
                       >
                         -
                       </button>
@@ -308,7 +308,7 @@ const CartPage = () => {
                       </span>
                       <button
                         onClick={() => handleIncrement(item.cartItemId)}
-                        className="w-7 h-5 flex items-center justify-center text-gray-600 hover:bg-gray-100 rounded-sm cursor-pointer text-base" // Reduced width (w-7), height (h-5), and font size (text-base)
+                        className="w-7 h-5 flex items-center justify-center text-gray-600 hover:bg-gray-100 rounded-sm cursor-pointer text-base"
                       >
                         +
                       </button>
@@ -359,6 +359,9 @@ const CartPage = () => {
             />
           </div>
 
+          {/* Billing and Shipping Addresses Display - Removed, as per request */}
+          {/* Coupon Code Input and Apply Button - Removed, as per request */}
+
           <div className="space-y-2">
             <div className="flex justify-between pb-2 border-b border-gray-200">
               <span className="text-gray-700">Subtotal</span>
@@ -372,6 +375,7 @@ const CartPage = () => {
                 ₹{tax.toFixed(2)}
               </span>
             </div>
+            {/* Discount display removed as coupon section is removed */}
             <div className="flex justify-between pt-4 border-t-2 border-gray-300">
               <span className="text-xl font-bold text-gray-900">Total</span>
               <span className="text-xl font-bold text-gray-900">
@@ -383,11 +387,11 @@ const CartPage = () => {
           <button
             onClick={handleCheckoutClick}
             className={`w-full py-3 mt-6 text-white font-semibold rounded-md transition-colors ${
-              pincodeVerified
+              pincodeVerified && items.length > 0
                 ? "bg-[#1A324A] hover:bg-[#142636] cursor-pointer"
                 : "bg-gray-300 cursor-not-allowed"
             }`}
-            disabled={!pincodeVerified}
+            disabled={!pincodeVerified || items.length === 0}
           >
             Checkout
           </button>

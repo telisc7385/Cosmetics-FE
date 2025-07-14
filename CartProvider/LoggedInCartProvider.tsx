@@ -20,6 +20,8 @@ import {
   CartApiResponse,
   CartItemInput,
   LoggedInCartContextType,
+  Product, // Ensure Product type is imported if used in CartItem (for product?.id)
+  ProductVariant, // Ensure ProductVariant type is imported
 } from "@/types/cart"; // Assuming types/cart.ts is the source for these
 
 // Helper to transform API cart items to frontend CartItem format
@@ -51,7 +53,7 @@ const parseCartResponse = (response: CartApiResponse): CartItem[] => {
     ) {
       rawCartItems = response.items;
     } else {
-      // console.warn("LoggedInCartProvider: Unexpected GET /cart response structure. Please adjust parseCartResponse.", response); // Removed console.warn
+      // If the structure is not recognized, return an empty array
       return [];
     }
 
@@ -72,7 +74,11 @@ const parseCartResponse = (response: CartApiResponse): CartItem[] => {
           item.variant.productId !== null);
 
       if (!cartItemIdExists || !productIdExists) {
-        // console.warn("LoggedInCartProvider: Skipping malformed cart item due to missing critical IDs (id or product/variant productId):", item); // Removed console.warn
+        // Log to console if an item is malformed (for debugging, but not a critical error for the user)
+        console.warn(
+          "LoggedInCartProvider: Skipping malformed cart item due to missing critical IDs (id or product/variant productId):",
+          item
+        );
         return false;
       }
       return true;
@@ -97,19 +103,13 @@ const parseCartResponse = (response: CartApiResponse): CartItem[] => {
             : item.variant?.productId !== undefined &&
               item.variant?.productId !== null
             ? Number(item.variant.productId)
-            : 0;
+            : 0; // Default to 0 if no valid product ID is found
 
         if (!cartItemId || isNaN(productId)) {
-          console.error(
-            "LoggedInCartProvider: Critical ID still missing or not a number after initial parsing attempt.",
-            {
-              rawItem: item,
-              extractedCartItemId: cartItemId,
-              extractedProductId: productId,
-            }
-          );
+          // This indicates a severe issue with backend data if it passes the filter but fails here.
+          // Throwing an error might be appropriate to halt processing of bad data.
           throw new Error(
-            "Backend response missing cartItemId or productId, or productId not a number for a cart item."
+            "Backend response missing cartItemId or productId, or productId not a number for a cart item after filtering."
           );
         }
 
@@ -159,13 +159,14 @@ const parseCartResponse = (response: CartApiResponse): CartItem[] => {
 
         return {
           cartItemId: cartItemId,
-          id: productId,
+          id: productId, // The product ID
+          productId: productId, // Explicitly set productId here
           name: displayName,
           quantity: quantity,
           sellingPrice: sellingPrice,
           basePrice: basePrice,
           image: image,
-          variantId: finalVariantId,
+          variantId: finalVariantId, // The variant ID, can be null
           variant: item.variant
             ? {
                 ...item.variant,
@@ -205,6 +206,7 @@ const parseCartResponse = (response: CartApiResponse): CartItem[] => {
       "LoggedInCartProvider: Error mapping cart items during parseCartResponse:",
       parseError
     );
+    // Return empty array on critical parsing error to prevent crashing
     return [];
   }
 };
@@ -224,6 +226,10 @@ export function LoggedInCartProvider({
   const [error, setError] = useState<string | null>(null);
   const [cartId, setCartId] = useState<number | null>(null);
 
+  /**
+   * Fetches the current cart items from the API.
+   * This should be called on initial load and when the cart state needs to be fully re-synced.
+   */
   const fetchCartItems = useCallback(async () => {
     if (!token) {
       setItems([]);
@@ -280,6 +286,7 @@ export function LoggedInCartProvider({
     }
   }, [token]);
 
+  // Effect to fetch cart items on component mount or token change
   useEffect(() => {
     if (token) {
       fetchCartItems();
@@ -290,6 +297,10 @@ export function LoggedInCartProvider({
     }
   }, [token, fetchCartItems]);
 
+  /**
+   * Adds an item to the cart.
+   * Uses optimistic UI update and then calls fetchCartItems to get the actual cart state and IDs.
+   */
   const addCartItem = useCallback(
     async (itemToAdd: CartItemInput) => {
       if (!token) {
@@ -303,12 +314,12 @@ export function LoggedInCartProvider({
 
       // Client-side stock check before optimistic update and API call
       const existingItemInCart = items.find((item) => {
-        const isSameProduct = item.id === itemToAdd.id;
+        const isSameProduct = item.productId === itemToAdd.id; // Use item.productId
         const hasVariants =
           itemToAdd.variantId !== undefined && itemToAdd.variantId !== null;
         const isSameVariant = hasVariants
           ? item.variantId === itemToAdd.variantId
-          : item.variantId === undefined || item.variantId === null;
+          : item.variantId === null; // Check for null explicitly for no variant
         return isSameProduct && isSameVariant;
       });
 
@@ -342,7 +353,8 @@ export function LoggedInCartProvider({
               : item
           );
         } else {
-          const tempCartItemId = Date.now() * -1 - Math.random(); // Generate a unique temporary negative ID
+          // Generate a unique temporary negative ID for new items
+          const tempCartItemId = Date.now() * -1 - Math.random();
           let newItemName = itemToAdd.name;
           if (itemToAdd.variant?.product?.name) {
             newItemName = itemToAdd.variant.product.name;
@@ -350,12 +362,28 @@ export function LoggedInCartProvider({
               newItemName += ` - ${itemToAdd.variant.name}`;
             }
           }
-          return [
-            ...currentItems,
-            { ...itemToAdd, cartItemId: tempCartItemId, name: newItemName },
-          ];
+
+          // Construct the new CartItem ensuring all required properties are present
+          const newCartItem: CartItem = {
+            cartItemId: tempCartItemId,
+            id: itemToAdd.id, // This should be the product ID
+            productId: itemToAdd.id, // Explicitly set productId
+            name: newItemName,
+            quantity: itemToAdd.quantity,
+            sellingPrice: itemToAdd.sellingPrice,
+            basePrice: itemToAdd.basePrice,
+            image: itemToAdd.image,
+            variantId: itemToAdd.variantId || null, // Ensure variantId is number or null
+            variant: itemToAdd.variant, // Pass the full variant object
+            product: itemToAdd.product, // Pass the full product object
+            stock: itemToAdd.stock,
+            slug: itemToAdd.slug, // Include slug
+          };
+
+          return [...currentItems, newCartItem];
         }
       });
+      toast.success(`${itemToAdd.quantity} ${itemToAdd.name} added to cart!`); // Optimistic toast
 
       try {
         let payload: {
@@ -371,15 +399,14 @@ export function LoggedInCartProvider({
           };
         } else {
           payload = {
-            productId: itemToAdd.id,
+            productId: itemToAdd.id, // itemToAdd.id is the product ID in this case
             quantity: itemToAdd.quantity,
           };
         }
 
         await apiCore("/cart/add", "POST", payload, token);
-        await fetchCartItems(); // Re-fetch to get official IDs and state
-        // --- ADDED THIS LINE: Now the success toast will show! ---
-        toast.success(`${itemToAdd.quantity} ${itemToAdd.name} added to cart!`);
+        // After successful add, refetch the cart to get the real cartItemId and updated state
+        await fetchCartItems();
       } catch (err: any) {
         console.error("LoggedInCartProvider: Failed to add cart item:", err);
         if (err.message && err.message.includes("401")) {
@@ -397,6 +424,10 @@ export function LoggedInCartProvider({
     [token, items, fetchCartItems]
   );
 
+  /**
+   * Removes an item from the cart.
+   * Uses optimistic UI update and re-fetches the cart on success.
+   */
   const removeCartItem = useCallback(
     async (cartItemId: number) => {
       if (!token) {
@@ -407,9 +438,11 @@ export function LoggedInCartProvider({
       setError(null);
       const prevItems = [...items];
 
+      // Optimistic UI update: remove the item
       setItems((currentItems) =>
         currentItems.filter((item) => item.cartItemId !== cartItemId)
       );
+      toast.error(`Item removed from cart.`); // Generic remove toast
 
       try {
         await apiCore(
@@ -418,7 +451,7 @@ export function LoggedInCartProvider({
           undefined,
           token
         );
-        toast.error(`Item removed from cart.`); // Generic remove toast
+        // After successful removal, refetch the cart to ensure sync
         await fetchCartItems();
       } catch (err: any) {
         console.error("LoggedInCartProvider: Failed to remove cart item:", err);
@@ -437,6 +470,10 @@ export function LoggedInCartProvider({
     [token, items, fetchCartItems]
   );
 
+  /**
+   * Increments the quantity of a cart item.
+   * Uses optimistic UI update. No immediate re-fetch unless an error occurs.
+   */
   const incrementItemQuantity = useCallback(
     async (cartItemId: number) => {
       if (!token) {
@@ -449,20 +486,19 @@ export function LoggedInCartProvider({
 
       const currentItem = items.find((item) => item.cartItemId === cartItemId);
       if (!currentItem) {
-        // console.warn("Attempted to increment non-existent item."); // Removed console.warn
+        console.warn("Attempted to increment non-existent item.");
         return;
       }
 
       const newQuantity = currentItem.quantity + 1;
 
-      // NEW STOCK CHECK (Client-side pre-check)
+      // Client-side stock check
       if (newQuantity > currentItem.stock) {
         toast.error(
           `You've reached the maximum quantity for ${currentItem.name} (stock limit: ${currentItem.stock}).`
         );
         return; // Prevent API call if stock limit is exceeded
       }
-      // END NEW STOCK CHECK
 
       // Optimistic UI update
       setItems((currentItems) =>
@@ -480,7 +516,8 @@ export function LoggedInCartProvider({
           { quantity: newQuantity },
           token
         );
-        // --- THIS WAS THE PROBLEM! Removed await fetchCartItems(); ---
+        // No fetchCartItems here. Rely on optimistic update.
+        // If the backend has a different stock, the next full fetch (e.g., page refresh) will correct it.
       } catch (err: any) {
         console.error(
           "LoggedInCartProvider: Failed to increment quantity:",
@@ -498,9 +535,14 @@ export function LoggedInCartProvider({
         setLoading(false);
       }
     },
-    [token, items] // fetchCartItems removed from dependencies as it's no longer called here
+    [token, items] // fetchCartItems removed as dependency since it's not called
   );
 
+  /**
+   * Decrements the quantity of a cart item.
+   * If quantity becomes 0 or less, removes the item.
+   * Uses optimistic UI update. No immediate re-fetch unless an error occurs.
+   */
   const decrementItemQuantity = useCallback(
     async (cartItemId: number) => {
       if (!token) {
@@ -513,12 +555,13 @@ export function LoggedInCartProvider({
 
       const currentItem = items.find((item) => item.cartItemId === cartItemId);
       if (!currentItem) {
-        // console.warn("Attempted to decrement non-existent item."); // Removed console.warn
+        console.warn("Attempted to decrement non-existent item.");
         return;
       }
 
       const newQuantity = currentItem.quantity - 1;
 
+      // Optimistic UI update
       setItems((currentItems) => {
         if (newQuantity <= 0) {
           return currentItems.filter(
@@ -550,7 +593,7 @@ export function LoggedInCartProvider({
             token
           );
         }
-        // --- THIS WAS THE PROBLEM! Removed await fetchCartItems(); ---
+        // No fetchCartItems here. Rely on optimistic update.
       } catch (err: any) {
         console.error(
           "LoggedInCartProvider: Failed to decrement quantity:",
@@ -563,14 +606,18 @@ export function LoggedInCartProvider({
           setError(err.message || "Failed to decrement item quantity.");
           toast.error(err.message || "Failed to decrement item quantity.");
         }
-        setItems(prevItems);
+        setItems(prevItems); // Rollback
       } finally {
         setLoading(false);
       }
     },
-    [token, items] // fetchCartItems removed from dependencies as it's no longer called here
+    [token, items] // fetchCartItems removed as dependency since it's not called
   );
 
+  /**
+   * Clears all items from the cart.
+   * Uses optimistic UI update and re-fetches the cart on success.
+   */
   const clearCart = useCallback(async () => {
     if (!token) {
       setError("You need to be logged in to clear your cart.");
@@ -582,11 +629,12 @@ export function LoggedInCartProvider({
 
     setItems([]); // Optimistic update
     setCartId(null);
+    toast.success("Cart cleared successfully!"); // Optimistic toast
 
     try {
       await apiCore("/cart/clear", "DELETE", undefined, token);
-      // toast.success("Cart cleared successfully!"); // Toast for clear action
-      await fetchCartItems(); // Re-fetch to ensure sync (should be empty)
+      // After successful clear, refetch to ensure it's truly empty and synchronized
+      await fetchCartItems();
     } catch (err: any) {
       console.error("LoggedInCartProvider: Failed to clear cart:", err);
       if (err.message && err.message.includes("401")) {
@@ -596,7 +644,7 @@ export function LoggedInCartProvider({
         setError(err.message || "Failed to clear cart.");
         toast.error(err.message || "Failed to clear cart.");
       }
-      setItems(prevItems); // Re-fetch to restore state if clear failed
+      setItems(prevItems); // Rollback to previous items if clear failed
     } finally {
       setLoading(false);
     }
@@ -611,7 +659,7 @@ export function LoggedInCartProvider({
     incrementItemQuantity,
     decrementItemQuantity,
     clearCart,
-    refetchCart: fetchCartItems,
+    refetchCart: fetchCartItems, // Expose fetchCartItems for manual re-fetching if needed
     cartId,
   };
 

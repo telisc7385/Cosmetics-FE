@@ -8,7 +8,8 @@ export const apiCore = async <T>(
   token?: string | null // FIX: Allow token to be string | null | undefined
 ): Promise<T> => {
   let baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
-console.log(body,"body")
+  console.log("Body received in apiCore:", body); // Added for initial inspection
+
   // Provide a fallback if NEXT_PUBLIC_BASE_URL is not set, but strongly recommend setting it
   if (!baseUrl) {
     console.warn("NEXT_PUBLIC_BASE_URL is not set. Falling back to default: https://cosmaticadmin.twilightparadox.com");
@@ -32,7 +33,8 @@ console.log(body,"body")
 
   const headers: Record<string, string> = {};
 
-  if (body && (method === 'POST' || method === 'PUT' || method === 'PATCH')) { // Handle PATCH for Content-Type
+  // Crucial for JSON payloads: Set Content-Type header if there's a body for POST/PUT/PATCH
+  if (body && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
     headers["Content-Type"] = "application/json";
   }
 
@@ -49,8 +51,10 @@ console.log(body,"body")
     next: { revalidate: 3600 },
   };
 
-  if (body && (method === 'POST' || method === 'PUT' || method === 'PATCH')) { // Handle PATCH for body
+  // Stringify the body only if it's meant to be a JSON payload for relevant methods
+  if (body && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
     requestOptions.body = JSON.stringify(body);
+    console.log("JSON Payload being sent (stringified in apiCore):", requestOptions.body); // Added for debugging
   }
 
   try {
@@ -72,7 +76,8 @@ console.log(body,"body")
       }
 
       console.error(
-        `[ Server ] API error: ${res.status} "${errorData.message?.slice(0, 200) || res.statusText}" for ${fullUrl}`
+        `[ Server ] API error: ${res.status} "${errorData.message?.slice(0, 200) || res.statusText}" for ${fullUrl}`,
+        errorData // Log full error data for more context
       );
       throw new Error(
         `API error ${res.status}: ${fullUrl} - ${errorData.message?.slice(0, 100) || res.statusText}`
@@ -94,20 +99,20 @@ console.log(body,"body")
 // All your existing interfaces should either be here or in a common types file.
 // I'm keeping them here for completeness as you provided them in this file's context.
 
-// CartItem interface moved to types/cart.ts for better organization, but defined here for reference
-// It should be imported from '@/types/cart' in your slices.
+// CartItem interface updated: productId is now mandatory, variantId is mandatory but can be null
 export interface CartItem {
   cartItemId: number;
-  id: number; // This is often the productId, check your backend schema
-  productId?: number; // Explicit productId if different from 'id'
+  id: number; // This is often the productId for simplicity, or the cart item's unique ID
+  productId: number; // **Made mandatory**: The actual product ID
   name: string;
   quantity: number;
   sellingPrice: number;
   basePrice?: number;
   image: string;
-  variantId?: number | null; // Can be number, null (no variant), or undefined (not specified)
-  variant?: ProductVariant | null; // Full variant object
-  product?: any; // Full product object
+  variantId: number | null; // **Made mandatory, but can be null**: The actual variant ID, or null if no variant
+  variant?: ProductVariant | null; // Full variant object (optional as it might not always be fetched)
+  product?: any; // Full product object (optional as it might not always be fetched)
+  slug?: string; // Added slug for navigation
 }
 
 export interface ProductVariant {
@@ -157,19 +162,23 @@ export interface GuestOrderPayload {
   paymentMethod: "COD" | "RAZORPAY";
 }
 
-// Logged-in Checkout Types - CORRECTED TO USE 'addressId'
+// MODIFIED: Logged-in Checkout Types to send string addresses AND new fields
 export interface LoggedInOrderPayload {
   items: {
     productId: number;
-    variantId?: number | null;
     quantity: number;
     price: number;
+    variantId?: number | null; // Still optional here, as the backend might not always require it
   }[];
-  discountAmount: number;
+  addressId: number; // NEW: Added as per your exact payload. Assuming this refers to the selected delivery address ID.
   totalAmount: number;
   paymentMethod: string;
-  addressId: string; // This is the delivery address
-  billingAddressId: string; // <--- THIS IS THE ONLY CHANGE NEEDED FOR THE TYPE ERROR
+  discountAmount: number;
+  discountCode?: string; // NEW: Added as per your exact payload (optional if not always present)
+  billingAddress: string;
+  shippingAddress: string;
+  cartId?: number; // Keep cartId as optional, confirm with backend if always required
+  subtotal: number; // NEW: Added as per your exact payload
 }
 
 
@@ -186,12 +195,20 @@ export interface Address {
   // country: string; // REMOVED as per request
 }
 
-export type AddressInput = Omit<Address, "id">; // For creating/updating, ID is not needed in input
+export type AddressType = "HOME" | "WORK" | "BILLING" | "SHIPPING";
 
-// *** FIX: ADDED LocalAddressItem interface here ***
+export type AddressInput = Omit<Address, "id"> & {
+  type: AddressType; // Explicitly defining the allowed types
+};
+
+
+// *** MODIFIED: LocalAddressItem interface to use 'type' and include other fields from your response ***
 export interface LocalAddressItem extends Address {
-  addressType?: "HOME" | "WORK" | "BOTH" | "BILLING" | "SHIPPING"; // Changed address_type to camelCase
-  isDefault?: boolean; // Changed is_default to camelCase
+  type: AddressType; // Use 'type' from backend response
+  isDefault: boolean; // Based on your sample, it's a boolean
+  userId: number; // Added userId based on your new reference
+  createdAt: string; // Added createdAt
+  updatedAt: string; // Added updatedAt
 }
 
 
@@ -199,7 +216,7 @@ export interface LocalAddressItem extends Address {
 export interface SingleAddressResponse {
   address: LocalAddressItem; // The address object itself
   message?: string;
-  updated: any;
+  updated?: LocalAddressItem; // Changed from 'any' to LocalAddressItem if backend returns it
 }
 
 export interface FetchAddressesResponse {

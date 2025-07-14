@@ -78,22 +78,18 @@ export default function BannerSlider({ banners }: { banners: BannerItem[] }) {
     ]
   );
 
-  if (filteredBanners.length === 0) {
-    return null;
-  }
+  if (filteredBanners.length === 0) return null;
 
   return (
-    <div className="w-full">
-      {/* Banner Container */}
-      <div className="relative w-full h-[250px] sm:h-[300px] md:h-[400px] lg:h-[450px] xl:h-[500px] overflow-hidden">
-        {/* Slider */}
+    <div className="w-full relative">
+      <div className="relative w-full h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] xl:h-[650px] overflow-hidden">
         <div ref={sliderRef} className="keen-slider w-full h-full">
           {filteredBanners.map((banner) => (
             <div
               key={banner.id}
               className="keen-slider__slide relative w-full h-full"
             >
-              {/* Background Image */}
+              {/* Background image */}
               <Image
                 src={
                   isMobile && banner.mobile_banner
@@ -107,20 +103,20 @@ export default function BannerSlider({ banners }: { banners: BannerItem[] }) {
                 sizes="100vw"
               />
 
-              {/* Overlay */}
-              <div className="absolute inset-0 flex items-center px-4 sm:px-10 md:px-20 z-10">
-                <div className="max-w-7xl mx-auto px-4 w-full">
-                  <div className="max-w-[60%] sm:max-w-[50%] text-black">
-                    <h2 className="text-lg sm:text-xl md:text-3xl lg:text-5xl font-semibold leading-snug sm:leading-snug md:leading-tight">
+              {/* Overlay content */}
+              <div className="absolute inset-0 z-10 flex items-center">
+                <div className="max-w-7xl mx-auto w-full px-4 sm:px-8 md:px-16">
+                  <div className="max-w-[600px] text-black">
+                    <h2 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-normal leading-snug sm:leading-snug md:leading-tight drop-shadow-md">
                       {banner.heading}
                     </h2>
-                    <p className="mt-2 sm:mt-3 text-xs sm:text-sm md:text-base text-gray-700">
+                    <p className="mt-4 text-sm sm:text-base md:text-lg text-black/90 drop-shadow">
                       {banner.subheading}{" "}
                       {banner.subheading2 && <span>{banner.subheading2}</span>}
                     </p>
                     <a
                       href={banner.buttonLink}
-                      className="inline-block mt-4 sm:mt-5 px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm md:text-base bg-black text-white border border-white font-medium shadow transition hover:bg-white hover:text-black hover:border-black"
+                      className="inline-block mt-6 px-6 py-2 bg-black text-white text-sm sm:text-base font-semibold shadow-md transition hover:bg-white hover:text-black border border-black"
                     >
                       {banner.buttonText}
                     </a>
@@ -131,69 +127,21 @@ export default function BannerSlider({ banners }: { banners: BannerItem[] }) {
           ))}
         </div>
 
-        {/* Arrows (Desktop Only) */}
+        {/* Dot indicators (absolute inside the banner container) */}
         {filteredBanners.length > 1 && (
-          <>
-            <button
-              onClick={() => instanceRef.current?.prev()}
-              className="absolute left-4 top-1/2 -translate-y-1/2 p-2 hover:scale-110 transition z-10 hidden sm:block"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="36"
-                height="36"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="#213e5a"
-                strokeWidth="2"
-                className="rotate-180"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </button>
-
-            <button
-              onClick={() => instanceRef.current?.next()}
-              className="absolute right-4 top-1/2 -translate-y-1/2 p-2 hover:scale-110 transition z-10 hidden sm:block"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="36"
-                height="36"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="#213e5a"
-                strokeWidth="2"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </button>
-          </>
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+            {filteredBanners.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => instanceRef.current?.moveToIdx(idx)}
+                className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
+                  currentSlide === idx ? "bg-white" : "bg-white/50"
+                }`}
+              ></button>
+            ))}
+          </div>
         )}
       </div>
-
-      {/* Dots (Below the banner for all devices) */}
-      {filteredBanners.length > 1 && (
-        <div className="mt-4 flex justify-center gap-2">
-          {filteredBanners.map((_, idx) => (
-            <button
-              key={idx}
-              onClick={() => instanceRef.current?.moveToIdx(idx)}
-              className={`rounded-full transition ${
-                currentSlide === idx ? "bg-[#213e5a]" : "bg-gray-400"
-              } w-1.5 h-1.5 sm:w-2 sm:h-2`}
-            ></button>
-          ))}
-        </div>
-      )}
     </div>
   );
 }

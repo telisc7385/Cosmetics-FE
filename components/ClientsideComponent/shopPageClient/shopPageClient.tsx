@@ -1,3 +1,4 @@
+// components/ClientsideComponent/shopPageClient/shopPageClient.tsx
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
@@ -110,7 +111,7 @@ const ShopPageClient: React.FC<Props> = ({ categories }) => {
   const totalPages = Math.ceil(sortedProducts.length / PRODUCTS_PER_PAGE);
 
   return (
-    <div className="min-h-screen container mx-auto bg-white">
+    <div className="min-h-screen bg-white">
       <div className="w-full h-[250px] relative rounded overflow-hidden">
         <Image
           src="/shopPage2.jpg"
@@ -155,7 +156,9 @@ const ShopPageClient: React.FC<Props> = ({ categories }) => {
           ) : paginatedProducts.length === 0 ? (
             <p>No products found.</p>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 **gap-1**">
+              {" "}
+              {/* Changed gap-2 to gap-1 */}
               {paginatedProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
@@ -167,7 +170,6 @@ const ShopPageClient: React.FC<Props> = ({ categories }) => {
               <button
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                // Apply conditional styling based on disabled state
                 className={`px-3 py-1 rounded transition-colors duration-200 ${
                   currentPage === 1
                     ? "border border-[#213E5A] text-[#213E5A] opacity-50 cursor-not-allowed"
@@ -184,7 +186,6 @@ const ShopPageClient: React.FC<Props> = ({ categories }) => {
                   setCurrentPage((prev) => Math.min(prev + 1, totalPages))
                 }
                 disabled={currentPage === totalPages}
-                // Apply conditional styling based on disabled state
                 className={`px-3 py-1 rounded transition-colors duration-200 ${
                   currentPage === totalPages
                     ? "border border-[#213E5A] text-[#213E5A] opacity-50 cursor-not-allowed"

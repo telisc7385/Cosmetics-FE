@@ -112,6 +112,7 @@ export interface CartItemFromAPI {
 }
 
 export interface CartItem {
+  productId: number | undefined;
   cartItemId: number; // Ensured to be number after parsing
   id: number; // Product ID (ensured to be number after parsing)
   name: string;

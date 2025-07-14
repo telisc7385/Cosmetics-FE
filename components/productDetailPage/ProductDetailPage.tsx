@@ -104,6 +104,7 @@ export default function ProductDetailClient({
 
     const item: Omit<CartItem, "cartItemId"> = {
       id: product.id,
+      productId: product.id, // ✅ FIXED: Add productId to match CartItem type
       name: selectedVariant?.name
         ? `${product.name} - ${selectedVariant.name}`
         : product.name,

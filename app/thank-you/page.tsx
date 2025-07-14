@@ -2,21 +2,22 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { useSearchParams, useRouter } from "next/navigation"; // Import useRouter
+import { useSearchParams, useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { apiCore } from "@/api/ApiCore";
 import { useAppSelector } from "@/store/hooks/hooks";
 import { selectToken } from "@/store/slices/authSlice";
 import Image from "next/image";
 
+// Interface Definitions
 interface CustomerInfo {
   first_name: string;
   last_name: string;
   country_code_for_phone_number: string | null;
   phone_number: string;
   email: string;
-  billing_address: string;
-  delivery_address: string;
+  billing_address: string; // This holds the billing address string
+  delivery_address: string; // This holds the delivery/shipping address string
 }
 
 interface OrderInfo {
@@ -68,7 +69,7 @@ interface OrderListApiResponse {
 
 const ThankYouPage = () => {
   const searchParams = useSearchParams();
-  const router = useRouter(); // Initialize useRouter
+  const router = useRouter();
   const orderId = searchParams.get("orderId");
   const token = useAppSelector(selectToken);
 
@@ -82,7 +83,6 @@ const ThankYouPage = () => {
       if (!orderId) {
         setError("Order ID is missing. Cannot display order details.");
         setLoading(false);
-        // If orderId is missing, it's a good place to replace history to home
         router.replace("/");
         return;
       }
@@ -100,13 +100,11 @@ const ThankYouPage = () => {
         if (responseData.results && responseData.results.length > 0) {
           const fetchedOrder = responseData.results[0];
           setOrder(fetchedOrder);
-          setShowCelebration(true); // Trigger confetti
-          // Successfully fetched order, now replace the history state
-          router.replace(`/thank-you?orderId=${orderId}`); // Replace with current URL to ensure back goes to home
+          setShowCelebration(true); // Trigger confetti 🥳
         } else {
           setError("Order not found or no results returned for this ID.");
           toast.error("Order not found.");
-          router.replace("/"); // If order not found, go to home
+          router.replace("/");
         }
       } catch (err: unknown) {
         const errorMessage =
@@ -139,13 +137,13 @@ const ThankYouPage = () => {
     };
 
     fetchOrderDetails();
-  }, [orderId, token, router]); // Add router to dependency array
+  }, [orderId, token, router]);
 
   const handleDownloadInvoice = () => {
     if (order?.order_info.invoice_url) {
       let baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
       if (!baseUrl) {
-        baseUrl = "https://cosmaticadmin.twilightparadox.com";
+        baseUrl = "https://cosmaticadmin.twilightparadox.com"; // Fallback URL
       }
       if (baseUrl.endsWith("/")) {
         baseUrl = baseUrl.slice(0, -1);
@@ -156,7 +154,7 @@ const ThankYouPage = () => {
 
       const invoiceFullUrl = `${baseUrl}${invoiceRelativePath}`;
       window.open(invoiceFullUrl, "_blank");
-      toast.success("Downloading invoice...");
+      toast.success("Downloading invoice... 📥");
     } else {
       toast.error("Invoice URL not available.");
     }
@@ -166,7 +164,7 @@ const ThankYouPage = () => {
     return (
       <div className="flex justify-center items-center h-screen">
         <p className="text-base text-gray-600">
-          Loading order details for your purchase...
+          Loading order details for your purchase... 🔄
         </p>
       </div>
     );
@@ -201,8 +199,6 @@ const ThankYouPage = () => {
   }
 
   if (!order) {
-    // This case should ideally be caught by the error state and router.replace('/')
-    // but kept for robustness. If order is null and no error, it's an unexpected state.
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-pink-100 to-purple-100 text-gray-800 p-3">
         <svg
@@ -265,6 +261,7 @@ const ThankYouPage = () => {
         </div>
       )}
 
+      {/* Global styles for confetti */}
       <style jsx global>{`
         .celebration-effect {
           position: fixed;
@@ -279,7 +276,7 @@ const ThankYouPage = () => {
 
         .confetti {
           position: absolute;
-          background-color: #f0f;
+          background-color: #f0f; /* Default color, overridden by inline style */
           opacity: 0;
           transform: translateY(0) rotate(0deg);
           animation: confetti-fall 3s ease-out forwards;
@@ -314,7 +311,9 @@ const ThankYouPage = () => {
             d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
           />
         </svg>
-        <h1 className="text-2xl sm:text-3xl font-extrabold mb-1">Thank You!</h1>
+        <h1 className="text-2xl sm:text-3xl font-extrabold mb-1">
+          Thank You! 🎉
+        </h1>
         <p className="text-base sm:text-lg">
           Your order has been placed successfully.
         </p>
@@ -359,6 +358,23 @@ const ThankYouPage = () => {
                 {order.payment_info.payment_type}
               </span>
             </p>
+            {/* Added Payment Status and Transaction ID */}
+            <p className="text-sm text-gray-600">
+              Payment Status:{" "}
+              <span className="font-semibold">
+                {order.payment_info.is_payment_done
+                  ? "Completed"
+                  : "Pending/Failed"}
+              </span>
+            </p>
+            {order.payment_info.payment_transaction_id && (
+              <p className="text-sm text-gray-600">
+                Transaction ID:{" "}
+                <span className="font-semibold">
+                  {order.payment_info.payment_transaction_id}
+                </span>
+              </p>
+            )}
           </div>
 
           <div>
@@ -378,12 +394,14 @@ const ThankYouPage = () => {
             <p className="text-sm text-gray-600">
               Phone:{" "}
               <span className="font-semibold">
+                {order.customer_info.country_code_for_phone_number}
                 {order.customer_info.phone_number}
               </span>
             </p>
           </div>
         </div>
 
+        {/* --- Billing & Shipping Addresses (using direct strings) --- */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-4 mb-4 border-b pb-3">
           <div>
             <h3 className="text-base sm:text-lg font-semibold text-gray-700 mb-2">
@@ -395,6 +413,7 @@ const ThankYouPage = () => {
               </span>
               <br />
               <span className="font-semibold">
+                {order.customer_info.country_code_for_phone_number}
                 {order.customer_info.phone_number}
               </span>
               <br />
@@ -413,6 +432,7 @@ const ThankYouPage = () => {
               </span>
               <br />
               <span className="font-semibold">
+                {order.customer_info.country_code_for_phone_number}
                 {order.customer_info.phone_number}
               </span>
               <br />
@@ -422,9 +442,10 @@ const ThankYouPage = () => {
             </p>
           </div>
         </div>
+        {/* --- End Billing & Shipping Addresses --- */}
 
         <h3 className="text-base sm:text-lg font-semibold text-gray-700 mb-3">
-          Items:
+          Items: 📦
         </h3>
         <ul className="space-y-3 mb-4 border-b pb-3">
           {order.items && order.items.length > 0 ? (
@@ -433,7 +454,7 @@ const ThankYouPage = () => {
                 key={item.id}
                 className="flex flex-col sm:flex-row items-start sm:items-center gap-2 border p-2 rounded-md bg-gray-50"
               >
-                {/* Link for Image - Added cursor-pointer class */}
+                {/* Link for Image */}
                 {item.slug ? (
                   <Link
                     href={`/product/${item.slug}`}
@@ -457,7 +478,7 @@ const ThankYouPage = () => {
                   />
                 )}
                 <div className="flex-grow">
-                  {/* Link for Product Name - Added cursor-pointer class */}
+                  {/* Link for Product Name */}
                   {item.slug ? (
                     <Link
                       href={`/product/${item.slug}`}
@@ -501,9 +522,8 @@ const ThankYouPage = () => {
           </div>
           {order.order_info.discount > 0 && (
             <div className="flex justify-between text-sm font-semibold text-gray-700">
-              <span>
-                Discount ({order.order_info.discount_coupon_code || "Applied"}):
-              </span>
+              {/* Changed to just "Discount:" */}
+              <span>Discount:</span>
               <span className="text-red-600">
                 -₹{order.order_info.discount.toFixed(2)}
               </span>
@@ -544,12 +564,6 @@ const ThankYouPage = () => {
               </p>
             )}
           </div>
-          {/* <Link
-            href="/shop"
-            className="block bg-[#213E5A] text-white py-2 px-4 rounded-lg text-sm font-semibold transition-transform duration-300 transform hover:-translate-y-1 w-full sm:w-auto text-center"
-          >
-            Continue Shopping
-          </Link> */}
           <Link
             href="/"
             className="block bg-[#213E5A] text-white py-2 px-4 rounded-lg text-sm font-semibold transition-transform duration-300 transform hover:-translate-y-1 w-full sm:w-auto text-center"
