@@ -165,6 +165,7 @@ const ShopPageClient: React.FC<Props> = ({ categories }) => {
             </div>
           )}
 
+     
           {totalPages > 1 && (
             <div className="mt-6 flex gap-4 items-center">
               <button
