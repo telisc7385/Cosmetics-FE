@@ -18,14 +18,14 @@ const FeaturesBanner = () => {
   }, []);
 
   return (
-    <div className="bg-[#fcfbf9] py-16 px-4">
+    <div className="bg-[#f9fafb] my-12 py-6 px-4">
       <div className="max-w-7xl mx-auto flex flex-wrap justify-center gap-x-8 gap-y-12">
         {features.map((item) => (
           <div
             key={item.id}
             className="flex flex-col items-center text-center w-full sm:w-[45%] md:w-[22%] lg:w-[22%] xl:w-[22%] px-2"
           >
-            <div className="bg-[#10626b] rounded-full p-4 mb-4 flex items-center justify-center shadow-lg w-30 h-30 flex-shrink-0 group perspective">
+            <div className="bg-[#10626b] rounded-full p-4 mb-4 flex items-center justify-center shadow-lg w-25 h-25 flex-shrink-0 group perspective">
               <div className="transition-transform duration-700 ease-in-out group-hover:rotate-y-360">
                 <Image
                   src={item.image || "/placeholder.png"}

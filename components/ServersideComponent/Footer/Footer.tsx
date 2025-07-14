@@ -1,14 +1,19 @@
 import { Category } from "@/types/category";
 import Image from "next/image";
-import Link from "next/link"; // Ensure Link is imported
-import { getCompanySettings } from "@/api/CompanyApi";
-import { getNavbarData } from "@/api/NavbarApi";
+import Link from "next/link";
+import { CompanySettings } from "@/api/CompanyApi"; // Import CompanySettings
+import { getNavbarData } from "@/api/NavbarApi"; // Keep this if Footer still needs nav items
+import { FaRegEnvelope } from "react-icons/fa";
+import { IoCallOutline } from "react-icons/io5";
 import { NavItem } from "@/types/nav";
 
-const Footer = async ({ topCategories }: { topCategories: Category[] }) => {
-  const settingsRes = await getCompanySettings();
-  const company = settingsRes?.result?.[0];
+// Define props interface for Footer
+interface FooterProps {
+  topCategories: Category[];
+  companyDetails?: CompanySettings; // Accept companyDetails as a prop
+}
 
+const Footer = async ({ topCategories, companyDetails }: FooterProps) => {
   let navItems: NavItem[] = [];
   try {
     const navResponse = await getNavbarData();
@@ -20,95 +25,51 @@ const Footer = async ({ topCategories }: { topCategories: Category[] }) => {
   }
 
   return (
-    <footer className="bg-[#F3F6F7] text-[#213C66] pt-12 pb-0">
+    <footer className="bg-[#F3F6F7] text-[#213C66] pt-8 pb-0">
       <div className="max-w-7xl mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 text-[15px]">
           {/* Column 1: Logo + Description */}
-          <div className="lg:col-span-1 text-center lg:text-left space-y-0 -mt-3">
+          <div className="lg:col-span-1 text-center lg:text-left space-y-0 -mt-5">
             <Image
-              src={company?.logo || "/logo1.png"}
+              src={companyDetails?.logo || "/logo1.png"}
               alt="Site Logo"
               width={180}
               height={70}
               className="mx-auto lg:mx-0"
             />
             <p className="text-sm leading-relaxed max-w-sm mx-auto lg:mx-0">
-              {company?.description ||
+              {companyDetails?.description ||
                 "Keep it simple, keep it minimal, yet stylish. We bring timeless, modern furniture designed for elegant, everyday living."}
             </p>
           </div>
 
-          {/* Menu + Categories grid for mobile and tablet views */}
+          {/* Mobile View: 2x2 Grid Layout */}
           <div className="block lg:hidden w-full">
-            <div className="grid grid-cols-2 gap-6">
-              {/* Menu (Mobile/Tablet) */}
-              <div>
-                <h4 className="font-bold text-black mb-3 text-lg">Menu</h4>
-                <ul className="space-y-2">
+            <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+              {/* Menu */}
+              <div className="space-y-2">
+                <h4 className="font-bold text-black text-base">Menu</h4>
+                <ul className="space-y-1">
                   {navItems.map((item) => (
                     <li key={item.id}>
-                      {/* For mobile and tablet, links under Menu show # */}
-                      <Link href="#">
-                        <span className="cursor-pointer hover:text-black text-md">
+                      <Link href={item.link}>
+                        <span className="cursor-pointer hover:text-black text-sm">
                           {item.name}
                         </span>
                       </Link>
                     </li>
                   ))}
                 </ul>
-
-                {/* Services under Menu in mobile/tablet */}
-                <div className="mt-6">
-                  <h4 className="font-bold text-black mb-3 text-lg">
-                    Services
-                  </h4>
-                  <ul className="space-y-2">
-                    {/* Link for "Terms" page - remains unchanged */}
-                    <li>
-                      <Link href="/terms">
-                        <span className="cursor-pointer hover:text-black text-md">
-                          Terms
-                        </span>
-                      </Link>
-                    </li>
-                    {/* Other service options with '#' links for mobile/tablet */}
-                    <li>
-                      <Link href="#">
-                        {" "}
-                        {/* Changed to # */}
-                        <span className="cursor-pointer hover:text-black text-md">
-                          Privacy Policy
-                        </span>
-                      </Link>
-                    </li>
-                    <li>
-                      <Link href="#">
-                        {" "}
-                        {/* Changed to # */}
-                        <span className="cursor-pointer hover:text-black text-md">
-                          Terms & Conditions
-                        </span>
-                      </Link>
-                    </li>
-                    {/* Removed Help option for mobile and tablet view */}
-                    {/* <li className="cursor-pointer hover:text-black text-md">
-                      Help
-                    </li> */}
-                  </ul>
-                </div>
               </div>
 
-              {/* Categories (Mobile/Tablet) */}
-              <div>
-                <h4 className="font-bold text-black mb-3 text-lg">
-                  Categories
-                </h4>
-                <ul className="space-y-2">
+              {/* Categories */}
+              <div className="space-y-2">
+                <h4 className="font-bold text-black text-base">Categories</h4>
+                <ul className="space-y-1">
                   {topCategories.map((category) => (
                     <li key={category.id}>
-                      {/* For mobile and tablet, links under Categories show # */}
                       <Link href="#">
-                        <span className="cursor-pointer hover:text-black text-md">
+                        <span className="cursor-pointer hover:text-black text-sm">
                           {category.name}
                         </span>
                       </Link>
@@ -116,6 +77,108 @@ const Footer = async ({ topCategories }: { topCategories: Category[] }) => {
                   ))}
                 </ul>
               </div>
+
+              {/* Services */}
+              <div className="space-y-2">
+                <h4 className="font-bold text-black text-base">Services</h4>
+                <ul className="space-y-1">
+                  <li>
+                    <Link href="/terms">
+                      <span className="cursor-pointer hover:text-black text-sm">
+                        Terms
+                      </span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="#">
+                      <span className="cursor-pointer hover:text-black text-sm">
+                        Privacy Policy
+                      </span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="#">
+                      <span className="cursor-pointer hover:text-black text-sm">
+                        Terms & Conditions
+                      </span>
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Get In Touch */}
+              <div className="space-y-2">
+                <h4 className="font-bold text-black text-base">Get In Touch</h4>
+                <div className="text-sm flex items-center gap-2">
+                  <IoCallOutline className="text-base" />
+                  <a href={`tel:${companyDetails?.phone || "+91180041224826"}`}>
+                    {companyDetails?.phone || "+91 1800 4122 4826"}
+                  </a>
+                </div>
+                <div className="text-sm flex items-center gap-2">
+                  <FaRegEnvelope className="text-base" />
+                  <a
+                    href={`mailto:${
+                      companyDetails?.email || "sales@mangochairs.com"
+                    }`}
+                  >
+                    {companyDetails?.email || "sales@mangochairs.com"}
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* Social Icons */}
+            <div className="flex justify-center items-center gap-4 mt-6">
+              {companyDetails?.facebook_icon && (
+                <Link
+                  href={companyDetails.facebook_link || "#"}
+                  target="_blank"
+                >
+                  <Image
+                    src={companyDetails.facebook_icon}
+                    alt="fb"
+                    width={40}
+                    height={40}
+                  />
+                </Link>
+              )}
+              {companyDetails?.instagram_icon && (
+                <Link
+                  href={companyDetails.instagram_link || "#"}
+                  target="_blank"
+                >
+                  <Image
+                    src={companyDetails.instagram_icon}
+                    alt="ig"
+                    width={40}
+                    height={40}
+                  />
+                </Link>
+              )}
+              {companyDetails?.twitter_icon && (
+                <Link href={companyDetails.twitter_link || "#"} target="_blank">
+                  <Image
+                    src={companyDetails.twitter_icon}
+                    alt="tw"
+                    width={40}
+                    height={40}
+                  />
+                </Link>
+              )}
+              {companyDetails?.linkedin_icon && (
+                <Link
+                  href={companyDetails.linkedin_link || "#"}
+                  target="_blank"
+                >
+                  <Image
+                    src={companyDetails.linkedin_icon}
+                    alt="li"
+                    width={40}
+                    height={40}
+                  />
+                </Link>
+              )}
             </div>
           </div>
 
@@ -155,7 +218,6 @@ const Footer = async ({ topCategories }: { topCategories: Category[] }) => {
           <div className="hidden lg:block">
             <h4 className="font-bold text-black mb-3 text-lg">Services</h4>
             <ul className="space-y-2">
-              {/* Link for "Terms" page */}
               <li>
                 <Link href="/terms">
                   <span className="cursor-pointer hover:text-black text-md">
@@ -171,76 +233,82 @@ const Footer = async ({ topCategories }: { topCategories: Category[] }) => {
                 </Link>
               </li>
               <li>
-                {" "}
-                {/* Wrapped in li */}
                 <Link href="/termscondition">
                   <span className="cursor-pointer hover:text-black text-md">
                     Terms and Conditions
                   </span>
                 </Link>
               </li>
-              {/* Help option is retained for desktop view */}
-              {/* <li className="cursor-pointer hover:text-black text-md">Help</li> */}
             </ul>
           </div>
 
-          {/* Contact + Social */}
-          <div>
+          {/* Contact + Social (Desktop) */}
+          <div className="hidden lg:block">
             <h4 className="font-bold text-black mb-3 text-lg">Get In Touch</h4>
-            <div className="mb-2 flex items-start gap-2 text-lg">
-              <span>📞</span>
+            <div className="mb-2 flex items-center gap-2 text-lg">
+              <IoCallOutline />
               <a
-                href={`tel:${company?.phone || "+91180041224826"}`}
+                href={`tel:${companyDetails?.phone || "+91180041224826"}`}
                 className="hover:underline"
               >
-                {company?.phone || "+91 1800 4122 4826"}
+                {companyDetails?.phone || "+91 1800 4122 4826"}
               </a>
             </div>
-            <div className="mb-4 flex items-start gap-2 text-lg">
-              <span>✉️</span>
+            <div className="mb-4 flex items-center gap-2 text-lg">
+              <FaRegEnvelope />
               <a
-                href={`mailto:${company?.email || "sales@mangochairs.com"}`}
+                href={`mailto:${
+                  companyDetails?.email || "sales@mangochairs.com"
+                }`}
                 className="hover:underline"
               >
-                {company?.email || "sales@mangochairs.com"}
+                {companyDetails?.email || "sales@mangochairs.com"}
               </a>
             </div>
-
             <div className="flex gap-4 text-[#213C66] text-lg -mt-2">
-              {company?.facebook_icon && (
-                <Link href={company.facebook_link || "#"} target="_blank">
+              {companyDetails?.facebook_icon && (
+                <Link
+                  href={companyDetails.facebook_link || "#"}
+                  target="_blank"
+                >
                   <Image
-                    src={company.facebook_icon}
+                    src={companyDetails.facebook_icon}
                     alt="fb"
                     width={60}
                     height={60}
                   />
                 </Link>
               )}
-              {company?.instagram_icon && (
-                <Link href={company.instagram_link || "#"} target="_blank">
+              {companyDetails?.instagram_icon && (
+                <Link
+                  href={companyDetails.instagram_link || "#"}
+                  target="_blank"
+                >
                   <Image
-                    src={company.instagram_icon}
+                    src={companyDetails.instagram_icon}
                     alt="ig"
                     width={60}
                     height={60}
                   />
                 </Link>
               )}
-              {company?.twitter_icon && (
-                <Link href={company.twitter_link || "#"} target="_blank">
+              {companyDetails?.twitter_icon && (
+                <Link href={companyDetails.twitter_link || "#"} target="_blank">
                   <Image
-                    src={company.twitter_icon}
+                    src={companyDetails.twitter_icon}
                     alt="tw"
                     width={60}
                     height={60}
                   />
                 </Link>
               )}
-              {company?.linkedin_icon && (
-                <Link href={company.linkedin_link || "#"} target="_blank">
+              {companyDetails?.linkedin_icon && (
+                <Link
+                  href={companyDetails.linkedin_link || "#"}
+                  target="_blank"
+                >
                   <Image
-                    src={company.linkedin_icon}
+                    src={companyDetails.linkedin_icon}
                     alt="li"
                     width={60}
                     height={60}

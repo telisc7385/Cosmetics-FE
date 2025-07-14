@@ -23,7 +23,7 @@ import { getProducts } from "@/api/fetchFeaturedSlider";
 export default async function HomePage() {
   const [
     banners,
-    categoriesResponse, // This comma is the only change: it skips the third element, effectively ignoring _whyChooseItems
+    categoriesResponse, 
     ,
     product,
     testimonials,
@@ -31,7 +31,7 @@ export default async function HomePage() {
   ] = await Promise.all([
     getBanners(),
     fetchCategories(),
-    getWhyChooseUs(), // The function is still called, but its return value is discarded
+    getWhyChooseUs(), 
     getProducts(),
     getTestimonials(),
     getGallery(),

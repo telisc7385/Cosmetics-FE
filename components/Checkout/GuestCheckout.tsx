@@ -103,7 +103,10 @@ const GuestCheckout = () => {
       return toast.error("Please fill all required address fields.");
     if (!/^\d{10}$/.test(formData.phone))
       return toast.error("Please enter a valid 10-digit phone number.");
-    if (cartItems.length === 0) return toast.error("Your cart is empty.");
+    if (cartItems.length === 0) {
+      // If cart is empty here, no need to proceed, show an error and return
+      return toast.error("Your cart is empty. Please add items to proceed.");
+    }
 
     const itemsForPayload = cartItems.map((item: CartItem) => ({
       quantity: item.quantity,
@@ -129,7 +132,7 @@ const GuestCheckout = () => {
       paymentMethod: formData.paymentMethod,
     };
 
-    setIsPlacingOrder(true);
+    setIsPlacingOrder(true); // Start showing the loader
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BASE_URL}/guest/checkout`,
@@ -146,9 +149,9 @@ const GuestCheckout = () => {
       }
 
       const data = await response.json();
-      dispatch(clearCart());
+      dispatch(clearCart()); // Clear cart AFTER successful order
       toast.success("Order placed successfully!");
-      router.push(`/thank-you?orderId=${data.order.id}`);
+      router.replace(`/thank-you?orderId=${data.order.id}`); // Redirect to thank you page
     } catch (error: unknown) {
       const message =
         error instanceof Error
@@ -156,17 +159,18 @@ const GuestCheckout = () => {
           : "Unexpected error placing order.";
       toast.error(message);
     } finally {
-      setIsPlacingOrder(false);
+      setIsPlacingOrder(false); // Stop showing the loader
     }
   };
 
+  // If order is being placed, show the loader. This check comes first.
   if (isPlacingOrder) {
     return (
       <div className="fixed inset-0 bg-white bg-opacity-75 flex items-center justify-center z-50">
         <div className="flex flex-col items-center">
           <Lottie
             loop
-            animationData={ShoppingCart}
+            animationData={ShoppingCart} // You might want a different Lottie for "placing order"
             play
             style={{ width: 150, height: 150 }}
           />
@@ -178,6 +182,7 @@ const GuestCheckout = () => {
     );
   }
 
+  // Only if order is NOT being placed, and cart is empty, show the empty cart animation.
   if (cartItems.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-[400px] px-4">
@@ -186,6 +191,7 @@ const GuestCheckout = () => {
     );
   }
 
+  // If neither loading nor empty cart, render the checkout form.
   return (
     <div
       className="font-sans flex flex-col lg:flex-row min-h-screen"

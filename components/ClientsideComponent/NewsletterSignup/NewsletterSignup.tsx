@@ -41,7 +41,7 @@ export default function NewsletterSignup() {
   };
 
   return (
-    <section className="bg-[#1d3f63] text-[#f3f6f7] py-12 px-4 text-center">
+    <section className="bg-[#1d3f63] text-[#f3f6f7] py-10 my-5 px-4 text-center">
       <div className="max-w-2xl mx-auto">
         <h2 className="text-3xl font-bold mb-4">
           Join Our <span className="text-[#9b59b6]">Newsletter</span> Now

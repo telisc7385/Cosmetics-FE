@@ -1,12 +1,11 @@
 // PersonalInfo.tsx
 "use client";
 
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { apiCore } from "@/api/ApiCore";
 import { useAppSelector, useAppDispatch } from "@/store/hooks/hooks";
 import { selectToken, updateProfile } from "@/store/slices/authSlice";
 import toast from "react-hot-toast";
-import { FaCamera } from "react-icons/fa";
 import Image from "next/image";
 
 interface UserInfo {
@@ -16,7 +15,7 @@ interface UserInfo {
   bio: string | null;
   firstName: string;
   lastName: string;
-  imageUrl: string | null;
+  imageUrl: string | null; // Keep imageUrl for display, but won't update it
   phone: string;
 }
 
@@ -30,9 +29,6 @@ export default function PersonalInfo() {
     lastName: "",
     bio: "",
   });
-
-  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const getUserInfo = useCallback(async () => {
     try {
@@ -49,7 +45,6 @@ export default function PersonalInfo() {
         lastName: userData.lastName,
         bio: userData.bio || "",
       });
-      setSelectedImageFile(null);
     } catch (error: unknown) {
       console.error("Failed to load personal info:", error);
       if (error instanceof Error) {
@@ -72,85 +67,44 @@ export default function PersonalInfo() {
 
   const handleSave = async () => {
     try {
-      const updateFormData = new FormData();
-      updateFormData.append("firstName", formData.firstName);
-      updateFormData.append("lastName", formData.lastName);
-      updateFormData.append("bio", formData.bio);
-
-      if (selectedImageFile) {
-        updateFormData.append("image", selectedImageFile);
-      }
+      const updatePayload = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        bio: formData.bio,
+      };
 
       const loadingToastId = toast.loading("Saving changes...");
 
-      const response = await fetch(
-        `${
-          process.env.NEXT_PUBLIC_BASE_URL ||
-          "https://cosmaticadmin.twilightparadox.com"
-        }/user/update`,
-        {
-          method: "PATCH",
-          headers: {
-            Authorization: `Token ${token}`,
-          },
-          body: updateFormData,
-        }
+      // ✨ FIX: Type assertion for the response of apiCore
+      const updatedUser = await apiCore<UserInfo>(
+        "/user/update", // Endpoint for user update
+        "PATCH",
+        updatePayload, // Send data as JSON body
+        token
       );
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        toast.error(errorData.message || "Failed to update profile.", {
-          id: loadingToastId,
-        });
-        throw new Error(errorData.message || "Failed to update profile.");
-      }
-
-      const updatedUser = await response.json();
       toast.success("Profile updated successfully!", { id: loadingToastId });
 
       dispatch(
         updateProfile({
           firstName: updatedUser.firstName || formData.firstName,
           lastName: updatedUser.lastName || formData.lastName,
-          imageUrl: updatedUser.imageUrl || null,
+          imageUrl: updatedUser.imageUrl || null, // Keep existing imageUrl, not updated via this form
           bio: updatedUser.bio || formData.bio,
           role: updatedUser.role || user?.role,
           phone: updatedUser.phone || user?.phone,
         })
       );
 
-      getUserInfo();
+      getUserInfo(); // Re-fetch to ensure UI is in sync with backend
 
       setEditing(false);
-      setSelectedImageFile(null);
     } catch (error: unknown) {
       console.error("Failed to update profile:", error);
-      if (error instanceof Error) {
-        toast.error(error.message);
-      } else if (typeof error === "string") {
-        toast.error(error);
-      } else {
-        toast.error("Failed to update profile.");
-      }
-    }
-  };
-
-  const handleImageClick = () => {
-    if (editing) {
-      fileInputRef.current?.click();
-    }
-  };
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setSelectedImageFile(file);
-      toast.success("New image selected! Click 'Save Changes' to upload.");
-    } else {
-      setSelectedImageFile(null);
-    }
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+      const errorMessage =
+        (error instanceof Error && error.message) ||
+        "Failed to update profile.";
+      toast.error(errorMessage, { id: toast.loading("Saving changes...") });
     }
   };
 
@@ -162,18 +116,12 @@ export default function PersonalInfo() {
     );
   }
 
-  const displayImageUrl = selectedImageFile
-    ? URL.createObjectURL(selectedImageFile)
-    : user.imageUrl || "/default-avatar.png";
+  const displayImageUrl = user.imageUrl || "/default-avatar.png";
 
   return (
     <div className="max-w-xl mx-auto mt-10 p-6 bg-white shadow-xl rounded-2xl border border-gray-100">
       <div className="flex items-center gap-6 relative">
-        <div
-          className="relative !w-[144px] !h-[144px] !rounded-full overflow-hidden"
-          onClick={editing ? handleImageClick : undefined}
-          style={{ cursor: editing ? "pointer" : "default" }}
-        >
+        <div className="relative !w-[144px] !h-[144px] !rounded-full overflow-hidden">
           <Image
             src={displayImageUrl}
             alt={user.firstName || "Profile Image"}
@@ -181,19 +129,7 @@ export default function PersonalInfo() {
             height={144}
             className="!w-[144px] !h-[144px] object-cover border-4 border-blue-100 shadow-md"
           />
-          {editing && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full text-white transition-opacity duration-300">
-              <FaCamera size={32} />
-            </div>
-          )}
         </div>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={handleImageChange}
-        />
 
         <div>
           {editing ? (
@@ -256,7 +192,6 @@ export default function PersonalInfo() {
                     bio: user.bio || "",
                   });
                 }
-                setSelectedImageFile(null);
               }}
               className="px-4 py-2 text-sm bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors cursor-pointer"
             >
@@ -264,8 +199,8 @@ export default function PersonalInfo() {
             </button>
             <button
               onClick={handleSave}
-              style={{ backgroundColor: "#203b67" }} // Set background color directly
-              className="px-4 py-2 text-sm text-white rounded hover:opacity-90 transition-opacity cursor-pointer" // Adjust hover and ensure text color
+              style={{ backgroundColor: "#203b67" }}
+              className="px-4 py-2 text-sm text-white rounded hover:opacity-90 transition-opacity cursor-pointer"
             >
               Save Changes
             </button>
@@ -273,8 +208,8 @@ export default function PersonalInfo() {
         ) : (
           <button
             onClick={() => setEditing(true)}
-            style={{ backgroundColor: "#203b67" }} // Set background color directly
-            className="px-4 py-2 text-sm text-white rounded hover:opacity-90 transition-opacity cursor-pointer" // Adjust hover and ensure text color
+            style={{ backgroundColor: "#203b67" }}
+            className="px-4 py-2 text-sm text-white rounded hover:opacity-90 transition-opacity cursor-pointer"
           >
             Edit Profile
           </button>

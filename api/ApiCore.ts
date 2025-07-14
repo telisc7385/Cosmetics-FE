@@ -8,7 +8,7 @@ export const apiCore = async <T>(
   token?: string | null // FIX: Allow token to be string | null | undefined
 ): Promise<T> => {
   let baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
-
+console.log(body,"body")
   // Provide a fallback if NEXT_PUBLIC_BASE_URL is not set, but strongly recommend setting it
   if (!baseUrl) {
     console.warn("NEXT_PUBLIC_BASE_URL is not set. Falling back to default: https://cosmaticadmin.twilightparadox.com");

@@ -143,6 +143,13 @@ const ProductCard = ({ product }: Props) => {
       {/* Link only for image */}
       <Link href={`/product/${product.slug}`} className="block">
         <div className="relative w-full h-36 rounded-md overflow-hidden bg-white">
+
+      {/* Product Image Section */}
+      <Link
+        href={`/product/${product.slug}`}
+        className="block flex-shrink-0 w-full"
+      >
+        <div className="relative w-full h-36 rounded-md overflow-hidden bg-gray-50 mb-3">
           <Image
             src={currentMainImageSrc}
             alt={product.name}
@@ -152,7 +159,8 @@ const ProductCard = ({ product }: Props) => {
         </div>
       </Link>
  
-      <div className="flex flex-col mt-2 px-1">
+      {/* Product Details Section */}
+      <div className="flex flex-col flex-grow w-full">
         {/* Product Title */}
         <Link href={`/product/${product.slug}`}>
           <h3 className="text-xs font-semibold text-black line-clamp-2 min-h-[32px]">
@@ -160,12 +168,13 @@ const ProductCard = ({ product }: Props) => {
           </h3>
         </Link>
  
+        {/* Price Information */}
    
  
  
-<div className="flex flex-row items-baseline gap-1 justify-center mt-1">
+<div className="flex flex-row items-baseline gap-2 justify-center mb-3">
   {!isNaN(currentBasePrice) && currentBasePrice > 0 ? (
-    <div className="text-base font-bold text-[#213E5A]">
+    <div className="text-lg font-bold text-[#213E5A]">
       ₹{currentBasePrice.toFixed(2)}
     </div>
   ) : (
@@ -177,15 +186,15 @@ const ProductCard = ({ product }: Props) => {
   {!isNaN(currentSellingPrice) &&
     currentSellingPrice > currentBasePrice &&
     currentSellingPrice > 0 && (
-      <div className="text-xs text-gray-400 line-through">
+      <div className="text-sm text-gray-400 line-through">
         ₹{currentSellingPrice.toFixed(2)}
       </div>
     )}
 </div>
  
  
-        {/* Buttons - centered below the price */}
-        <div className="flex justify-center mt-2 w-full">
+        {/* Buttons - centered below the price, pushed to bottom */}
+        <div className="flex justify-center mt-auto w-full">
           {product.variants && product.variants.length > 0 ? (
             <Link href={`/product/${product.slug}`}>
               <button className="flex items-center gap-1 bg-[#213E5A] text-white text-[11px] px-2 py-1.5 rounded-full">

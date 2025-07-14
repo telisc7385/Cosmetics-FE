@@ -1,4 +1,3 @@
-// app/layout.tsx
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Josefin_Sans } from "next/font/google";
 import "./globals.css";
@@ -8,8 +7,7 @@ import { Toaster } from "react-hot-toast";
 import Footer from "@/components/ServersideComponent/Footer/Footer";
 import { fetchTopCategories } from "@/api/fetchTopCategories";
 import ReduxProviderWrapper from "@/CartProvider/ReduxProviderWrapper";
-
-// Import your PromotionBanner component
+import { getCompanySettings, CompanySettings } from "@/api/CompanyApi"; // Import CompanyApi and CompanySettings
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,7 +36,11 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const topCategories = await fetchTopCategories();
-  // const newArrivals = await getNewArrivalProducts();
+
+  const companySettingsRes = await getCompanySettings();
+  const companyDetails: CompanySettings | undefined =
+    companySettingsRes?.result?.[0];
+
   return (
     <html lang="en">
       <body
@@ -46,9 +48,14 @@ export default async function RootLayout({
       >
         <ReduxProviderWrapper>
           <Toaster position="top-center" />
-          <Navbar />
+
+          <Navbar companyDetails={companyDetails} />
           <main className="pt-0 bg-white">{children}</main>
-          <Footer topCategories={topCategories} />
+
+          <Footer
+            topCategories={topCategories}
+            companyDetails={companyDetails}
+          />
         </ReduxProviderWrapper>
       </body>
     </html>

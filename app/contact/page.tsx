@@ -108,7 +108,7 @@ export default function ContactFormSection() {
 
       <div className="container mx-auto flex flex-col lg:flex-row items-stretch justify-center gap-10">
         {/* Left: Form */}
-        <div className="w-full lg:w-7/12 bg-white/80 backdrop-blur-md p-6 sm:p-10 rounded-2xl shadow-lg border border-pink-200 h-full">
+        <div className="w-full lg:w-7/12 bg-white/80 backdrop-blur-md p-6 sm:p-10 rounded-2xl shadow-md border border-[#213e5a] h-full">
           <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
             Contact Us
           </h2>
@@ -201,7 +201,7 @@ export default function ContactFormSection() {
         {/* Right: Info Section */}
         <div className="w-full lg:w-5/12 flex flex-col justify-between h-full">
           {company && (
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 sm:gap-2 bg-[#F3F6F7] rounded-2xl shadow-lg border border-gray-200 px-4 py-3 mb-2 text-[16px] lg:h-[230px]">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 sm:gap-2 bg-[#F3F6F7] rounded-2xl shadow-sm border border-gray-200 px-4 py-3 mb-2 text-[16px] lg:h-[230px]">
               <div className="flex flex-col sm:w-1/2 space-y-2 max-h-52 overflow-y-auto scrollbar-hide w-full">
                 <h3 className="text-md uppercase text-gray-500 font-semibold text-[17px] sm:text-[14px] text-center sm:text-left">
                   Contact Info
@@ -304,7 +304,7 @@ export default function ContactFormSection() {
             </div>
           )}
 
-          <div className="overflow-hidden rounded-2xl shadow-lg border border-gray-200 flex-1 hidden sm:block">
+          <div className="overflow-hidden rounded-2xl shadow-md border border-gray-200 flex-1 hidden sm:block">
             <iframe
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3424.175008753406!2d73.89774167465146!3d18.49106117007603!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc2ea620bdc521b%3A0x14d7209d899076dc!2sConsociate%20Solutions!5e1!3m2!1sen!2sin!4v1751878629709!5m2!1sen!2sin"
               width="100%"
