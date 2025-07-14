@@ -123,19 +123,22 @@ const ProductCard = ({ product }: Props) => {
 
   return (
     <div
-      className="relative group rounded-md overflow-hidden p-2 w-[160px] sm:w-[200px] bg-gradient-to-br from-[#dae6f1] to-white shadow-md hover:shadow-lg transition-all duration-300"
+      className="relative group rounded-lg overflow-hidden p-3 w-[160px] sm:w-[200px] bg-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 flex flex-col items-center text-center"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
       {product.priceDifferencePercent > 0 && (
-        <div className="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-semibold px-2 py-0.5 rounded z-10">
+        <div className="absolute top-3 left-3 bg-pink-500 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full z-10 shadow-md">
           {product.priceDifferencePercent}% OFF
         </div>
       )}
 
-      {/* Link only for image */}
-      <Link href={`/product/${product.slug}`} className="block">
-        <div className="relative w-full h-36 rounded-md overflow-hidden bg-white">
+      {/* Product Image Section */}
+      <Link
+        href={`/product/${product.slug}`}
+        className="block flex-shrink-0 w-full"
+      >
+        <div className="relative w-full h-36 rounded-md overflow-hidden bg-gray-50 mb-3">
           <Image
             src={currentMainImageSrc}
             alt={product.name}
@@ -145,17 +148,19 @@ const ProductCard = ({ product }: Props) => {
         </div>
       </Link>
 
-      <div className="flex flex-col mt-2 px-1">
+      {/* Product Details Section */}
+      <div className="flex flex-col flex-grow w-full">
         {/* Product Title */}
         <Link href={`/product/${product.slug}`}>
-          <h3 className="text-xs font-semibold text-black line-clamp-2 min-h-[32px]">
+          <h3 className="text-sm font-semibold text-gray-800 line-clamp-2 min-h-[36px] mb-2">
             {product.name}
           </h3>
         </Link>
 
-        <div className="flex flex-row items-baseline gap-1 justify-center mt-1">
+        {/* Price Information */}
+        <div className="flex flex-row items-baseline gap-2 justify-center mb-3">
           {!isNaN(currentBasePrice) && currentBasePrice > 0 ? (
-            <div className="text-base font-bold text-[#213E5A]">
+            <div className="text-lg font-bold text-[#213E5A]">
               ₹{currentBasePrice.toFixed(2)}
             </div>
           ) : (
@@ -167,18 +172,20 @@ const ProductCard = ({ product }: Props) => {
           {!isNaN(currentSellingPrice) &&
             currentSellingPrice > currentBasePrice &&
             currentSellingPrice > 0 && (
-              <div className="text-xs text-gray-400 line-through">
+              <div className="text-sm text-gray-400 line-through">
                 ₹{currentSellingPrice.toFixed(2)}
               </div>
             )}
         </div>
 
-        {/* Buttons - centered below the price */}
-        <div className="flex justify-center mt-2 w-full">
+        {/* Buttons - centered below the price, pushed to bottom */}
+        <div className="flex justify-center mt-auto w-full">
           {product.variants && product.variants.length > 0 ? (
             <Link href={`/product/${product.slug}`}>
-              <button className="flex items-center gap-1 bg-[#213E5A] text-white text-[11px] px-2 py-1.5 rounded-full">
-                <MdTune className="text-sm" /> Variant
+              <button className="flex items-center justify-center gap-1 bg-[#213E5A] text-white text-[11px] px-3 py-1.5 rounded-full hover:bg-opacity-90 transition-all duration-300 shadow-sm hover:shadow-md max-w-[150px]">
+                {" "}
+                {/* Added max-w-[150px] */}
+                <MdTune className="text-base" /> Variant Options
               </button>
             </Link>
           ) : (
@@ -186,19 +193,20 @@ const ProductCard = ({ product }: Props) => {
               type="button"
               onClick={handleAddToCart}
               disabled={isOutOfStock}
-              className={`flex items-center gap-1 bg-[#213E5A] text-white text-[11px] px-4 py-1.5 rounded-full ${
+              className={`flex items-center justify-center gap-1 bg-[#213E5A] text-white text-[11px] px-3 py-1.5 rounded-full transition-all duration-300 shadow-sm hover:shadow-md max-w-[150px] ${
+                /* Added max-w-[150px] */
                 isOutOfStock
-                  ? "opacity-50 cursor-not-allowed"
-                  : "cursor-pointer"
+                  ? "opacity-50 cursor-not-allowed bg-gray-400"
+                  : "hover:bg-opacity-90 cursor-pointer"
               }`}
             >
-              <HiOutlineShoppingBag className="text-sm" /> Add
+              <HiOutlineShoppingBag className="text-base" /> Add
             </button>
           )}
         </div>
 
         {isOutOfStock && (
-          <p className="text-[11px] text-red-600 text-center mt-1 font-medium">
+          <p className="text-[11px] text-red-600 text-center mt-2 font-medium">
             Out of Stock
           </p>
         )}
