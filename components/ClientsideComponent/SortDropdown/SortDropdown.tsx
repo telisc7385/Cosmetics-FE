@@ -1,5 +1,3 @@
-
-
 "use client";
 
 type SortOrder = "price_asc" | "price_desc";
@@ -19,10 +17,6 @@ export default function SortDropdown({
       onChange={(e) => setSortOrder(e.target.value as SortOrder)}
       className="border h-11 sm:h-auto rounded px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-0.5 focus:ring-black"
     >
-
-      <option className="text-sm h-5 w-5" value="price_asc">Price: Low to High</option>
-      <option className="text-sm" value="price_desc">Price: High to Low</option>
-
       <option className="text-sm" value="price_asc">
         Price: Low to High
       </option>
@@ -32,4 +26,3 @@ export default function SortDropdown({
     </select>
   );
 }
-

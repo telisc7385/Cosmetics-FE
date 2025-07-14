@@ -8,7 +8,7 @@ import { Funnel } from "lucide-react";
 
 import SidebarFiltersClient from "@/components/ServersideComponent/SidebarFilters/SidebarFilters";
 import ProductCard from "@/components/CommonComponents/ProductCard/ProductCard";
-import SortDropdown from "../SortDropdown.tsx/SortDropdown"; // Ensure this path is correct
+import SortDropdown from "@/components/ClientsideComponent/SortDropdown/SortDropdown"; // Ensure this path is correct
 
 import { Category } from "@/types/category";
 import { Product } from "@/types/product";
@@ -165,7 +165,6 @@ const ShopPageClient: React.FC<Props> = ({ categories }) => {
             </div>
           )}
 
-     
           {totalPages > 1 && (
             <div className="mt-6 flex gap-4 items-center">
               <button

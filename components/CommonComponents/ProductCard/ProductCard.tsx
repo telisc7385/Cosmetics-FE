@@ -65,7 +65,6 @@ const ProductCard = ({ product }: Props) => {
   const currentSellingPrice = Number(
     selectedVariant?.selling_price || product.sellingPrice || 0
   );
-
   const currentBasePrice = Number(
     selectedVariant?.base_price || product.basePrice || 0
   );
@@ -108,7 +107,7 @@ const ProductCard = ({ product }: Props) => {
         addToCart({
           ...itemPayload,
           cartItemId: Date.now() * -1 - Math.floor(Math.random() * 1000),
-          productId: product.id, // ✅ required field for Redux slice
+          productId: product.id,
         })
       );
     }
@@ -121,84 +120,84 @@ const ProductCard = ({ product }: Props) => {
 
   return (
     <div
-      className="relative group rounded-md overflow-hidden p-2 w-[160px] sm:w-[200px] bg-gradient-to-br from-[#dae6f1] to-white shadow-md hover:shadow-lg transition-all duration-300"
+      className="group bg-white rounded-2xl border border-pink-100 shadow-sm transition-shadow duration-300 w-[160px] sm:w-[200px] overflow-hidden"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      {product.priceDifferencePercent > 0 && (
-        <div className="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-semibold px-2 py-0.5 rounded z-10">
-          {product.priceDifferencePercent}% OFF
-        </div>
-      )}
-
       {/* Product Image */}
-      <Link href={`/product/${product.slug}`} className="block">
-        <div className="relative w-full h-36 rounded-md overflow-hidden bg-gray-50 mb-3">
-          <Image
-            src={currentMainImageSrc}
-            alt={product.name}
-            fill
-            className="object-contain transition-transform duration-300 ease-in-out group-hover:scale-105"
-          />
-        </div>
+      <Link
+        href={`/product/${product.slug}`}
+        className="block relative h-52 bg-pink-50"
+      >
+        <Image
+          src={currentMainImageSrc}
+          alt={product.name}
+          fill
+          className="object-cover transition-transform duration-300 ease-in-out scale-100 group-hover:scale-110"
+        />
+        {product.priceDifferencePercent > 0 && (
+          <div className="absolute top-3 left-3 bg-pink-600 text-white text-[10px] px-2 py-0.5 rounded-full font-semibold shadow-sm">
+            {product.priceDifferencePercent}% OFF
+          </div>
+        )}
       </Link>
 
-      {/* Product Info */}
-      <div className="flex flex-col flex-grow w-full">
+      {/* Content */}
+      <div className="p-3 flex flex-col text-left">
+        {/* Product Name */}
         <Link href={`/product/${product.slug}`}>
-          <h3 className="text-xs font-semibold text-black line-clamp-2 min-h-[32px]">
+          <h3 className="text-[13px] text-gray-800 font-semibold mb-1 group-hover:text-pink-700 transition-colors line-clamp-2 min-h-[34px]">
             {product.name}
           </h3>
         </Link>
 
-        {/* Price Section */}
-        <div className="flex flex-row items-baseline gap-2 justify-center mb-3">
-          {!isNaN(currentBasePrice) && currentBasePrice > 0 ? (
-            <div className="text-base font-bold text-[#213E5A]">
-              ₹{currentBasePrice.toFixed(2)}
-            </div>
-          ) : (
-            <div className="text-base font-semibold text-gray-500">
-              Price Unavailable
-            </div>
-          )}
-
-          {!isNaN(currentSellingPrice) &&
-            currentSellingPrice > currentBasePrice &&
-            currentSellingPrice > 0 && (
-              <div className="text-xs text-gray-400 line-through">
-                ₹{currentSellingPrice.toFixed(2)}
-              </div>
+        {/* Price + Button */}
+        <div className="flex justify-between items-start mt-2 mb-1">
+          {/* Price */}
+          <div className="flex flex-col">
+            {!isNaN(currentBasePrice) && currentBasePrice > 0 ? (
+              <span className="text-sm font-bold text-pink-700">
+                ₹{currentBasePrice.toFixed(2)}
+              </span>
+            ) : (
+              <span className="text-sm text-gray-500">Price Unavailable</span>
             )}
-        </div>
 
-        {/* Action Button */}
-        <div className="flex justify-center mt-auto w-full">
+            {!isNaN(currentSellingPrice) &&
+              currentSellingPrice > currentBasePrice && (
+                <span className="text-xs text-gray-400 line-through mt-0.5">
+                  ₹{currentSellingPrice.toFixed(2)}
+                </span>
+              )}
+          </div>
+
+          {/* Action Button */}
           {product.variants && product.variants.length > 0 ? (
             <Link href={`/product/${product.slug}`}>
-              <button className="flex items-center gap-1 bg-[#213E5A] text-white text-[11px] px-3 py-1.5 rounded-full transition-all duration-300 shadow-sm hover:shadow-md max-w-[150px]">
-                <MdTune className="text-base" /> Variant Options
+              <button className="text-[11px] flex items-center gap-1 px-3 py-1.5 bg-pink-600 text-white rounded-full hover:bg-pink-700 transition">
+                <MdTune className="text-xs" />
+                Options
               </button>
             </Link>
           ) : (
             <button
-              type="button"
               onClick={handleAddToCart}
               disabled={isOutOfStock}
-              className={`flex items-center justify-center gap-1 bg-[#213E5A] text-white text-[11px] px-3 py-1.5 rounded-full transition-all duration-300 shadow-sm hover:shadow-md max-w-[150px] ${
+              className={`text-[11px] flex items-center gap-1 px-3 py-1.5 rounded-full transition ${
                 isOutOfStock
-                  ? "opacity-50 cursor-not-allowed"
-                  : "cursor-pointer"
+                  ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                  : "bg-pink-600 text-white hover:bg-pink-700"
               }`}
             >
-              <HiOutlineShoppingBag className="text-sm" /> Add
+              <HiOutlineShoppingBag className="text-xs" />
+              Add
             </button>
           )}
         </div>
 
-        {/* Stock Message */}
+        {/* Stock Info */}
         {isOutOfStock && (
-          <p className="text-[11px] text-red-600 text-center mt-1 font-medium">
+          <p className="text-[10px] text-red-600 font-medium text-right mt-1">
             Out of Stock
           </p>
         )}
