@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Menu, X, ChevronDown, ChevronUp } from "lucide-react";
+import { Menu, X, ChevronDown, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { getNavbarData, NavbarItem } from "@/api/NavbarApi";
 import { getCompanySettings } from "@/api/CompanyApi";
 import { fetchCategories } from "@/api/fetchCategories";
-import { Category } from "@/types/category";
+import { Category} from "@/types/category";
 
 const MobileMenu = () => {
   const router = useRouter();
@@ -19,6 +19,7 @@ const MobileMenu = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [showCategories, setShowCategories] = useState(false);
   const [expandedCatId, setExpandedCatId] = useState<number | null>(null);
+  const [expandedSubCatId, setExpandedSubCatId] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchNav = async () => {
@@ -59,18 +60,27 @@ const MobileMenu = () => {
     fetchCats();
   }, []);
 
-  const handleParentCategoryClick = (catId: number) => {
-    setOpen(false);
-    setShowCategories(false);
-    setExpandedCatId(null);
-    router.push(`/category/${catId}`);
+  const toggleParentCategory = (catId: number) => {
+    setExpandedCatId((prev) => (prev === catId ? null : catId));
+    setExpandedSubCatId(null);
   };
 
-  const handleSubcategoryClick = (subId: number) => {
+  const toggleSubcategory = (subId: number) => {
+    setExpandedSubCatId((prev) => (prev === subId ? null : subId));
+  };
+
+  const goToCategory = (
+    id: number,
+    type: "category" | "subcategory" | "subsubcategory"
+  ) => {
     setOpen(false);
     setShowCategories(false);
     setExpandedCatId(null);
-    router.push(`/subcategory/${subId}`);
+    setExpandedSubCatId(null);
+
+    if (type === "category") router.push(`/category/${id}`);
+    else if (type === "subcategory") router.push(`/subcategory/${id}`);
+    else router.push(`/subsubcategory/${id}`);
   };
 
   return (
@@ -108,62 +118,86 @@ const MobileMenu = () => {
                       className="text-black text-lg font-medium flex items-center justify-between w-full"
                     >
                       Categories
-                      {showCategories ? (
-                        <ChevronUp size={18} />
-                      ) : (
-                        <ChevronDown size={18} />
-                      )}
+                      <ChevronDown size={18} />
                     </button>
 
                     {showCategories && (
                       <ul className="ml-2 mt-2 space-y-2">
                         {categories.map((cat) => (
                           <li key={cat.id}>
-                            <button
-                              onClick={() => {
-                                if (
-                                  Array.isArray(cat.subcategories) &&
-                                  cat.subcategories.length > 0
-                                ) {
-                                  setExpandedCatId((prev) =>
-                                    prev === cat.id ? null : cat.id
-                                  );
-                                }
-                                handleParentCategoryClick(cat.id);
-                              }}
-                              className="text-sm text-gray-800 font-medium flex justify-between w-full"
-                            >
-                              <span className="flex items-center gap-1">
+                            <div className="flex justify-between items-center">
+                              <button
+                                onClick={() => goToCategory(cat.id, "category")}
+                                className="text-sm font-medium text-left text-gray-800 w-full"
+                              >
                                 {cat.name}
-                                {Array.isArray(cat.subcategories) &&
-                                  cat.subcategories.length > 0 && (
+                              </button>
+                              {Array.isArray(cat.subcategories) &&
+                                cat.subcategories.length > 0 && (
+                                  <button
+                                    onClick={() => toggleParentCategory(cat.id)}
+                                  >
                                     <ChevronDown
                                       size={14}
                                       className="text-gray-600"
                                     />
-                                  )}
-                              </span>
-                            </button>
+                                  </button>
+                                )}
+                            </div>
 
                             {expandedCatId === cat.id &&
                               Array.isArray(cat.subcategories) &&
                               cat.subcategories.length > 0 && (
                                 <ul className="ml-4 mt-1 space-y-1">
-                                  {cat.subcategories.map((sub: Category) => (
+                                  {cat.subcategories.map((sub) => (
                                     <li key={sub.id}>
-                                      <button
-                                        className="text-xs text-gray-600 hover:text-blue-600 block text-left w-full flex justify-between items-center"
-                                        onClick={() =>
-                                          typeof sub.id === "number" &&
-                                          handleSubcategoryClick(sub.id)
-                                        }
-                                      >
-                                        <span>{sub.name}</span>
-                                        {Array.isArray(sub.subcategories) &&
-                                          sub.subcategories.length > 0 && (
-                                            <ChevronDown size={12} />
+                                      <div className="flex justify-between items-center">
+                                        <button
+                                          onClick={() =>
+                                            goToCategory(sub.id, "subcategory")
+                                          }
+                                          className="text-xs font-medium text-left text-gray-700 w-full"
+                                        >
+                                          {sub.name}
+                                        </button>
+                                        {Array.isArray(sub.subsubcategories) &&
+                                          sub.subsubcategories.length > 0 && (
+                                            <button
+                                              onClick={() =>
+                                                toggleSubcategory(sub.id)
+                                              }
+                                            >
+                                              <ChevronRight
+                                                size={12}
+                                                className="text-gray-500"
+                                              />
+                                            </button>
                                           )}
-                                      </button>
+                                      </div>
+
+                                      {expandedSubCatId === sub.id &&
+                                        Array.isArray(sub.subsubcategories) &&
+                                        sub.subsubcategories.length > 0 && (
+                                          <ul className="ml-4 mt-1 space-y-1">
+                                            {sub.subsubcategories.map(
+                                              (subsub) => (
+                                                <li key={subsub.id}>
+                                                  <button
+                                                    onClick={() =>
+                                                      goToCategory(
+                                                        subsub.id,
+                                                        "subsubcategory"
+                                                      )
+                                                    }
+                                                    className="text-xs text-gray-600 hover:text-blue-600 block text-left"
+                                                  >
+                                                    {subsub.name}
+                                                  </button>
+                                                </li>
+                                              )
+                                            )}
+                                          </ul>
+                                        )}
                                     </li>
                                   ))}
                                 </ul>

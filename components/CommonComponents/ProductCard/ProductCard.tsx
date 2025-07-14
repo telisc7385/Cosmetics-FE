@@ -1,6 +1,6 @@
 // ProductCard.tsx
 "use client";
-
+ 
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -12,33 +12,33 @@ import { Product, ProductVariant } from "@/types/product"; // Assuming Product a
 import toast from "react-hot-toast"; // Keep toast import, for other errors if needed
 import { HiOutlineShoppingBag } from "react-icons/hi2";
 import { MdTune } from "react-icons/md";
-
+ 
 interface Props {
   product: Product;
 }
-
+ 
 const ProductCard = ({ product }: Props) => {
   const dispatch = useAppDispatch();
   const isLoggedIn = useAppSelector(selectIsLoggedIn);
   const { addCartItem } = useLoggedInCart();
-
+ 
   const firstGeneralImage = product.images.find(
     (img) => img.sequence === 1
   )?.image;
   const secondGeneralImage = product.images.find(
     (img) => img.sequence === 2
   )?.image;
-
+ 
   const [hovered, setHovered] = useState(false);
   const [mainDisplayImage, setMainDisplayImage] = useState<string>("");
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(
     null
   );
-
+ 
   useEffect(() => {
     let initialImage = firstGeneralImage || "/placeholder.jpg";
     let initialVariant: ProductVariant | null = null;
-
+ 
     if (product.variants && product.variants.length > 0) {
       const defaultSelectedVariant = product.variants.find(
         (v) => v.is_selected
@@ -51,41 +51,41 @@ const ProductCard = ({ product }: Props) => {
         initialVariant = product.variants[0];
       }
     }
-
+ 
     setMainDisplayImage(initialImage);
     setSelectedVariant(initialVariant);
   }, [product, firstGeneralImage]);
-
+ 
   const currentMainImageSrc =
     selectedVariant && selectedVariant.images.length > 0
       ? mainDisplayImage
       : hovered && secondGeneralImage
       ? secondGeneralImage
       : firstGeneralImage || "/placeholder.jpg";
-
-
-
-
+ 
+ 
+ 
+ 
   const currentSellingPrice = Number(
     selectedVariant?.selling_price || product.sellingPrice || 0
   );
-  
+ 
   const currentBasePrice = Number(
     selectedVariant?.base_price || product.basePrice || 0
   );
-  
-
-
-
-
+ 
+ 
+ 
+ 
+ 
   const handleAddToCart = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
-
+ 
     const itemStock =
       product.variants && product.variants.length > 0
         ? selectedVariant?.stock ?? 0
         : product.stock ?? 0;
-
+ 
     const itemPayload = {
       id: product.id,
       name: product.name,
@@ -98,12 +98,12 @@ const ProductCard = ({ product }: Props) => {
       product: product,
       stock: itemStock,
     };
-
+ 
     if (itemStock === 0) {
       toast.error(`${product.name} is out of stock.`);
       return;
     }
-
+ 
     if (isLoggedIn) {
       try {
         await addCartItem(itemPayload);
@@ -122,12 +122,12 @@ const ProductCard = ({ product }: Props) => {
       // REMOVED: toast.success(`${product.name} added to cart!`);
     }
   };
-
+ 
   const isOutOfStock =
     product.variants && product.variants.length > 0
       ? selectedVariant?.stock === 0
       : product.stock === 0;
-
+ 
   return (
     <div
       className="relative group rounded-md overflow-hidden p-2 w-[160px] sm:w-[200px] bg-gradient-to-br from-[#dae6f1] to-white shadow-md hover:shadow-lg transition-all duration-300"
@@ -139,7 +139,7 @@ const ProductCard = ({ product }: Props) => {
           {product.priceDifferencePercent}% OFF
         </div>
       )}
-
+ 
       {/* Link only for image */}
       <Link href={`/product/${product.slug}`} className="block">
         <div className="relative w-full h-36 rounded-md overflow-hidden bg-white">
@@ -151,7 +151,7 @@ const ProductCard = ({ product }: Props) => {
           />
         </div>
       </Link>
-
+ 
       <div className="flex flex-col mt-2 px-1">
         {/* Product Title */}
         <Link href={`/product/${product.slug}`}>
@@ -159,10 +159,10 @@ const ProductCard = ({ product }: Props) => {
             {product.name}
           </h3>
         </Link>
-
-    
-
-
+ 
+   
+ 
+ 
 <div className="flex flex-row items-baseline gap-1 justify-center mt-1">
   {!isNaN(currentBasePrice) && currentBasePrice > 0 ? (
     <div className="text-base font-bold text-[#213E5A]">
@@ -173,7 +173,7 @@ const ProductCard = ({ product }: Props) => {
       Price Unavailable
     </div>
   )}
-
+ 
   {!isNaN(currentSellingPrice) &&
     currentSellingPrice > currentBasePrice &&
     currentSellingPrice > 0 && (
@@ -182,8 +182,8 @@ const ProductCard = ({ product }: Props) => {
       </div>
     )}
 </div>
-
-
+ 
+ 
         {/* Buttons - centered below the price */}
         <div className="flex justify-center mt-2 w-full">
           {product.variants && product.variants.length > 0 ? (
@@ -207,7 +207,7 @@ const ProductCard = ({ product }: Props) => {
             </button>
           )}
         </div>
-
+ 
         {isOutOfStock && (
           <p className="text-[11px] text-red-600 text-center mt-1 font-medium">
             Out of Stock
@@ -217,5 +217,5 @@ const ProductCard = ({ product }: Props) => {
     </div>
   );
 };
-
+ 
 export default ProductCard;
