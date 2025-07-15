@@ -8,6 +8,7 @@ import { loginSuccess } from "@/store/slices/authSlice";
 import { Eye, EyeOff } from "lucide-react";
 import ForgotPassword from "@/components/ClientsideComponent/ForgotPassword/ForgotPassword";
 import Image from "next/image";
+import Cookies from "js-cookie"; // <-- Yeh line add karein
 
 interface LoginFormProps {
   redirectPath: string;
@@ -60,6 +61,16 @@ export default function LoginForm({
 
       if (res.ok && data.token && data.user) {
         dispatch(loginSuccess({ customer: data.user, token: data.token }));
+
+        // --- Naya Code Yahan Add Karein: Token ko cookie mein save karna ---
+        // 'authToken' ko ussi name se badlein jo aap app/layout.tsx mein read kar rahe hain.
+        Cookies.set("authToken", data.token, {
+          expires: 7,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "Lax",
+        });
+        // --- Naya Code End ---
+
         toast.success("Login successful!");
         router.push(redirectPath);
       } else {
@@ -120,7 +131,7 @@ export default function LoginForm({
                   <div className="relative">
                     <input
                       type={showPassword ? "text" : "password"}
-                      className={`w-full p-2 pr-10 rounded border text-[#213E5A]  ${
+                      className={`w-full p-2 pr-10 rounded border text-[#213E5A]  ${
                         errors.password
                           ? "border-red-500 bg-red-50"
                           : "border-gray-300"

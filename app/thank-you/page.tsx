@@ -1,23 +1,45 @@
+// pages/thank-you.tsx or app/thank-you/page.tsx (for Next.js App Router)
 "use client";
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams} from "next/navigation";
 import toast from "react-hot-toast";
-import { apiCore } from "@/api/ApiCore";
-import { useAppSelector } from "@/store/hooks/hooks";
-import { selectToken } from "@/store/slices/authSlice";
+import { apiCore } from "@/api/ApiCore"; // Ensure this path is correct
+import { useAppSelector } from "@/store/hooks/hooks"; // Ensure this path is correct
+import { selectToken } from "@/store/slices/authSlice"; // Ensure this path is correct
 import Image from "next/image";
+import Lottie from "react-lottie-player"; // Import Lottie
+import ShoppingCart from "@/public/ShoppingCart.json"; // Assuming your Lottie animation file path
 
-// Interface Definitions
+// Interface Definitions (Ensure these match your backend response structure)
 interface CustomerInfo {
   first_name: string;
   last_name: string;
   country_code_for_phone_number: string | null;
   phone_number: string;
   email: string;
-  billing_address: string; // This holds the billing address string
-  delivery_address: string; // This holds the delivery/shipping address string
+  // Updated to support either a string or a structured object for addresses
+  billing_address:
+    | string
+    | {
+        street: string;
+        city: string;
+        state: string;
+        pincode: string;
+        landmark?: string; // Optional landmark field
+      }
+    | null; // Explicitly allow null
+  delivery_address:
+    | string
+    | {
+        street: string;
+        city: string;
+        state: string;
+        pincode: string;
+        landmark?: string; // Optional landmark field
+      }
+    | null; // Explicitly allow null
 }
 
 interface OrderInfo {
@@ -50,7 +72,9 @@ interface RawOrderItemFromApi {
   slug?: string | null;
 }
 
-interface DetailedOrder {
+// Ensure DetailedOrder is correctly typed based on what your guest/checkout API returns
+// and what the /order/detail/:orderId API returns.
+export interface DetailedOrder {
   id: string;
   purchased_item_count: number;
   customer_info: CustomerInfo;
@@ -69,9 +93,8 @@ interface OrderListApiResponse {
 
 const ThankYouPage = () => {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const orderId = searchParams.get("orderId");
-  const token = useAppSelector(selectToken);
+  const token = useAppSelector(selectToken); // This will be null for guest users
 
   const [order, setOrder] = useState<DetailedOrder | null>(null);
   const [loading, setLoading] = useState(true);
@@ -79,38 +102,103 @@ const ThankYouPage = () => {
   const [showCelebration, setShowCelebration] = useState(false);
 
   useEffect(() => {
-    const fetchOrderDetails = async () => {
+    const loadOrderDetails = async () => {
       if (!orderId) {
         setError("Order ID is missing. Cannot display order details.");
         setLoading(false);
-        router.replace("/");
         return;
       }
 
+      setLoading(true);
+      setError(null);
+      setOrder(null); // Reset order state before attempting to load
+
+      let fetchedOrder: DetailedOrder | null = null;
+
+      // 1. Attempt to load from sessionStorage for ALL sessions first,
+      // but only if a stored order with the matching ID exists.
+      if (typeof window !== "undefined") {
+        const storedGuestOrder = sessionStorage.getItem("lastGuestOrder");
+        if (storedGuestOrder) {
+          try {
+            const parsedOrder: DetailedOrder = JSON.parse(storedGuestOrder);
+            // Crucially, check if the ID matches the one from the URL.
+            // This prevents showing an old, irrelevant order.
+            if (
+              parsedOrder.id === orderId &&
+              parsedOrder.order_info &&
+              parsedOrder.customer_info
+            ) {
+              fetchedOrder = parsedOrder;
+              // IMPORTANT: Remove it from sessionStorage after successful retrieval
+              // to prevent showing it again on subsequent page loads/navs.
+              sessionStorage.removeItem("lastGuestOrder");
+              console.log(
+                "ThankYouPage: Loaded guest order from sessionStorage."
+              );
+            } else {
+              console.log(
+                "ThankYouPage: Stored order in sessionStorage does not match current orderId or is incomplete. Will attempt API fetch."
+              );
+              // If it doesn't match, maybe it's an old guest order, or incomplete.
+              // We should remove it and then proceed to API.
+              sessionStorage.removeItem("lastGuestOrder");
+            }
+          } catch (e) {
+            console.error(
+              "ThankYouPage: Failed to parse stored guest order from sessionStorage:",
+              e
+            );
+            // If parsing fails, proceed to API fetch
+            sessionStorage.removeItem("lastGuestOrder"); // Clear corrupted data
+          }
+        }
+      }
+
+      if (fetchedOrder) {
+        setOrder(fetchedOrder);
+        setShowCelebration(true);
+        setLoading(false);
+        return; // Exit if a valid order was loaded from sessionStorage
+      }
+
+      // 2. If no valid order found in sessionStorage, then proceed with API fetch.
+      // This API call will now be attempted for both logged-in and guest users.
+      // The success depends on your backend's endpoint configuration for guest orders.
       try {
-        setLoading(true);
-        setError(null);
+        console.log(
+          `ThankYouPage: Attempting API fetch for order ID: ${orderId} (token present: ${!!token})`
+        );
         const responseData = await apiCore<OrderListApiResponse>(
           `/order/detail/${orderId}`,
           "GET",
           undefined,
-          token
+          token // Pass token if available (for logged-in users). For guests, this will be null/undefined.
         );
 
         if (responseData.results && responseData.results.length > 0) {
-          const fetchedOrder = responseData.results[0];
-          setOrder(fetchedOrder);
-          setShowCelebration(true); // Trigger confetti 🥳
+          setOrder(responseData.results[0]);
+          setShowCelebration(true);
+          console.log(
+            "ThankYouPage: Successfully fetched order details from API."
+          );
         } else {
+          // If API returns no results, or an empty array
           setError("Order not found or no results returned for this ID.");
           toast.error("Order not found.");
-          router.replace("/");
+          console.error(
+            "ThankYouPage: API returned no results for order ID:",
+            orderId
+          );
         }
       } catch (err: unknown) {
         const errorMessage =
           err instanceof Error ? err.message : "Unknown error occurred";
 
-        console.error("Failed to fetch order details:", errorMessage);
+        console.error(
+          "ThankYouPage: Failed to fetch order details from API:",
+          errorMessage
+        );
 
         if (
           errorMessage.includes("401") ||
@@ -119,7 +207,7 @@ const ThankYouPage = () => {
           setError(
             "You are not authorized to view this order. Please log in if you are the owner."
           );
-          toast.error("Unauthorized access.");
+          toast.error("Unauthorized access to order details.");
         } else if (errorMessage.includes("404")) {
           setError("The order you are looking for could not be found.");
           toast.error("Order not found.");
@@ -130,17 +218,17 @@ const ThankYouPage = () => {
           );
           toast.error("Error loading order details.");
         }
-        router.replace("/"); // On any error, redirect to home
       } finally {
         setLoading(false);
       }
     };
 
-    fetchOrderDetails();
-  }, [orderId, token, router]);
+    loadOrderDetails();
+  }, [orderId, token]); // Re-run effect if orderId or token changes
 
   const handleDownloadInvoice = () => {
-    if (order?.order_info.invoice_url) {
+    // Crucially, check if order and order.order_info exist before accessing invoice_url
+    if (order?.order_info?.invoice_url) {
       let baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
       if (!baseUrl) {
         baseUrl = "https://cosmaticadmin.twilightparadox.com"; // Fallback URL
@@ -148,23 +236,35 @@ const ThankYouPage = () => {
       if (baseUrl.endsWith("/")) {
         baseUrl = baseUrl.slice(0, -1);
       }
-      const invoiceRelativePath = order.order_info.invoice_url.startsWith("/")
-        ? order.order_info.invoice_url
-        : `/${order.order_info.invoice_url}`;
+      // Ensure the invoice URL from the backend is handled correctly
+      // It might be an absolute path or a full URL.
+      const invoiceRelativePath = order.order_info.invoice_url.startsWith(
+        "http"
+      )
+        ? order.order_info.invoice_url // It's already a full URL
+        : order.order_info.invoice_url.startsWith("/")
+        ? `${baseUrl}${order.order_info.invoice_url}` // Absolute path, append to base
+        : `${baseUrl}/${order.order_info.invoice_url}`; // Relative path, append with slash
 
-      const invoiceFullUrl = `${baseUrl}${invoiceRelativePath}`;
-      window.open(invoiceFullUrl, "_blank");
+      window.open(invoiceRelativePath, "_blank"); // Use the potentially adjusted URL
       toast.success("Downloading invoice... 📥");
     } else {
       toast.error("Invoice URL not available.");
     }
   };
 
+  // --- Conditional Renders ---
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <p className="text-base text-gray-600">
-          Loading order details for your purchase... 🔄
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
+        <Lottie
+          loop
+          animationData={ShoppingCart} // Re-use your Lottie animation for loading
+          play
+          style={{ width: 100, height: 100 }}
+        />
+        <p className="mt-4 text-xl font-semibold text-gray-700">
+          Loading order details...
         </p>
       </div>
     );
@@ -194,11 +294,20 @@ const ThankYouPage = () => {
         >
           Go to Homepage
         </Link>
+        {/* For guests, if API fetch failed, still guide them. */}
+        <Link
+          href="/guest-checkout"
+          className="block mt-3 text-blue-600 hover:underline text-sm"
+        >
+          Try Guest Checkout Again
+        </Link>
       </div>
     );
   }
 
   if (!order) {
+    // This case should theoretically be covered by the `error` state now,
+    // but kept as a fallback for extreme edge cases where order is null but no specific error.
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-pink-100 to-purple-100 text-gray-800 p-3">
         <svg
@@ -240,6 +349,7 @@ const ThankYouPage = () => {
     );
   }
 
+  // If we reach here, `order` is guaranteed not to be null
   return (
     <div className="relative container mx-auto p-2 sm:p-4 bg-gray-50 min-h-screen">
       {showCelebration && (
@@ -358,7 +468,6 @@ const ThankYouPage = () => {
                 {order.payment_info.payment_type}
               </span>
             </p>
-            {/* Added Payment Status and Transaction ID */}
             <p className="text-sm text-gray-600">
               Payment Status:{" "}
               <span className="font-semibold">
@@ -400,8 +509,6 @@ const ThankYouPage = () => {
             </p>
           </div>
         </div>
-
-        {/* --- Billing & Shipping Addresses (using direct strings) --- */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-4 mb-4 border-b pb-3">
           <div>
             <h3 className="text-base sm:text-lg font-semibold text-gray-700 mb-2">
@@ -417,9 +524,33 @@ const ThankYouPage = () => {
                 {order.customer_info.phone_number}
               </span>
               <br />
-              <span className="whitespace-pre-line">
-                {order.customer_info.billing_address}
-              </span>
+              {order.customer_info.billing_address ? ( // ADDED NULL CHECK
+                typeof order.customer_info.billing_address === "string" ? (
+                  <span className="whitespace-pre-line">
+                    {order.customer_info.billing_address}
+                  </span>
+                ) : (
+                  <>
+                    <span>{order.customer_info.billing_address.street}</span>
+                    <br />
+                    {order.customer_info.billing_address.landmark && (
+                      <>
+                        <span>
+                          {order.customer_info.billing_address.landmark}
+                        </span>
+                        <br />
+                      </>
+                    )}
+                    <span>
+                      {order.customer_info.billing_address.city},{" "}
+                      {order.customer_info.billing_address.state} -{" "}
+                      {order.customer_info.billing_address.pincode}
+                    </span>
+                  </>
+                )
+              ) : (
+                <span className="italic">Billing address not provided.</span> // Fallback if null
+              )}
             </p>
           </div>
           <div>
@@ -436,14 +567,36 @@ const ThankYouPage = () => {
                 {order.customer_info.phone_number}
               </span>
               <br />
-              <span className="whitespace-pre-line">
-                {order.customer_info.delivery_address}
-              </span>
+              {order.customer_info.delivery_address ? ( // ADDED NULL CHECK
+                typeof order.customer_info.delivery_address === "string" ? (
+                  <span className="whitespace-pre-line">
+                    {order.customer_info.delivery_address}
+                  </span>
+                ) : (
+                  <>
+                    <span>{order.customer_info.delivery_address.street}</span>
+                    <br />
+                    {order.customer_info.delivery_address.landmark && (
+                      <>
+                        <span>
+                          {order.customer_info.delivery_address.landmark}
+                        </span>
+                        <br />
+                      </>
+                    )}
+                    <span>
+                      {order.customer_info.delivery_address.city},{" "}
+                      {order.customer_info.delivery_address.state} -{" "}
+                      {order.customer_info.delivery_address.pincode}
+                    </span>
+                  </>
+                )
+              ) : (
+                <span className="italic">Shipping address not provided.</span> // Fallback if null
+              )}
             </p>
           </div>
         </div>
-        {/* --- End Billing & Shipping Addresses --- */}
-
         <h3 className="text-base sm:text-lg font-semibold text-gray-700 mb-3">
           Items: 📦
         </h3>
@@ -454,7 +607,6 @@ const ThankYouPage = () => {
                 key={item.id}
                 className="flex flex-col sm:flex-row items-start sm:items-center gap-2 border p-2 rounded-md bg-gray-50"
               >
-                {/* Link for Image */}
                 {item.slug ? (
                   <Link
                     href={`/product/${item.slug}`}
@@ -478,7 +630,6 @@ const ThankYouPage = () => {
                   />
                 )}
                 <div className="flex-grow">
-                  {/* Link for Product Name */}
                   {item.slug ? (
                     <Link
                       href={`/product/${item.slug}`}
@@ -514,34 +665,30 @@ const ThankYouPage = () => {
             </p>
           )}
         </ul>
-
         <div className="text-right space-y-1">
           <div className="flex justify-between text-sm font-semibold text-gray-700">
             <span>Subtotal:</span>
-            <span>₹{order.order_info.sub_total.toFixed(2)}</span>
+            <span>₹{(order.order_info.sub_total ?? 0).toFixed(2)}</span>
           </div>
-          {order.order_info.discount > 0 && (
+          {(order.order_info.discount ?? 0) > 0 && (
             <div className="flex justify-between text-sm font-semibold text-gray-700">
-              {/* Changed to just "Discount:" */}
               <span>Discount:</span>
               <span className="text-red-600">
-                -₹{order.order_info.discount.toFixed(2)}
+                -₹{(order.order_info.discount ?? 0).toFixed(2)}
               </span>
             </div>
           )}
-
           <div className="flex justify-between text-lg font-bold text-blue-700 border-t pt-2 mt-2">
             <span>Total Paid:</span>
-            <span>₹{order.order_info.final_total.toFixed(2)}</span>
+            <span>₹{(order.order_info.final_total ?? 0).toFixed(2)}</span>
           </div>
         </div>
-
         <div className="mt-5 flex flex-col items-center space-y-2 sm:flex-row sm:justify-center sm:space-y-0 sm:space-x-2">
           <div className="flex flex-col items-center w-full sm:w-auto">
             <button
               onClick={handleDownloadInvoice}
               className="inline-flex items-center justify-center hover:cursor-pointer text-[#213E5A] border border-[#213E5A] bg-white font-semibold py-2 px-4 rounded-lg text-sm transition-all duration-300 transform hover:-translate-y-1 hover:bg-[#213E5A] hover:text-white shadow-md w-full sm:w-auto"
-              disabled={!order.order_info.invoice_url}
+              disabled={!order.order_info?.invoice_url}
             >
               <svg
                 className="w-5 h-5 mr-2"
@@ -558,17 +705,30 @@ const ThankYouPage = () => {
               </svg>
               Download Invoice
             </button>
-            {!order.order_info.invoice_url && (
+            {!order.order_info?.invoice_url && (
               <p className="text-xs text-red-500 mt-1 sm:mt-0">
-                Invoice not available.
+                Invoice not available yet.
               </p>
             )}
           </div>
           <Link
             href="/"
-            className="block bg-[#213E5A] text-white py-2 px-4 rounded-lg text-sm font-semibold transition-transform duration-300 transform hover:-translate-y-1 w-full sm:w-auto text-center"
+            className="inline-flex items-center justify-center bg-[#213E5A] text-white font-semibold py-2 px-4 rounded-lg text-sm shadow-md transition-all duration-300 transform hover:-translate-y-1 w-full sm:w-auto"
           >
-            Go to Home
+            <svg
+              className="w-5 h-5 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2 2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+              />
+            </svg>
+            Back to Home
           </Link>
         </div>
       </div>

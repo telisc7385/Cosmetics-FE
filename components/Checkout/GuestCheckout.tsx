@@ -1,3 +1,4 @@
+// GuestCheckout.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -16,8 +17,9 @@ import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import Lottie from "react-lottie-player";
 import ShoppingCart from "@/public/ShoppingCart.json";
-import { Trash2 } from "lucide-react"; // ✅ Import Trash Icon
+import { Trash2 } from "lucide-react";
 
+// (EmptyCartAnimation component is unchanged and good as is)
 const EmptyCartAnimation = () => (
   <div className="flex flex-col items-center justify-center py-10 animate-fadeIn">
     <style jsx>{`
@@ -92,22 +94,30 @@ const GuestCheckout = () => {
   };
 
   const handlePlaceOrder = async () => {
+    // Input Validations
     if (!formData.email) return toast.error("Email is required.");
     if (
       !formData.fullName ||
       !formData.phone ||
       !formData.addressLine ||
       !city ||
-      !formData.state
-    )
+      !formData.state ||
+      !formData.pincode // Added pincode to required fields validation
+    ) {
       return toast.error("Please fill all required address fields.");
-    if (!/^\d{10}$/.test(formData.phone))
+    }
+    if (!/^\d{10}$/.test(formData.phone)) {
       return toast.error("Please enter a valid 10-digit phone number.");
+    }
+    if (!/^\d{6}$/.test(formData.pincode)) {
+      // Added pincode format validation
+      return toast.error("Please enter a valid 6-digit pincode.");
+    }
     if (cartItems.length === 0) {
-      // If cart is empty here, no need to proceed, show an error and return
       return toast.error("Your cart is empty. Please add items to proceed.");
     }
 
+    // Prepare payload
     const itemsForPayload = cartItems.map((item: CartItem) => ({
       quantity: item.quantity,
       price: item.sellingPrice,
@@ -132,7 +142,7 @@ const GuestCheckout = () => {
       paymentMethod: formData.paymentMethod,
     };
 
-    setIsPlacingOrder(true); // Start showing the loader
+    setIsPlacingOrder(true);
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BASE_URL}/guest/checkout`,
@@ -145,32 +155,49 @@ const GuestCheckout = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Order failed. Try again.");
+        throw new Error(errorData.message || "Order failed. Please try again.");
       }
 
       const data = await response.json();
-      dispatch(clearCart()); // Clear cart AFTER successful order
-      toast.success("Order placed successfully!");
-      router.replace(`/thank-you?orderId=${data.order.id}`); // Redirect to thank you page
+      console.log("Order placed successfully (backend response):", data); // Debugging
+
+      // Store the entire order object in sessionStorage for the ThankYouPage
+      // Ensure data.order exists before stringifying and storing
+      if (typeof window !== "undefined" && data.order) {
+        sessionStorage.setItem("lastGuestOrder", JSON.stringify(data.order));
+      }
+
+      // **IMPORTANT CHANGE:** Clear cart and redirect ONLY if order ID is confirmed
+      if (data.order?.id) {
+        dispatch(clearCart()); // Clear cart AFTER successful order AND before redirect
+        toast.success("Order placed successfully!");
+        router.replace(`/thank-you?orderId=${data.order.id}`);
+      } else {
+        // Fallback if order ID is missing from response, but order was "ok"
+        toast.error(
+          "Order placed, but couldn't confirm details. Please check your email for confirmation."
+        );
+        router.replace("/"); // Redirect to homepage or a generic success page
+      }
     } catch (error: unknown) {
       const message =
         error instanceof Error
           ? error.message
-          : "Unexpected error placing order.";
+          : "An unexpected error occurred while placing your order.";
       toast.error(message);
     } finally {
-      setIsPlacingOrder(false); // Stop showing the loader
+      setIsPlacingOrder(false);
     }
   };
 
-  // If order is being placed, show the loader. This check comes first.
+  // (Conditional rendering for isPlacingOrder and cartItems.length === 0 are unchanged and correct)
   if (isPlacingOrder) {
     return (
       <div className="fixed inset-0 bg-white bg-opacity-75 flex items-center justify-center z-50">
         <div className="flex flex-col items-center">
           <Lottie
             loop
-            animationData={ShoppingCart} // You might want a different Lottie for "placing order"
+            animationData={ShoppingCart}
             play
             style={{ width: 150, height: 150 }}
           />
@@ -182,16 +209,25 @@ const GuestCheckout = () => {
     );
   }
 
-  // Only if order is NOT being placed, and cart is empty, show the empty cart animation.
   if (cartItems.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-[400px] px-4">
+        {/*
+          IMPORTANT: This 'EmptyCartAnimation' will be shown if the cart is empty
+          when this component first renders, OR if the user navigates back to
+          this page after the cart has been cleared by a successful order.
+
+          To prevent showing 'Your cart is empty' after a successful order and redirect,
+          the 'Thank You' page must load. The issue is likely that the "Thank You"
+          page isn't configured to *use* the `orderId` or `lastGuestOrder` data
+          you're passing/storing.
+        */}
         <EmptyCartAnimation />
       </div>
     );
   }
 
-  // If neither loading nor empty cart, render the checkout form.
+  // (The rest of your JSX for GuestCheckout form and cart display is unchanged and good)
   return (
     <div
       className="font-sans flex flex-col lg:flex-row min-h-screen"
@@ -229,6 +265,16 @@ const GuestCheckout = () => {
             value={formData.phone}
             onChange={handleChange}
             maxLength={10}
+          />
+          <input
+            type="text"
+            name="pincode" // Added pincode input
+            placeholder="Pincode *"
+            required
+            className="w-full border border-gray-300 rounded px-3 py-2.5 text-gray-800 bg-white text-sm"
+            value={formData.pincode}
+            onChange={handleChange}
+            maxLength={6}
           />
           <input
             type="text"

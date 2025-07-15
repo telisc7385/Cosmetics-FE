@@ -156,7 +156,7 @@ const ProductCard = ({ product }: Props) => {
           {/* Price */}
           <div className="flex flex-col">
             {!isNaN(currentBasePrice) && currentBasePrice > 0 ? (
-              <span className="text-sm font-bold text-pink-700">
+              <span className="text-sm font-bold text-[#007C85]">
                 ₹{currentBasePrice.toFixed(2)}
               </span>
             ) : (

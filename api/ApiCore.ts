@@ -269,7 +269,8 @@ export interface CartItemFromAPI {
     description: string;
     sellingPrice: number;
     basePrice: number;
-    images: { image: string }[]; // Assuming image structure for direct products
+    // FIX APPLIED HERE: Changed `image` to `url` to match other image interfaces
+    images: { id: number; url: string; publicId?: string; }[];
   } | null;
   variant: { // This would be populated if it's a product variant
     id: number;
