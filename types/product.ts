@@ -43,10 +43,11 @@ export interface Product {
   isDeleted: boolean;
   deletedAt: string | null;
   name: string;
+  seoName?: string; // ✅ Added field (optional to avoid breaking anything)
   description: string;
   SKU: string;
-  basePrice: string; // Still string from API, will be parsed
-  sellingPrice: string; // Still string from API, will be parsed
+  basePrice: string;
+  sellingPrice: string;
   priceDifferencePercent: number;
   stock: number;
   isNewArrival: boolean;
@@ -70,6 +71,7 @@ export interface Product {
   category: ProductCategory;
   subcategory: any | null;
 }
+
 
 export interface ProductVariant {
   base_price: number; // Changed to number as discussed, assuming numeric

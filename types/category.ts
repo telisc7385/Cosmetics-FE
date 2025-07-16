@@ -1,4 +1,5 @@
-import { Product } from "./product";
+// types/category.ts
+import type { Product } from "./product";
 
 export interface SubSubCategory {
   id: number;
@@ -6,18 +7,21 @@ export interface SubSubCategory {
 }
 
 export interface SubCategory {
+  title: React.ReactNode;
   id: number;
   name: string;
   subsubcategories?: SubSubCategory[];
 }
 
 export interface Category {
+  title: React.ReactNode;
   products: Product[];
   id: number;
   name: string;
   isDeleted?: boolean;
   subcategories?: SubCategory[];
-  imageUrl: string;         // ✅ Already required, no change here
-  banner?: string;          // ✅ Add this optional banner field
-  description?: string;     // ✅ Add if you’re using `category.description` in any component
+  imageUrl: string;
+  banner?: string;
+  description?: string;
+  parent?: number | null; // ✅ Added as requested
 }

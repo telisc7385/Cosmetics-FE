@@ -8,7 +8,7 @@ type Props = {
 export default async function TestimonialSection({ testimonials }: Props) {
   return (
     // Outer section: Handles full-width gray background and vertical padding.
-    <section className="w-full py-7 bg-gray-50">
+    <section className="w-full py-0 bg-gray-50">
       {/* This div is for the SectionHeader, constrained to max-w-[84rem] and centered. */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mb-5 mt-7">
         {" "}

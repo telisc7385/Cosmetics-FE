@@ -17,21 +17,30 @@ export type Testimonial = {
 
 type Props = {
   testimonials: Testimonial[];
-  // --- CHANGE MADE HERE: Added title and subtitle props back ---
   title: string;
   subtitle: string;
 };
 
-// --- CHANGE MADE HERE: Added title and subtitle to destructuring ---
 export default function TestimonialSlider({ testimonials }: Props) {
   const [activeIndex, setActiveIndex] = useState(0);
   const swiperRef = useRef<SwiperType | null>(null);
 
   return (
-    <>
-      <div className="max-w-full bg-[#b0c9e8] py-1 sm:py-4 overflow-hidden">
-        {/* Inner div: This is the container for the Swiper content, limited to max-w-[84rem] and centered. */}
-        {/* It also applies horizontal padding to the content within the full-width blue background. */}
+    <div className="relative w-full overflow-hidden">
+      {/* ✅ Background image */}
+      <div className="absolute inset-0 z-0">
+        <Image
+          src="/testimonialbg2.jpg" // 🔁 Replace with your image path
+          alt="Testimonial Background"
+          fill
+          className="object-cover object-center"
+        />
+        {/* ✅ Overlay with soft tint */}
+        <div className="absolute inset-0 bg-[#F7EFE0] opacity-0 z-10" />
+      </div>
+
+      {/* ✅ Swiper Content */}
+      <div className="relative z-20 py-6 sm:py-10">
         <div className="max-w-7xl mx-auto sm:px-6 lg:px-10">
           <Swiper
             modules={[Autoplay]}
@@ -75,7 +84,6 @@ export default function TestimonialSlider({ testimonials }: Props) {
                       <p className="text-sm text-gray-500">{t.role}</p>
                     </div>
                   </div>
-
                   <div
                     className={`
                       text-gray-700 text-sm overflow-y-auto pr-1
@@ -93,6 +101,6 @@ export default function TestimonialSlider({ testimonials }: Props) {
           </Swiper>
         </div>
       </div>
-    </>
+    </div>
   );
 }

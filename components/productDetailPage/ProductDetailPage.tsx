@@ -1,17 +1,16 @@
-// ProductDetailClient.tsx
 "use client";
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Product, ProductVariant } from "@/types/product";
-import ProductCard from "../CommonComponents/ProductCard/ProductCard"; // Keep this, it's for related products
+import ProductCard from "../CommonComponents/ProductCard/ProductCard";
 import { useAppSelector, useAppDispatch } from "@/store/hooks/hooks";
 import { selectIsLoggedIn } from "@/store/slices/authSlice";
 import { addToCart as addGuestCartItem } from "@/store/slices/cartSlice";
 import { useLoggedInCart } from "@/CartProvider/LoggedInCartProvider";
 import { CartItem } from "@/types/cart";
 import ProductTabs from "./ProductTabs";
-import toast from "react-hot-toast"; // Keep toast import, for other errors if needed
+import toast from "react-hot-toast";
 import Link from "next/link";
 
 type Props = {
@@ -98,16 +97,16 @@ export default function ProductDetailClient({
     }
     if (quantity > currentStock) {
       toast.error(`Only ${currentStock} items available.`);
-      setQuantity(currentStock); // Cap the quantity in the input field
+      setQuantity(currentStock);
       return;
     }
 
     const item: Omit<CartItem, "cartItemId"> = {
       id: product.id,
-      productId: product.id, // ✅ FIXED: Add productId to match CartItem type
+      productId: product.id,
       name: selectedVariant?.name
         ? `${product.name} - ${selectedVariant.name}`
-        : product.name,
+        : product.seoName ?? product.name, // ✅ Updated safely
       quantity,
       sellingPrice,
       basePrice,
@@ -124,7 +123,6 @@ export default function ProductDetailClient({
     if (isLoggedIn) {
       try {
         await addLoggedInCartItem(item);
-        // REMOVED: toast.success(`${quantity} ${item.name} added to cart!`);
       } catch {
         toast.error("Failed to add product to cart.");
       }
@@ -135,7 +133,6 @@ export default function ProductDetailClient({
           cartItemId: Date.now() * -1 - Math.random(),
         })
       );
-      // REMOVED: toast.success(`${quantity} ${item.name} added to guest cart!`);
     }
   };
 
@@ -146,7 +143,6 @@ export default function ProductDetailClient({
 
   return (
     <section className="bg-[#f3f4f6] py-10 px-4 sm:px-6 lg:px-8">
-      {/* Container for both breadcrumb and product detail */}
       <div className="max-w-7xl mx-auto">
         <nav className="mb-4 text-sm text-gray-600">
           <Link href="/">Home</Link> / <Link href="/shop">Shop</Link> /{" "}
@@ -243,7 +239,6 @@ export default function ProductDetailClient({
               dangerouslySetInnerHTML={{ __html: product.description || "" }}
             />
 
-            {/* 💰 PRICE BLOCK */}
             <div className="flex items-baseline space-x-2">
               <div className="text-2xl font-bold text-gray-800">
                 ₹{basePrice}
@@ -255,14 +250,10 @@ export default function ProductDetailClient({
               )}
             </div>
 
-            {/* MODIFIED CODE HERE: Apply line-through only to the base price value */}
             <div className="flex items-center gap-2">
               {basePrice > 0 && (
                 <span className="text-gray-500 text-base">
-                  {" "}
-                  {/* Removed line-through from this span */}
-                  MRP ₹<span className="line-through">{sellingPrice}</span>{" "}
-                  {/* Applied line-through here */}
+                  MRP ₹<span className="line-through">{sellingPrice}</span>
                 </span>
               )}
               <span className="text-gray-500 text-sm">
@@ -344,7 +335,6 @@ export default function ProductDetailClient({
           </div>
         </div>
 
-        {/* Product Tabs within the same max-w-7xl container */}
         <div id="product-description-tab" className="text-sm sm:text-base">
           <ProductTabs
             productDetails={product.productDetails}
@@ -355,7 +345,6 @@ export default function ProductDetailClient({
           />
         </div>
 
-        {/* Related Products within the same max-w-7xl container */}
         {relatedProducts.length > 0 && (
           <div className="py-10  sm:px-0">
             <h2 className="text-2xl font-semibold mb-4">
@@ -368,8 +357,7 @@ export default function ProductDetailClient({
             </div>
           </div>
         )}
-      </div>{" "}
-      {/* END of max-w-7xl mx-auto container */}
+      </div>
     </section>
   );
 }

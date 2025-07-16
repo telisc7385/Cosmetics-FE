@@ -7,7 +7,7 @@ import FeaturedSliderComponent from "@/components/ServersideComponent/FeaturedSl
 import GalleryPage from "@/components/ServersideComponent/GalleryPage/GalleryPage";
 import HotListWrapper from "@/components/HotList/HotListWrapper";
 import NewsletterSignup from "@/components/ClientsideComponent/NewsletterSignup/NewsletterSignup";
-import SlidingBanner from "@/components/ServersideComponent/SlidingBanner/SlidingBanner";
+
 import TopCategoriesClient from "@/components/ClientsideComponent/TopCategoriesClient/TopCategoriesClient";
 // import PromotionBanner from "@/components/ClientsideComponent/PromotionBanner/PromotionBanner";
 
@@ -19,23 +19,18 @@ import {
   getWhyChooseUs,
 } from "@/api/fetchWhyChooseUs";
 import { getProducts } from "@/api/fetchFeaturedSlider";
+import Counter from "@/components/ClientsideComponent/Counter/counter";
 
 export default async function HomePage() {
-  const [
-    banners,
-    categoriesResponse, 
-    ,
-    product,
-    testimonials,
-    gallery,
-  ] = await Promise.all([
-    getBanners(),
-    fetchCategories(),
-    getWhyChooseUs(), 
-    getProducts(),
-    getTestimonials(),
-    getGallery(),
-  ]);
+  const [banners, categoriesResponse, , product, testimonials, gallery] =
+    await Promise.all([
+      getBanners(),
+      fetchCategories(),
+      getWhyChooseUs(),
+      getProducts(),
+      getTestimonials(),
+      getGallery(),
+    ]);
 
   const { categories } = categoriesResponse;
 
@@ -44,10 +39,11 @@ export default async function HomePage() {
       <HeroBanner banners={banners} />
       <CategorySection categories={categories} />
       <TopCategoriesClient categories={categories} />
-      <SlidingBanner />
-      <HotListWrapper />
       <FeaturesBanner />
+      <HotListWrapper />
+
       <FeaturedSliderComponent product={product} />
+      <Counter />
       <TestimonialsSection testimonials={testimonials} />
       <GalleryPage gallery={gallery} />
       <NewsletterSignup />

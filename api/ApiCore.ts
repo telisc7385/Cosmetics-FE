@@ -1,48 +1,29 @@
 // api/ApiCore.ts
 
-// 1. Make apiCore generic to expect a specific return type
 export const apiCore = async <T>(
-  url: string, // This parameter is still named 'url' as in your provided code
-  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE', // PATCH included
+  url: string,
+  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
   body?: unknown,
-  token?: string | null // FIX: Allow token to be string | null | undefined
+  token?: string | null
 ): Promise<T> => {
   let baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
-  console.log("Body received in apiCore:", body); // Added for initial inspection
+  console.log("Body received in apiCore:", body);
 
-  // Provide a fallback if NEXT_PUBLIC_BASE_URL is not set, but strongly recommend setting it
   if (!baseUrl) {
     console.warn("NEXT_PUBLIC_BASE_URL is not set. Falling back to default: https://cosmaticadmin.twilightparadox.com");
     baseUrl = "https://cosmaticadmin.twilightparadox.com";
   }
 
-  // --- START: URL Construction Logic ---
-  // Ensure baseUrl does not end with a slash
-  if (baseUrl.endsWith('/')) {
-    baseUrl = baseUrl.slice(0, -1);
-  }
-
-  // Ensure the 'url' parameter (which should be a path) starts with a slash
-  // If 'url' already contains the full base URL, this logic needs to adapt,
-  // but based on your previous examples, 'url' should be something like '/order/detail/47'
+  if (baseUrl.endsWith('/')) baseUrl = baseUrl.slice(0, -1);
   const finalUrlPath = url.startsWith('/') ? url : `/${url}`;
-
-  const fullUrl = `${baseUrl}${finalUrlPath}`; // Correctly form the full URL
-  // --- END: URL Construction Logic ---
-
+  const fullUrl = `${baseUrl}${finalUrlPath}`;
 
   const headers: Record<string, string> = {};
-
-  // Crucial for JSON payloads: Set Content-Type header if there's a body for POST/PUT/PATCH
-  if (body && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
+  if (body && ['POST', 'PUT', 'PATCH'].includes(method)) {
     headers["Content-Type"] = "application/json";
   }
-
-  // Only add Authorization header if token is a non-empty string
-  // Changed from `Token ${token}` to `Bearer ${token}` based on your screenshot's evidence.
-  // If your backend specifically requires "Token", revert this line.
   if (token && typeof token === 'string' && token.trim() !== '') {
-    headers["Authorization"] = `Token ${token}`; // IMPORTANT CHANGE HERE
+    headers["Authorization"] = `Token ${token}`;
   }
 
   const requestOptions: RequestInit = {
@@ -51,16 +32,14 @@ export const apiCore = async <T>(
     next: { revalidate: 3600 },
   };
 
-  // Stringify the body only if it's meant to be a JSON payload for relevant methods
-  if (body && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
+  if (body && ['POST', 'PUT', 'PATCH'].includes(method)) {
     requestOptions.body = JSON.stringify(body);
-    console.log("JSON Payload being sent (stringified in apiCore):", requestOptions.body); // Added for debugging
+    console.log("JSON Payload being sent (stringified in apiCore):", requestOptions.body);
   }
 
   try {
-    console.log(`[API Call] ${method} ${fullUrl}`); // Log the full URL for debugging
+    console.log(`[API Call] ${method} ${fullUrl}`);
     const res = await fetch(fullUrl, requestOptions);
-
     const contentType = res.headers.get("Content-Type");
 
     if (!res.ok) {
@@ -72,12 +51,12 @@ export const apiCore = async <T>(
           errorData.message = await res.text();
         }
       } catch (e) {
-        errorData.message = res.statusText; // Fallback if parsing fails
+        errorData.message = res.statusText;
       }
 
       console.error(
         `[ Server ] API error: ${res.status} "${errorData.message?.slice(0, 200) || res.statusText}" for ${fullUrl}`,
-        errorData // Log full error data for more context
+        errorData
       );
       throw new Error(
         `API error ${res.status}: ${fullUrl} - ${errorData.message?.slice(0, 100) || res.statusText}`
@@ -88,7 +67,7 @@ export const apiCore = async <T>(
       return await res.json() as T;
     } else {
       console.warn(`[ Server ] Non-JSON response for ${fullUrl}: ${res.status}. Returning null.`);
-      return null as T; // Be cautious if T is not nullable
+      return null as T;
     }
   } catch (error) {
     console.error(`[ Server ] Fetch failed for ${fullUrl}:`, error);
@@ -96,23 +75,21 @@ export const apiCore = async <T>(
   }
 };
 
-// All your existing interfaces should either be here or in a common types file.
-// I'm keeping them here for completeness as you provided them in this file's context.
+// --- Interfaces ---
 
-// CartItem interface updated: productId is now mandatory, variantId is mandatory but can be null
 export interface CartItem {
   cartItemId: number;
-  id: number; // This is often the productId for simplicity, or the cart item's unique ID
-  productId: number; // **Made mandatory**: The actual product ID
+  id: number;
+  productId: number;
   name: string;
   quantity: number;
   sellingPrice: number;
   basePrice?: number;
   image: string;
-  variantId: number | null; // **Made mandatory, but can be null**: The actual variant ID, or null if no variant
-  variant?: ProductVariant | null; // Full variant object (optional as it might not always be fetched)
-  product?: any; // Full product object (optional as it might not always be fetched)
-  slug?: string; // Added slug for navigation
+  variantId: number | null;
+  variant?: ProductVariant | null;
+  product?: any;
+  slug?: string;
 }
 
 export interface ProductVariant {
@@ -148,13 +125,12 @@ export interface ProductVariant {
   };
 }
 
-// Guest Checkout Types
 export interface GuestOrderPayload {
   email: string;
   address: AddressInput;
   items: {
-    productId?: number; // Can be productId or id from CartItem
-    variantId?: number; // Should be number if present, or undefined
+    productId?: number;
+    variantId?: number;
     quantity: number;
     price: number;
   }[];
@@ -162,123 +138,106 @@ export interface GuestOrderPayload {
   paymentMethod: "COD" | "RAZORPAY";
 }
 
-// MODIFIED: Logged-in Checkout Types to send string addresses AND new fields
 export interface LoggedInOrderPayload {
   items: {
     productId: number;
     quantity: number;
     price: number;
-    variantId?: number | null; // Still optional here, as the backend might not always require it
+    variantId?: number | null;
   }[];
-  addressId: number; // NEW: Added as per your exact payload. Assuming this refers to the selected delivery address ID.
+  addressId: number;
   totalAmount: number;
   paymentMethod: string;
   discountAmount: number;
-  discountCode?: string; // NEW: Added as per your exact payload (optional if not always present)
+  discountCode?: string;
   billingAddress: string;
   shippingAddress: string;
-  cartId?: number; // Keep cartId as optional, confirm with backend if always required
-  subtotal: number; // NEW: Added as per your exact payload
+  cartId?: number;
+  subtotal: number;
 }
 
-
-// UPDATED: Address and AddressInput Interfaces to match your requested structure - REMOVED 'country'
 export interface Address {
-  id: string; // Assuming string ID from backend
-  fullName: string; // Changed from full_name
-  phone: string; // Changed from phone_number
-  pincode: string; // Changed from zipcode
+  id: string;
+  fullName: string;
+  phone: string;
+  pincode: string;
   state: string;
   city: string;
-  addressLine: string; // Changed from address
-  landmark?: string; // New optional field
-  // country: string; // REMOVED as per request
+  addressLine: string;
+  landmark?: string;
 }
 
 export type AddressType = "HOME" | "WORK" | "BILLING" | "SHIPPING";
 
 export type AddressInput = Omit<Address, "id"> & {
-  type: AddressType; // Explicitly defining the allowed types
+  type: AddressType;
 };
 
-
-// *** MODIFIED: LocalAddressItem interface to use 'type' and include other fields from your response ***
 export interface LocalAddressItem extends Address {
-  type: AddressType; // Use 'type' from backend response
-  isDefault: boolean; // Based on your sample, it's a boolean
-  userId: number; // Added userId based on your new reference
-  createdAt: string; // Added createdAt
-  updatedAt: string; // Added updatedAt
+  type: AddressType;
+  isDefault: boolean;
+  userId: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
-
-// UPDATED: Response Interfaces using the new Address type
 export interface SingleAddressResponse {
-  address: LocalAddressItem; // The address object itself
+  address: LocalAddressItem;
   message?: string;
-  updated?: LocalAddressItem; // Changed from 'any' to LocalAddressItem if backend returns it
+  updated?: LocalAddressItem;
 }
 
 export interface FetchAddressesResponse {
-  address: LocalAddressItem[]; // Array of addresses
+  address: LocalAddressItem[];
   message?: string;
 }
 
-// NEWLY ADDED: OrderResponse interface
 export interface OrderResponse {
-  id: string; // The ID of the newly placed order
-  message?: string; // A success message from the backend
-  // You can add other fields here that your backend returns after creating an order, e.g.:
-  // totalAmount: number;
-  // status: string;
-  // orderNumber?: string;
+  id: string;
+  message?: string;
 }
 
-// Interfaces for fetching order details (used in thank-ou page)
 export interface OrderItemDetail {
-  id: string; // Product ID or Variant ID from the order detail
+  id: string;
   name: string;
   quantity: number;
-  price: number; // Price per unit at the time of order
+  price: number;
   image: string;
-  variantId?: string; // Optional variant ID for ordered item
-  // Add other fields you expect for an order item from the /order/detail API
+  variantId?: string;
 }
 
 export interface OrderDetailResponse {
-  id: string; // The order ID
-  total_amount: number; // Assuming backend still returns snake_case for order details
+  id: string;
+  total_amount: number;
   payment_method: string;
   order_date: string;
-  billing_address: Address; // Now uses the new Address interface
-  shipping_address: Address; // Now uses the new Address interface
-  items: OrderItemDetail[]; // Array of items in the order
-  // Add other order-specific fields like status, delivery_date etc.
+  billing_address: Address;
+  shipping_address: Address;
+  items: OrderItemDetail[];
 }
 
 export interface CartItemFromAPI {
-  id: number; // This is the cart item ID
+  id: number;
   cartId: number;
-  productId: number | null; // Can be null if it's purely a variant
-  variantId: number | null; // This can be null from the API
+  productId: number | null;
+  variantId: number | null;
   quantity: number;
   createdAt: string;
-  product: { // This would be populated if it's a direct product (no variant)
+  product: {
     id: number;
     name: string;
     description: string;
     sellingPrice: number;
     basePrice: number;
-    // FIX APPLIED HERE: Changed `image` to `url` to match other image interfaces
-    images: { id: number; url: string; publicId?: string; }[];
+    images: { id: number; url: string; publicId?: string }[];
   } | null;
-  variant: { // This would be populated if it's a product variant
+  variant: {
     id: number;
     productId: number;
-    name: string | null; // This is the variant's specific name (e.g., "Red")
+    name: string | null;
     SKU: string;
     description: string | null;
-    specification: Record<string, any>; // Or a more specific type if known
+    specification: Record<string, any>;
     selling_price: number;
     base_and_selling_price_difference_in_percent: number;
     stock: number;
@@ -299,9 +258,18 @@ export interface CartItemFromAPI {
       sequence_number: number;
       is_active: boolean;
     }[];
-    product: { // The parent product information for the variant
+    product: {
       name: string;
       description: string;
     };
   } | null;
+}
+
+// ✅ ADDED: Category Interface at the end without affecting anything
+export interface Category {
+  id: number;
+  name: string;
+  title?: string;
+  image?: string;
+  parent?: number | null;
 }

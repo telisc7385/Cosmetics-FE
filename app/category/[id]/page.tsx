@@ -1,51 +1,78 @@
 import CategoryInfo from "@/components/ServersideComponent/CategoryInfo/CategoryInfo";
 import { Category } from "@/types/category";
 import { notFound } from "next/navigation";
+import { Metadata } from "next";
 
-interface PageProps {
+type Props = {
   params: Promise<{ id: string }>;
-}
+  
+};
 
-const Page = async ({ params }: PageProps) => {
-  const { id } = await params;
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const resolvedParams = await params;
+  const { id } = resolvedParams;
 
   try {
-    const categoryRes = await fetch(
+    const res = await fetch(
       `${process.env.NEXT_PUBLIC_BASE_URL}/category/id?category=${id}`,
       { cache: "no-store" }
     );
 
-    console.log(
-      "Fetching category from:",
-      `${process.env.NEXT_PUBLIC_BASE_URL}/category/id?category=${id}`
-    );
+    if (!res.ok) return {};
 
+    const data = await res.json();
+    const category = data?.data?.categories?.[0];
+    if (!category) return {};
+
+    return {
+      title: category.seo_title || category.name || "Category",
+      description:
+        category.seo_description || `Shop products in ${category.name}`,
+    };
+  } catch (error) {
+    console.error("❌ Error generating metadata:", error);
+    return {};
+  }
+}
+
+export default async function Page({ params }: Props) {
+  const resolvedParams = await params;
+  const { id } = resolvedParams;
+ 
+
+  try {
+    const url = new URL(`${process.env.NEXT_PUBLIC_BASE_URL}/category/id`);
+    url.searchParams.append("category", id);
+    
+    url.searchParams.append("limit", "4");
+   
+
+    const categoryRes = await fetch(url.toString(), { cache: "no-store" });
     if (!categoryRes.ok) return notFound();
 
-    const raw = await categoryRes.text();
-    const data = JSON.parse(raw);
-    console.log("✅ Parsed JSON:", data);
-
-    if (
-      !data.success ||
-      !data.data ||
-      !data.data.categories ||
-      data.data.categories.length === 0
-    ) {
-      return notFound();
-    }
+    const data = await categoryRes.json();
+    if (!data.success || !data.data?.categories?.length) return notFound();
 
     const categoryData = data.data.categories[0];
+    const products = data.data.products || [];
+
     const category: Category = {
       ...categoryData,
-      products: data.data.products || [],
+      products,
     };
 
-    return <CategoryInfo category={category} products={category.products} />;
+    return (
+      <div className="pt-8 container mx-auto max-w-7xl space-y-4">
+        <CategoryInfo
+          category={category}
+          initialProducts={products}
+          initialPage={1}
+          totalPagesFromServer={data.data.totalPages || 1}
+        />
+      </div>
+    );
   } catch (error) {
     console.error("❌ Failed to load category:", error);
     return notFound();
   }
-};
-
-export default Page;
+}

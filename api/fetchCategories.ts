@@ -1,19 +1,21 @@
-import { Category } from "@/types/category";
+// api/fetchCategories.ts
 import { apiCore } from "./ApiCore";
-import { Product } from "@/types/product";
+import type { Category } from "@/types/category"; // ✅ Use type-only import
 
 export interface GetCategoriesResponse {
-  products: Product[];
   success: boolean;
   categories: Category[];
 }
 
 export const fetchCategories = async (): Promise<GetCategoriesResponse> => {
   try {
-    const data = await apiCore("/category/frontend", "GET");
-    return data as GetCategoriesResponse;
+    const data = await apiCore<GetCategoriesResponse>("/category/frontend", "GET");
+    return data;
   } catch (error) {
     console.error("Error fetching categories:", (error as Error).message);
     throw error;
   }
 };
+
+// ✅ Use `export type` for isolatedModules compatibility
+export type { Category };

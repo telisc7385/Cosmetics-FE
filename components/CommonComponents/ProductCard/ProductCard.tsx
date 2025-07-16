@@ -120,7 +120,7 @@ const ProductCard = ({ product }: Props) => {
 
   return (
     <div
-      className="group bg-white rounded-2xl border border-pink-100 shadow-sm transition-shadow duration-300 w-[160px] sm:w-[200px] overflow-hidden"
+      className="group bg-white rounded-2xl border border-pink-100 shadow-sm transition-shadow duration-300 w-full max-w-[250px] mx-auto overflow-hidden"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
