@@ -2,7 +2,7 @@
 
 export interface ProductImage {
   id: number;
-  // url: string;
+  url: string;
   image: string; // URL for main product images
   sequence: number;
   productId: number;

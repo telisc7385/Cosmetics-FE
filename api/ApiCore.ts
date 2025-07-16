@@ -16,7 +16,7 @@ export const apiCore = async <T>(
 
   if (baseUrl.endsWith('/')) baseUrl = baseUrl.slice(0, -1);
   const finalUrlPath = url.startsWith('/') ? url : `/${url}`;
-  const fullUrl = `${baseUrl}${finalUrlPath}`;
+  const fullUrl = `${baseUrl}${finalUrlPath}`; // FIX: Corrected variable name from finalUrlUrl to finalUrlPath
 
   const headers: Record<string, string> = {};
   if (body && ['POST', 'PUT', 'PATCH'].includes(method)) {
@@ -77,6 +77,25 @@ export const apiCore = async <T>(
 
 // --- Interfaces ---
 
+export interface ProductImage {
+  id: number;
+  url: string;
+  publicId?: string;
+  createdAt?: string;
+  variantId?: number;
+  sequence_number?: number;
+  is_active?: boolean;
+}
+
+export interface Product {
+  id: number;
+  name: string;
+  description: string;
+  sellingPrice: number;
+  basePrice: number;
+  images: ProductImage[];
+}
+
 export interface CartItem {
   cartItemId: number;
   id: number;
@@ -88,7 +107,7 @@ export interface CartItem {
   image: string;
   variantId: number | null;
   variant?: ProductVariant | null;
-  product?: any;
+  product?: Product;
   slug?: string;
 }
 
@@ -110,15 +129,7 @@ export interface ProductVariant {
   low_stock_threshold: number;
   createdAt: string;
   isDeleted: boolean;
-  images: {
-    id: number;
-    url: string;
-    publicId: string;
-    createdAt: string;
-    variantId: number;
-    sequence_number: number;
-    is_active: boolean;
-  }[];
+  images: ProductImage[];
   product: {
     name: string;
     description: string;
@@ -136,6 +147,8 @@ export interface GuestOrderPayload {
   }[];
   totalAmount: number;
   paymentMethod: "COD" | "RAZORPAY";
+  // Added discountCode for guest orders too if applicable
+  discountCode?: string;
 }
 
 export interface LoggedInOrderPayload {
@@ -149,7 +162,7 @@ export interface LoggedInOrderPayload {
   totalAmount: number;
   paymentMethod: string;
   discountAmount: number;
-  discountCode?: string;
+  discountCode?: string; // Now correctly included for sending the applied coupon
   billingAddress: string;
   shippingAddress: string;
   cartId?: number;
@@ -229,7 +242,7 @@ export interface CartItemFromAPI {
     description: string;
     sellingPrice: number;
     basePrice: number;
-    images: { id: number; url: string; publicId?: string }[];
+    images: ProductImage[];
   } | null;
   variant: {
     id: number;
@@ -249,15 +262,7 @@ export interface CartItemFromAPI {
     low_stock_threshold: number;
     createdAt: string;
     isDeleted: boolean;
-    images: {
-      id: number;
-      url: string;
-      publicId: string;
-      createdAt: string;
-      variantId: number;
-      sequence_number: number;
-      is_active: boolean;
-    }[];
+    images: ProductImage[];
     product: {
       name: string;
       description: string;
@@ -265,11 +270,35 @@ export interface CartItemFromAPI {
   } | null;
 }
 
-// ✅ ADDED: Category Interface at the end without affecting anything
 export interface Category {
   id: number;
   name: string;
   title?: string;
   image?: string;
   parent?: number | null;
+}
+
+// ✅ NEW: Coupon Interface
+export interface Coupon {
+  id: number;
+  code: string;
+  discountType: 'percentage' | 'fixed';
+  discountValue: number;
+  minPurchase?: number;
+  maxDiscountAmount?: number;
+  expirationDate: string;
+  isActive: boolean;
+  usageLimitPerUser?: number;
+  totalUsageLimit?: number;
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ✅ NEW: Interface for coupon validation response from backend
+export interface CouponValidationResponse {
+  isValid: boolean;
+  discountAmount: number;
+  appliedCouponDetails?: Coupon; // Optional: include full coupon details if valid
+  message?: string; // e.g., "Coupon applied successfully", "Invalid coupon"
 }

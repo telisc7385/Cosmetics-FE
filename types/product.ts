@@ -2,6 +2,7 @@
 
 export interface ProductImage {
   id: number;
+  url: string; // ✅ ADDED: This was the missing property causing the error.
   image: string; // URL for main product images
   sequence: number;
   productId: number;
@@ -65,13 +66,12 @@ export interface Product {
   seoKeyword: string;
   seoDescription: string;
   productDetails: string;
-  images: ProductImage[];
+  images: ProductImage[]; // This will now correctly map to the updated ProductImage
   variants?: ProductVariant[];
   specifications: any[];
   category: ProductCategory;
   subcategory: any | null;
 }
-
 
 export interface ProductVariant {
   base_price: number; // Changed to number as discussed, assuming numeric
@@ -122,6 +122,8 @@ export interface CartItem {
   variantId?: number | null; // Keeps as number or null, optional
   variant?: ProductVariant | null;
   product?: Product | null;
+  stock: number; // ✅ ADDED: For consistency with CartItemInput and product stock
+  slug?: string | null; // ✅ ADDED: For consistency with CartItemInput and product slug
 }
 
 export type CartApiResponse = {
@@ -150,6 +152,8 @@ export interface CartItemInput {
   variantId?: number | null; // This already allows `undefined` because it's optional.
   variant?: ProductVariant | null;
   product?: Product | null;
+  stock: number; // Consistent with CartItem
+  slug?: string | null; // Consistent with CartItem
 }
 
 // In your types/product.ts or types/cart.ts file:
