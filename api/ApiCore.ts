@@ -215,6 +215,7 @@ export interface FetchAddressesResponse {
 export interface OrderResponse {
   id: string;
   message?: string;
+  razorpayOrderId:string
 }
 
 export interface OrderItemDetail {

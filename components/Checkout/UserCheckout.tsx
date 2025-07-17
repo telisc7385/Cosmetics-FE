@@ -918,7 +918,7 @@ const UserCheckout = () => {
         variantId: item.variantId || item.variant?.id || null, // Ensure variantId is number or null
       })),
       addressId: Number(deliveryAddressObj.id), // Ensure addressId is a NUMBER
-      totalAmount: Number(finalTotalAmount),
+      totalAmount: 1,
       paymentMethod,
       discountAmount: Number(discountAmount),
       ...(appliedCoupon && { discountCode: appliedCoupon.code }), // Include discountCode if a coupon is applied
@@ -953,40 +953,74 @@ const UserCheckout = () => {
     // --- END CRUCIAL DEBUGGING LOGS ---
 
     try {
+    
       if (paymentMethod === "RAZORPAY") {
-        // For Razorpay, store details in localStorage and redirect
-        // Pass the entire payload for backend processing after payment success
-        localStorage.setItem(
-          "paymentDetails",
-          JSON.stringify({
-            amount: Math.round(payload.totalAmount * 100), // Razorpay expects amount in smallest currency unit (e.g., paise)
-            orderId: `MOCK_RZP_${Date.now()}`, // Temporary client-side order ID for Razorpay dialog
-            description: "Payment for your order",
-            prefillName: billingAddressObj.fullName,
-            prefillEmail: "user@example.com", // Replace with actual user email
-            payloadForBackend: {
-              // Store the actual order payload for backend
-              items: payload.items,
-              addressId: payload.addressId,
-              totalAmount: payload.totalAmount,
-              discountAmount: payload.discountAmount,
-              discountCode: payload.discountCode,
-              billingAddress: payload.billingAddress,
-              shippingAddress: payload.shippingAddress,
-              cartId: payload.cartId,
-              subtotal: payload.subtotal,
-              taxAmount: payload.taxAmount,
-              appliedTaxRate: payload.appliedTaxRate,
-              taxType: payload.taxType,
-              isTaxInclusive: payload.isTaxInclusive,
-              shippingRate: payload.shippingRate,
-              // paymentMethod will be added by PaymentMethodPage after success
-              // paymentTransactionId, razorpayOrderId, razorpaySignature will be added by PaymentMethodPage
-            },
-          })
+  try {
+    // 1. Create order in backend first
+    const order = await apiCore<OrderResponse>(
+      "/order",
+      "POST",
+      payload,
+      token
+    );
+
+    const razorpayOrderId = order.razorpayOrderId;
+    const internalOrderId = order.id;
+
+    // 2. Load Razorpay script
+    const loadScript = (src: string): Promise<boolean> => {
+      return new Promise((resolve) => {
+        const script = document.createElement("script");
+        script.src = src;
+        script.onload = () => resolve(true);
+        script.onerror = () => resolve(false);
+        document.body.appendChild(script);
+      });
+    };
+
+    const scriptLoaded = await loadScript("https://checkout.razorpay.com/v1/checkout.js");
+
+    if (!scriptLoaded) {
+      toast.error("Failed to load Razorpay. Please try again.");
+      setIsPlacingOrder(false);
+      return;
+    }
+
+   
+    const options = {
+      key: "rzp_live_s1XxBl5X5Jx4lU", 
+      amount: Math.round(payload.totalAmount * 100), 
+      currency: "INR",
+      name: "consmo",
+      description: "Thank you for your purchase",
+      order_id: razorpayOrderId, 
+      handler: function (response: any) {
+        
+        router.push(
+          `/thankyou?orderId=${internalOrderId}`
         );
-        // Redirect to PaymentMethod page
-        router.push("/payment");
+      },
+      prefill: {
+        name: billingAddressObj.fullName,
+        email: "ganesh@gamil.com", 
+      },
+      modal: {
+        ondismiss: function () {
+          toast.error("Payment cancelled.");
+          setIsPlacingOrder(false);
+        },
+      },
+    };
+
+    const rzp = new (window as any).Razorpay(options);
+    rzp.open();
+  } catch (error: any) {
+    toast.error("Failed to start payment.");
+    console.error("Razorpay Error:", error);
+    setIsPlacingOrder(false);
+  }
+
+
       } else {
         // For COD, directly place the order via API
         const order = await apiCore<OrderResponse>(
