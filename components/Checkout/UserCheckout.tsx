@@ -1,7 +1,8 @@
+// src/app/checkout/page.tsx (or pages/checkout.tsx)
 "use client";
 
-import React, { JSX, useEffect, useState } from "react";
-import { useLoggedInCart } from "@/CartProvider/LoggedInCartProvider"; // Ensure this path is correct
+import React, { JSX, useEffect, useState, useCallback } from "react";
+import { useLoggedInCart } from "@/CartProvider/LoggedInCartProvider";
 import Image from "next/image";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
@@ -10,16 +11,18 @@ import { selectToken } from "@/store/slices/authSlice";
 import Link from "next/link";
 import {
   apiCore,
-  LoggedInOrderPayload,
+  LoggedInOrderPayload, // This interface needs to be updated in your ApiCore.ts
   OrderResponse,
   LocalAddressItem,
   FetchAddressesResponse,
   SingleAddressResponse,
   AddressInput,
-} from "@/api/ApiCore"; // Ensure ApiCore types are correctly defined
+} from "@/api/ApiCore";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { FaTrashAlt } from "react-icons/fa";
 import { CiEdit } from "react-icons/ci";
+import Modal from "@/components/Modal";
+import { CartItem } from "@/types/cart"; // Import CartItem type
 
 // Coupon types based on your /coupon/user-coupon API response
 interface Coupon {
@@ -48,11 +51,219 @@ interface CouponRedeemResponse {
 }
 
 // Define AddressType for clear distinction for the modal's context
-type AddressCreationIntent = "BILLING" | "SHIPPING" | "HOME" | "WORK"; // Updated to use backend 'type' values
+type AddressCreationIntent = "BILLING" | "SHIPPING" | "HOME" | "WORK";
+
+// UPDATED: Define types for data passed from CartPage to Checkout
+interface VerifiedPincodeDetails {
+  pincode: string;
+  city: string;
+  state: string;
+  shippingRate?: number;
+  taxPercentage?: number;
+  taxType?: string;
+}
+
+interface CheckoutDataFromCart {
+  subtotal: number;
+  shippingRate: number;
+  taxableAmount: number; // New: subtotal + shippingRate
+  taxAmount: number; // New: tax calculated on taxableAmount
+  taxPercentage: number;
+  taxType: string; // New: tax type from CartPage
+  total: number; // This 'total' is the final total from CartPage (after tax, before coupon)
+  cartItems: CartItem[]; // Changed from any[] to CartItem[]
+  verifiedPincodeDetails: VerifiedPincodeDetails | null;
+}
+
+// --- Mock API for Pincode Check (if you don't have a shared apiCore for this component) ---
+// In a real app, this would be part of your actual API service
+const mockPincodeCheck = async (pincode: string) => {
+  return new Promise<{
+    available: boolean;
+    city?: string;
+    state?: string;
+    message?: string;
+  }>((resolve) => {
+    setTimeout(() => {
+      if (pincode === "400001") {
+        resolve({ available: true, city: "Mumbai", state: "Maharashtra" });
+      } else if (pincode === "110001") {
+        resolve({ available: true, city: "Delhi", state: "Delhi" });
+      } else if (pincode === "600001") {
+        resolve({ available: true, city: "Chennai", state: "Tamil Nadu" });
+      } else {
+        resolve({
+          available: false,
+          message: "Delivery not available to this pincode.",
+        });
+      }
+    }, 300);
+  });
+};
+
+// --- Pincode Input Component for Address Forms ---
+interface PincodeInputProps {
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onBlur: () => void; // To trigger validation on blur
+  isVerifiedAndDisabled: boolean; // From CartPage, for shipping address
+  verifiedPincodeFromCart: string | undefined; // Pincode from CartPage verification
+  cityValue: string;
+  stateValue: string;
+  setCity: (city: string) => void;
+  setState: (state: string) => void;
+  disabled?: boolean; // General disable prop
+  setLocalPincodeValidationMessage: (message: string | null) => void; // Callback to set message in parent
+}
+
+const PincodeInput: React.FC<PincodeInputProps> = ({
+  value,
+  onChange,
+  onBlur,
+  isVerifiedAndDisabled,
+  verifiedPincodeFromCart,
+  cityValue,
+  stateValue,
+  setCity,
+  setState,
+  disabled = false,
+  setLocalPincodeValidationMessage,
+}) => {
+  const [checkingPincode, setCheckingPincode] = useState(false);
+  const [internalValidationMessage, setInternalValidationMessage] = useState<
+    string | null
+  >(null);
+
+  const validatePincode = useCallback(
+    async (pincode: string) => {
+      if (!pincode || pincode.length !== 6) {
+        const msg = "Enter a valid 6-digit pincode.";
+        setInternalValidationMessage(msg);
+        setLocalPincodeValidationMessage(msg);
+        return false;
+      }
+
+      setCheckingPincode(true);
+      setInternalValidationMessage(null);
+      setLocalPincodeValidationMessage(null); // Clear parent's message too
+      try {
+        const res = await mockPincodeCheck(pincode); // Use your actual apiCore here
+        if (!res.available) {
+          const msg = res.message || "Delivery not available to this pincode.";
+          setInternalValidationMessage(msg);
+          setLocalPincodeValidationMessage(msg);
+          return false;
+        }
+
+        // If a pincode was verified on the cart page, ensure this new address matches it
+        // This applies specifically to SHIPPING addresses being created/edited
+        if (verifiedPincodeFromCart && pincode !== verifiedPincodeFromCart) {
+          const msg = `This address pincode must match your verified delivery pincode (${verifiedPincodeFromCart}).`;
+          setInternalValidationMessage(msg);
+          setLocalPincodeValidationMessage(msg);
+          return false;
+        }
+
+        setCity(res.city || "");
+        setState(res.state || "");
+        setInternalValidationMessage(null);
+        setLocalPincodeValidationMessage(null);
+        return true;
+      } catch (error) {
+        console.error("Pincode validation error:", error);
+        const msg = "Failed to verify pincode. Please try again.";
+        setInternalValidationMessage(msg);
+        setLocalPincodeValidationMessage(msg);
+        return false;
+      } finally {
+        setCheckingPincode(false);
+      }
+    },
+    [
+      verifiedPincodeFromCart,
+      setCity,
+      setState,
+      setLocalPincodeValidationMessage,
+    ]
+  );
+
+  // Trigger validation on blur
+  const handleBlur = () => {
+    if (!isVerifiedAndDisabled && !disabled) {
+      // Only validate if not autofilled/disabled
+      validatePincode(value);
+    }
+    onBlur(); // Call parent's onBlur
+  };
+
+  // If pincode is verified and disabled, ensure no local validation message
+  useEffect(() => {
+    if (isVerifiedAndDisabled || disabled) {
+      setInternalValidationMessage(null);
+      setLocalPincodeValidationMessage(null);
+    }
+  }, [isVerifiedAndDisabled, disabled, setLocalPincodeValidationMessage]);
+
+  // Re-validate if value changes and it's not disabled
+  useEffect(() => {
+    if (value && value.length === 6 && !isVerifiedAndDisabled && !disabled) {
+      validatePincode(value);
+    } else if (!value || value.length !== 6) {
+      setInternalValidationMessage(null); // Clear message if pincode is incomplete
+      setLocalPincodeValidationMessage(null);
+    }
+  }, [
+    value,
+    isVerifiedAndDisabled,
+    disabled,
+    validatePincode,
+    setLocalPincodeValidationMessage,
+  ]);
+
+  return (
+    <div className="mb-4">
+      <label
+        htmlFor="pincode"
+        className="block text-sm font-medium text-gray-700 mb-1"
+      >
+        Pincode
+      </label>
+      <input
+        type="text"
+        id="pincode"
+        name="pincode"
+        value={value}
+        onChange={onChange}
+        onBlur={handleBlur}
+        disabled={isVerifiedAndDisabled || disabled || checkingPincode} // Disable if autofilled, externally disabled, or checking
+        className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 ${
+          isVerifiedAndDisabled || disabled
+            ? "bg-gray-100 cursor-not-allowed"
+            : ""
+        }`}
+        maxLength={6}
+      />
+      {internalValidationMessage && (
+        <p className="mt-1 text-sm text-red-600">{internalValidationMessage}</p>
+      )}
+      {checkingPincode && (
+        <p className="mt-1 text-sm text-gray-500">Checking pincode...</p>
+      )}
+      {value &&
+        !internalValidationMessage &&
+        !checkingPincode &&
+        !isVerifiedAndDisabled && (
+          <div className="mt-1 text-sm text-green-600">
+            City: {cityValue}, State: {stateValue}
+          </div>
+        )}
+    </div>
+  );
+};
 
 const UserCheckout = () => {
   const {
-    items, // items should now conform to the updated CartItem interface
+    items,
     error: cartError,
     loading: cartLoading,
     incrementItemQuantity,
@@ -64,30 +275,42 @@ const UserCheckout = () => {
   const router = useRouter();
   const token = useAppSelector(selectToken);
 
-  const initialSubtotal = React.useMemo(() => {
+  // Use the updated CheckoutDataFromCart interface
+  const [checkoutData, setCheckoutData] = useState<CheckoutDataFromCart | null>(
+    null
+  );
+
+  // Recalculate subtotal based on current cart items
+  const currentSubtotal = React.useMemo(() => {
     return (items || []).reduce(
       (sum, item) => sum + item.quantity * item.sellingPrice,
       0
     );
   }, [items]);
 
-  const shippingCharges: number = 0;
+  // Use values from checkoutData for calculations if available, otherwise default to 0
+  const shippingRate = checkoutData?.shippingRate || 0;
+  const taxableAmount = currentSubtotal + shippingRate; // Calculation from CartPage
+  const taxPercentage = checkoutData?.taxPercentage || 0;
+  const taxAmount = taxableAmount * (taxPercentage / 100); // Calculation from CartPage
+  const taxType = checkoutData?.taxType || "N/A"; // Tax type from CartPage
 
   const [showCouponSection, setShowCouponSection] = useState<boolean>(false);
   const [availableCoupons, setAvailableCoupons] = useState<Coupon[]>([]);
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
   const [discountAmount, setDiscountAmount] = useState<number>(0);
-  const [finalTotalAmount, setFinalTotalAmount] = useState<number>(0);
+  const [finalTotalAmount, setFinalTotalAmount] = useState<number>(0); // This will be updated below
   const [copiedCouponCode, setCopiedCouponCode] = useState<string | null>(null);
   const [isPlacingOrder, setIsPlacingOrder] = useState<boolean>(false);
 
+  // Calculate final total amount based on new logic
   useEffect(() => {
-    let calculatedTotal = initialSubtotal + shippingCharges;
+    let calculatedTotal = taxableAmount + taxAmount; // Start with taxable amount + tax
     if (appliedCoupon && discountAmount > 0) {
       calculatedTotal -= discountAmount;
     }
     setFinalTotalAmount(Math.max(0, calculatedTotal));
-  }, [initialSubtotal, shippingCharges, appliedCoupon, discountAmount]);
+  }, [taxableAmount, taxAmount, appliedCoupon, discountAmount]);
 
   const [address, setAddress] = useState<LocalAddressItem[]>([]);
   const [selectedBillingAddressId, setSelectedBillingAddressId] = useState<
@@ -115,12 +338,31 @@ const UserCheckout = () => {
     landmark: "",
     type: "HOME", // Default type when creating a new address
   });
-  const [, setAddressCreationIntent] = useState<AddressCreationIntent | null>(
-    null
-  );
+  const [addressCreationIntent, setAddressCreationIntent] =
+    useState<AddressCreationIntent | null>(null);
+  const [pincodeValidationMessage, setPincodeValidationMessage] = useState<
+    string | null
+  >(null);
 
   const [paymentMethod, setPaymentMethod] = useState<"COD" | "RAZORPAY">("COD");
 
+  // Load checkout data from localStorage on mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedCheckoutData = localStorage.getItem(
+        "orderSummaryForCheckout"
+      );
+      if (storedCheckoutData) {
+        const parsedData: CheckoutDataFromCart = JSON.parse(storedCheckoutData);
+        setCheckoutData(parsedData);
+      } else {
+        toast.error("Cart data not found. Please go back to cart.");
+        router.push("/cart"); // Redirect if no cart data
+      }
+    }
+  }, [router]);
+
+  // Fetch addresses on token or initial load
   useEffect(() => {
     async function fetchAddresses() {
       if (!token) {
@@ -201,6 +443,7 @@ const UserCheckout = () => {
     fetchAddresses();
   }, [token]);
 
+  // Persist selected addresses and useBillingAsDelivery to localStorage
   useEffect(() => {
     if (selectedBillingAddressId) {
       localStorage.setItem(
@@ -215,7 +458,7 @@ const UserCheckout = () => {
 
     if (useBillingAsDelivery && selectedBillingAddressId) {
       setSelectedDeliveryAddressId(selectedBillingAddressId);
-      localStorage.removeItem("selectedDeliveryAddressId");
+      localStorage.removeItem("selectedDeliveryAddressId"); // Clear separate delivery ID if same as billing
     } else if (!useBillingAsDelivery) {
       if (selectedDeliveryAddressId) {
         localStorage.setItem(
@@ -254,7 +497,18 @@ const UserCheckout = () => {
       type: intent, // Set the type directly based on intent
     });
     setEditingAddress(null);
-    setAddressCreationIntent(intent);
+    setAddressCreationIntent(intent); // Set intent for conditional autofill/disable
+
+    // Autofill pincode/city/state for SHIPPING address if verified data exists
+    if (intent === "SHIPPING" && checkoutData?.verifiedPincodeDetails) {
+      setFormData((prev) => ({
+        ...prev,
+        pincode: checkoutData.verifiedPincodeDetails!.pincode,
+        city: checkoutData.verifiedPincodeDetails!.city,
+        state: checkoutData.verifiedPincodeDetails!.state,
+      }));
+    }
+    setPincodeValidationMessage(null); // Clear any previous validation messages
     setShowModal(true);
   };
 
@@ -270,7 +524,8 @@ const UserCheckout = () => {
       type: addr.type, // Preserve existing type when editing
     });
     setEditingAddress(addr);
-    setAddressCreationIntent(null);
+    setAddressCreationIntent(null); // Not creating, so no specific intent
+    setPincodeValidationMessage(null); // Clear any previous validation messages
     setShowModal(true);
   };
 
@@ -350,6 +605,9 @@ const UserCheckout = () => {
     if ((name === "phone" || name === "pincode") && !/^\d*$/.test(value))
       return;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    if (name === "pincode") {
+      setPincodeValidationMessage(null); // Clear main validation message on input change
+    }
   };
 
   const handleFormSubmit = async (e: React.FormEvent): Promise<void> => {
@@ -382,6 +640,54 @@ const UserCheckout = () => {
       return;
     }
 
+    // Pincode validation using the mockPincodeCheck
+    let isPincodeValid = true;
+    let currentPincodeValidationMessage: string | null = null;
+
+    try {
+      const pincodeCheckResult = await mockPincodeCheck(pincode);
+      if (!pincodeCheckResult.available) {
+        isPincodeValid = false;
+        currentPincodeValidationMessage =
+          pincodeCheckResult.message ||
+          "Delivery not available to this pincode.";
+      } else {
+        // If pincode is valid, ensure city and state are updated from the check
+        setFormData((prev) => ({
+          ...prev,
+          city: pincodeCheckResult.city || prev.city,
+          state: pincodeCheckResult.state || prev.state,
+        }));
+      }
+    } catch (error) {
+      console.error("Pincode validation API error:", error);
+      isPincodeValid = false;
+      currentPincodeValidationMessage =
+        "Failed to verify pincode. Please try again.";
+    }
+
+    // Additional check for SHIPPING address if pincode was verified on cart page
+    if (
+      isPincodeValid &&
+      (type === "SHIPPING" || type === "HOME" || type === "WORK") &&
+      checkoutData?.verifiedPincodeDetails?.pincode
+    ) {
+      if (pincode !== checkoutData.verifiedPincodeDetails.pincode) {
+        isPincodeValid = false;
+        currentPincodeValidationMessage = `Shipping pincode must match the verified delivery pincode (${checkoutData.verifiedPincodeDetails.pincode}).`;
+      }
+    }
+
+    if (!isPincodeValid) {
+      setPincodeValidationMessage(currentPincodeValidationMessage);
+      toast.error(
+        currentPincodeValidationMessage || "Pincode validation failed."
+      );
+      return;
+    } else {
+      setPincodeValidationMessage(null); // Clear message if validation passes
+    }
+
     await toast.promise(
       (async () => {
         if (editingAddress) {
@@ -392,10 +698,14 @@ const UserCheckout = () => {
             formData,
             token
           );
-          setAddress((prev) =>
-            prev.map((a) => (a.id === res.updated?.id ? res.updated : a))
-          );
-          return "Address updated successfully!";
+          if (res.updated) {
+            setAddress((prev) =>
+              prev.map((a) => (a.id === res.updated?.id ? res.updated : a))
+            );
+            return "Address updated successfully!";
+          } else {
+            throw new Error("Failed to update address.");
+          }
         } else {
           // CREATE new address
           const res = await apiCore<SingleAddressResponse>(
@@ -513,8 +823,9 @@ const UserCheckout = () => {
       if (response.success) {
         setAppliedCoupon(coupon);
 
+        // Discount should only apply on subtotal price
         const calculatedDiscountAmount =
-          initialSubtotal * (coupon.discount / 100);
+          currentSubtotal * (coupon.discount / 100);
         setDiscountAmount(Number(calculatedDiscountAmount.toFixed(2)));
 
         toast.success(`Coupon "${coupon.name}" applied successfully!`);
@@ -577,6 +888,12 @@ const UserCheckout = () => {
       console.error("Attempted to place order with invalid cartId:", cartId);
       return;
     }
+    if (!checkoutData) {
+      toast.error(
+        "Order summary data is missing. Please go back to cart and re-verify pincode."
+      );
+      return;
+    }
 
     setIsPlacingOrder(true);
 
@@ -595,13 +912,9 @@ const UserCheckout = () => {
     // Construct the payload with the EXACT NEW STRUCTURE provided
     const payload: LoggedInOrderPayload = {
       items: items.map((item) => ({
-        // Use item.productId directly as it's now mandatory on CartItem
-        // Fallback to item.product?.id or item.id if productId might still be an issue with your actual data source
         productId: item.productId || item.product?.id || item.id, // Ensure productId is a number
         quantity: item.quantity,
         price: item.sellingPrice,
-        // Use item.variantId directly as it's now mandatory on CartItem (can be null)
-        // Fallback to item.variant?.id if variantId might still be an issue with your actual data source
         variantId: item.variantId || item.variant?.id || null, // Ensure variantId is number or null
       })),
       addressId: Number(deliveryAddressObj.id), // Ensure addressId is a NUMBER
@@ -612,7 +925,12 @@ const UserCheckout = () => {
       billingAddress: formattedBillingAddress,
       shippingAddress: formattedShippingAddress,
       cartId: cartId, // CartId is now always expected as a number by this payload (if it was optional, remove this line)
-      subtotal: Number(initialSubtotal), // Include subtotal
+      subtotal: Number(currentSubtotal), // Use currentSubtotal
+      taxAmount: Number(taxAmount), // Use calculated taxAmount
+      appliedTaxRate: taxPercentage, // Use calculated taxPercentage
+      taxType: taxType, // Use calculated taxType
+      isTaxInclusive: false, // As per your order summary response
+      shippingRate: Number(shippingRate), // Use calculated shippingRate
     };
 
     // --- CRUCIAL DEBUGGING LOGS (Keep these!) ---
@@ -635,22 +953,58 @@ const UserCheckout = () => {
     // --- END CRUCIAL DEBUGGING LOGS ---
 
     try {
-      const order = await apiCore<OrderResponse>(
-        "/order",
-        "POST",
-        payload, // Pass the OBJECT, apiCore will stringify it
-        token
-      );
-      toast.success("Order placed successfully!");
-      clearCart();
-      router.push(
-        // Pass formatted addresses for thank-you page if needed
-        `/thank-you?orderId=${
-          order.id || ""
-        }&billingAddress=${encodeURIComponent(
-          formattedBillingAddress
-        )}&shippingAddress=${encodeURIComponent(formattedShippingAddress)}`
-      );
+      if (paymentMethod === "RAZORPAY") {
+        // For Razorpay, store details in localStorage and redirect
+        // Pass the entire payload for backend processing after payment success
+        localStorage.setItem(
+          "paymentDetails",
+          JSON.stringify({
+            amount: Math.round(payload.totalAmount * 100), // Razorpay expects amount in smallest currency unit (e.g., paise)
+            orderId: `MOCK_RZP_${Date.now()}`, // Temporary client-side order ID for Razorpay dialog
+            description: "Payment for your order",
+            prefillName: billingAddressObj.fullName,
+            prefillEmail: "user@example.com", // Replace with actual user email
+            payloadForBackend: {
+              // Store the actual order payload for backend
+              items: payload.items,
+              addressId: payload.addressId,
+              totalAmount: payload.totalAmount,
+              discountAmount: payload.discountAmount,
+              discountCode: payload.discountCode,
+              billingAddress: payload.billingAddress,
+              shippingAddress: payload.shippingAddress,
+              cartId: payload.cartId,
+              subtotal: payload.subtotal,
+              taxAmount: payload.taxAmount,
+              appliedTaxRate: payload.appliedTaxRate,
+              taxType: payload.taxType,
+              isTaxInclusive: payload.isTaxInclusive,
+              shippingRate: payload.shippingRate,
+              // paymentMethod will be added by PaymentMethodPage after success
+              // paymentTransactionId, razorpayOrderId, razorpaySignature will be added by PaymentMethodPage
+            },
+          })
+        );
+        // Redirect to PaymentMethod page
+        router.push("/payment");
+      } else {
+        // For COD, directly place the order via API
+        const order = await apiCore<OrderResponse>(
+          "/order",
+          "POST",
+          payload, // Pass the OBJECT, apiCore will stringify it
+          token
+        );
+        toast.success("Order placed successfully!");
+        clearCart(); // Clear cart after successful order placement
+        router.push(
+          `/thankyou?orderId=${
+            order.id || ""
+          }&billingAddress=${encodeURIComponent(
+            formattedBillingAddress
+          )}&shippingAddress=${encodeURIComponent(formattedShippingAddress)}`
+        );
+      }
     } catch (err: unknown) {
       const error = err as Error;
       toast.error(error.message || "There was an error placing your order.");
@@ -948,132 +1302,103 @@ const UserCheckout = () => {
         <div className="bg-white p-3 rounded-lg shadow-md">
           <h2 className="text-2xl font-bold text-gray-800 mb-6">Your Cart</h2>
           {cartLoading ? (
-            <div className="flex flex-col items-center justify-center h-40">
-              <div className="cart-loader running flex items-end justify-center mb-4">
+            <div className="flex flex-col items-center justify-center h-48">
+              <div className="cart-loader running">
                 <div className="wheel left"></div>
-                <div className="product"></div>
                 <div className="wheel right"></div>
+                <div className="product"></div>
               </div>
-              <p className="text-gray-600 text-center">Loading cart items...</p>
+              <p className="text-gray-600 mt-4">Loading cart items...</p>
             </div>
           ) : cartError ? (
-            <p className="text-red-500 text-center">{cartError}</p>
+            <div className="text-red-500 text-center py-5">
+              Error loading cart: {cartError}
+            </div>
           ) : items.length === 0 ? (
-            <div className="text-center py-10">
-              <p className="text-gray-600 mb-4">Your cart is empty.</p>
-              <Link href="/products" className="text-[#213E5A] hover:underline">
-                Continue Shopping
-              </Link>
+            <div className="text-gray-600 text-center py-5">
+              Your cart is empty.
             </div>
           ) : (
-            <div className="space-y-4">
-              {items.map((item) => (
-                <div
-                  key={item.cartItemId} // Use cartItemId as the unique key for cart items
-                  className="flex items-center gap-3 border-b pb-4 last:border-b-0 last:pb-0"
-                >
-                  {/* Image Display */}
-                  <div className="w-20 h-20 flex-shrink-0 relative overflow-hidden rounded-md border border-gray-200">
-                    {item.image ? (
+            <>
+              <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
+                {items.map((item) => (
+                  <div
+                    key={item.cartItemId}
+                    className="flex items-center justify-between border-b border-gray-100 pb-4 last:border-b-0"
+                  >
+                    <div className="flex items-center">
                       <Image
                         src={item.image}
                         alt={item.name}
-                        fill // Use fill to make the image cover the parent div
-                        style={{ objectFit: "contain" }} // Adjust objectFit as needed
-                        className="rounded-md"
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" // Optimize image loading
+                        width={60}
+                        height={60}
+                        className="rounded-md object-cover mr-4"
                       />
-                    ) : (
-                      <div className="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400 text-xs">
-                        No Image
+                      <div>
+                        <Link
+                          href={`/product/${item.slug}`}
+                          className="font-medium text-gray-800 hover:text-[#213E5A] text-sm"
+                        >
+                          {item.name}
+                        </Link>
+                        <p className="text-gray-600 text-xs">
+                          ₹{item.sellingPrice.toFixed(2)}
+                        </p>
                       </div>
-                    )}
-                  </div>
-
-                  <div className="flex-grow">
-                    <h3 className="font-semibold text-gray-800 text-base">
-                      <Link
-                        href={item.slug ? `/product/${item.slug}` : "#"} // Link to product page using slug
-                        className="hover:underline"
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => decrementItemQuantity(item.cartItemId)}
+                        className="p-1 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
+                        aria-label="Decrease quantity"
                       >
-                        {item.name}
-                      </Link>
-                    </h3>
-                    {item.variant && item.variant.name && (
-                      <p className="text-sm text-gray-600">
-                        Variant: {item.variant.name}
-                      </p>
-                    )}
-                    <p className="text-gray-700 font-medium text-sm mt-1">
-                      ₹{item.sellingPrice.toFixed(2)}
-                      {item.basePrice && item.basePrice > item.sellingPrice && (
-                        <span className="line-through text-gray-500 ml-2">
-                          ₹{item.basePrice.toFixed(2)}
-                        </span>
-                      )}
-                    </p>
-                    {item.stock !== undefined && ( // Display stock if available
-                      <p className="text-xs text-gray-500">
-                        Stock: {item.stock}
-                      </p>
-                    )}
+                        <Minus size={16} />
+                      </button>
+                      <span className="text-sm font-medium">
+                        {item.quantity}
+                      </span>
+                      <button
+                        onClick={() => incrementItemQuantity(item.cartItemId)}
+                        className="p-1 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
+                        aria-label="Increase quantity"
+                      >
+                        <Plus size={16} />
+                      </button>
+                      <button
+                        onClick={() => removeCartItem(item.cartItemId)}
+                        className="p-1 rounded-full text-red-500 hover:bg-red-100"
+                        aria-label="Remove item"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                   </div>
-
-                  <div className="flex items-center space-x-2 flex-shrink-0">
-                    {/* Decrement Button */}
-                    <button
-                      onClick={() => decrementItemQuantity(item.cartItemId)} // Pass item.cartItemId
-                      disabled={item.quantity <= 1 || cartLoading}
-                      className="p-1.5 rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    >
-                      <Minus size={16} />
-                    </button>
-                    <span className="font-semibold text-gray-800 text-sm w-8 text-center">
-                      {item.quantity}
-                    </span>
-                    {/* Increment Button */}
-                    <button
-                      onClick={() => incrementItemQuantity(item.cartItemId)} // Pass item.cartItemId
-                      disabled={
-                        cartLoading ||
-                        (item.stock !== undefined &&
-                          item.quantity >= item.stock)
-                      } // Disable if quantity equals or exceeds stock
-                      className="p-1.5 rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    >
-                      <Plus size={16} />
-                    </button>
-                  </div>
-
-                  {/* Remove Button */}
-                  <button
-                    onClick={() => removeCartItem(item.cartItemId)} // Pass item.cartItemId
-                    disabled={cartLoading}
-                    className="p-2 rounded-full text-red-500 hover:bg-red-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors ml-2"
-                  >
-                    <Trash2 size={20} />
-                  </button>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+              <div className="flex justify-between items-center mt-4 border-t pt-4">
+                <span className="font-semibold text-gray-800">Subtotal:</span>
+                <span className="font-semibold text-gray-900">
+                  ₹{currentSubtotal.toFixed(2)}
+                </span>
+              </div>
+            </>
           )}
         </div>
 
         {/* Coupon Section */}
         <div className="bg-white p-3 rounded-lg shadow-md">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Coupons</h2>
-          <button
+          <h2
+            className="text-lg font-bold text-gray-800 mb-4 cursor-pointer flex justify-between items-center"
             onClick={() => {
               setShowCouponSection(!showCouponSection);
               if (!showCouponSection) fetchCoupons(); // Fetch coupons when opening
             }}
-            className="w-full py-2 px-4 border border-[#213E5A] text-[#213E5A] rounded-md hover:bg-[#e6f0f7] transition-colors"
           >
-            {showCouponSection ? "Hide Coupons" : "View Available Coupons"}
-          </button>
-
+            Apply Coupon
+            <span>{showCouponSection ? "▲" : "▼"}</span>
+          </h2>
           {showCouponSection && (
-            <div className="mt-4 border-t pt-4">
+            <div className="mt-4">
               {availableCoupons.length === 0 ? (
                 <p className="text-gray-600 text-sm">No coupons available.</p>
               ) : (
@@ -1081,30 +1406,29 @@ const UserCheckout = () => {
                   {availableCoupons.map((coupon) => (
                     <div
                       key={coupon.id}
-                      className="flex items-center justify-between p-3 border rounded-lg bg-gray-50"
+                      className="border border-gray-200 rounded-md p-3 flex justify-between items-center"
                     >
                       <div>
-                        <p className="font-semibold text-gray-800 text-sm">
+                        <p className="font-semibold text-gray-800">
                           {coupon.name}
                         </p>
-                        <p className="text-xs text-gray-600">
+                        <p className="text-sm text-gray-600">
                           Code:{" "}
-                          <span className="font-mono text-indigo-700">
+                          <span className="font-mono text-[#213E5A]">
                             {coupon.code}
                           </span>
                         </p>
                         <p className="text-xs text-gray-500">
-                          Expires:{" "}
-                          {new Date(coupon.expiresAt).toLocaleDateString()}
+                          Discount: {coupon.discount}%
                         </p>
                       </div>
                       <div className="flex space-x-2">
                         <button
                           onClick={() => handleCopyCoupon(coupon.code)}
-                          className={`py-1 px-2 rounded-md text-xs font-medium ${
+                          className={`text-sm px-3 py-1 rounded-md ${
                             copiedCouponCode === coupon.code
                               ? "bg-green-100 text-green-700"
-                              : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                              : "bg-blue-100 text-blue-700 hover:bg-blue-200"
                           }`}
                         >
                           {copiedCouponCode === coupon.code
@@ -1114,7 +1438,7 @@ const UserCheckout = () => {
                         <button
                           onClick={() => handleApplyCoupon(coupon)}
                           disabled={appliedCoupon?.id === coupon.id}
-                          className="py-1 px-2 rounded-md text-xs font-medium bg-[#213E5A] text-white hover:bg-[#1a324a] disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="bg-[#213E5A] text-white text-sm px-3 py-1 rounded-md hover:bg-[#1a324a] disabled:opacity-50"
                         >
                           {appliedCoupon?.id === coupon.id
                             ? "Applied"
@@ -1127,16 +1451,14 @@ const UserCheckout = () => {
               )}
             </div>
           )}
-
           {appliedCoupon && (
-            <div className="mt-4 pt-4 border-t border-gray-200 flex items-center justify-between">
-              <p className="text-sm font-semibold text-green-700">
-                Coupon Applied: {appliedCoupon.code} (-₹
-                {discountAmount.toFixed(2)})
+            <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-md flex justify-between items-center">
+              <p className="text-green-700 font-semibold text-sm">
+                Coupon &quot;{appliedCoupon.code}&quot; applied!
               </p>
               <button
                 onClick={handleRemoveCoupon}
-                className="text-red-500 hover:underline text-sm"
+                className="text-red-500 hover:text-red-700 text-sm"
               >
                 Remove
               </button>
@@ -1149,218 +1471,278 @@ const UserCheckout = () => {
           <h2 className="text-2xl font-bold text-gray-800 mb-6">
             Order Summary
           </h2>
-          <div className="space-y-3 text-gray-700">
-            <div className="flex justify-between">
-              <span>Subtotal:</span>
-              <span className="font-semibold">
-                ₹{initialSubtotal.toFixed(2)}
+          <div className="space-y-3">
+            <div className="flex justify-between pb-2">
+              <span className="text-gray-700">Subtotal Price</span>
+              <span className="font-medium text-gray-900">
+                ₹{currentSubtotal.toFixed(2)}
               </span>
             </div>
-            <div className="flex justify-between">
-              <span>Shipping:</span>
-              <span className="font-semibold">
-                {shippingCharges === 0
-                  ? "Free"
-                  : `₹${shippingCharges.toFixed(2)}`}
+            <div className="flex justify-between pb-2 border-b border-gray-200">
+              <span className="text-gray-700">Shipping Rate</span>
+              <span className="font-medium text-gray-900">
+                ₹{shippingRate.toFixed(2)}
               </span>
             </div>
-            {appliedCoupon && (
-              <div className="flex justify-between text-green-700">
-                <span>Discount ({appliedCoupon.code}):</span>
-                <span className="font-semibold">
-                  -₹{discountAmount.toFixed(2)}
-                </span>
-              </div>
-            )}
-            <div className="flex justify-between pt-3 border-t border-gray-200 text-lg font-bold">
-              <span>Total:</span>
-              <span>₹{finalTotalAmount.toFixed(2)}</span>
+            <div className="flex justify-between pb-2">
+              <span className="text-gray-700 font-semibold">
+                Taxable Amount
+              </span>
+              <span className="font-semibold text-gray-900">
+                ₹{taxableAmount.toFixed(2)}
+              </span>
+            </div>
+            <div className="flex justify-between pb-2 border-b border-gray-200">
+              <span className="text-gray-700">
+                {taxType} Tax ({taxPercentage}%)
+              </span>
+              <span className="font-medium text-gray-900">
+                ₹{taxAmount.toFixed(2)}
+              </span>
+            </div>
+            {/* Display Total before discount */}
+            <div className="flex justify-between pb-2">
+              <span className="text-gray-700 font-semibold">
+                Total (before discount)
+              </span>
+              <span className="font-semibold text-gray-900">
+                ₹{(taxableAmount + taxAmount).toFixed(2)}
+              </span>
+            </div>
+            <div className="flex justify-between border-b pb-2">
+              <span className="text-gray-700">Discount</span>
+              <span className="font-medium text-red-600">
+                - ₹{discountAmount.toFixed(2)}
+              </span>
+            </div>
+            <div className="flex justify-between pt-4 border-t-2 border-gray-300">
+              <span className="text-xl font-bold text-gray-900">Total</span>
+              <span className="text-xl font-bold text-gray-900">
+                ₹{finalTotalAmount.toFixed(2)}
+              </span>
             </div>
           </div>
           <button
             onClick={handlePlaceOrder}
             disabled={
               isPlacingOrder ||
-              cartLoading ||
-              addressIsLoading ||
-              items.length === 0 ||
               !selectedBillingAddressId ||
-              !selectedDeliveryAddressId
+              !selectedDeliveryAddressId ||
+              items.length === 0
             }
-            className="mt-6 w-full bg-[#213E5A] text-white py-3 px-4 rounded-md text-lg font-semibold hover:bg-[#1a324a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className={`w-full py-3 mt-6 text-white font-semibold rounded-md transition-colors ${
+              !isPlacingOrder &&
+              selectedBillingAddressId &&
+              selectedDeliveryAddressId &&
+              items.length > 0
+                ? "bg-[#1A324A] hover:bg-[#142835]"
+                : "bg-gray-300 cursor-not-allowed"
+            }`}
           >
             {isPlacingOrder ? "Placing Order..." : "Place Order"}
           </button>
         </div>
       </div>
 
-      {/* Address Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">
-              {editingAddress ? "Edit Address" : "Add New Address"}
-            </h2>
-            <form onSubmit={handleFormSubmit} className="space-y-4">
-              <div>
-                <label
-                  htmlFor="fullName"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  id="fullName"
-                  name="fullName"
-                  value={formData.fullName}
-                  onChange={handleFormChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                  required
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="phone"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Phone Number
-                </label>
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleFormChange}
-                  maxLength={10}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                  required
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="pincode"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Pincode
-                </label>
-                <input
-                  type="text"
-                  id="pincode"
-                  name="pincode"
-                  value={formData.pincode}
-                  onChange={handleFormChange}
-                  maxLength={6}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                  required
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="state"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  State
-                </label>
-                <input
-                  type="text"
-                  id="state"
-                  name="state"
-                  value={formData.state}
-                  onChange={handleFormChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                  required
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="city"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  City
-                </label>
-                <input
-                  type="text"
-                  id="city"
-                  name="city"
-                  value={formData.city}
-                  onChange={handleFormChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                  required
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="addressLine"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Address Line (Street, House No.)
-                </label>
-                <textarea
-                  id="addressLine"
-                  name="addressLine"
-                  value={formData.addressLine}
-                  onChange={handleFormChange}
-                  rows={3}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                  required
-                ></textarea>
-              </div>
-              <div>
-                <label
-                  htmlFor="landmark"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Landmark (Optional)
-                </label>
-                <input
-                  type="text"
-                  id="landmark"
-                  name="landmark"
-                  value={formData.landmark}
-                  onChange={handleFormChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="type"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Address Type
-                </label>
-                <select
-                  id="type"
-                  name="type"
-                  value={formData.type}
-                  onChange={handleFormChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                  required
-                >
-                  <option value="HOME">Home</option>
-                  <option value="WORK">Work</option>
-                  <option value="BILLING">Billing</option>
-                  <option value="SHIPPING">Shipping</option>
-                </select>
-              </div>
-              <div className="flex justify-end space-x-3">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-[#213E5A] text-white rounded-md hover:bg-[#1a324a]"
-                >
-                  {editingAddress ? "Save Changes" : "Add Address"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <Modal
+          title={editingAddress ? "Edit Address" : "Add New Address"}
+          onClose={() => setShowModal(false)}
+        >
+          <form onSubmit={handleFormSubmit} className="space-y-4">
+            <div>
+              <label
+                htmlFor="fullName"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Full Name
+              </label>
+              <input
+                type="text"
+                id="fullName"
+                name="fullName"
+                value={formData.fullName}
+                onChange={handleFormChange}
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                required
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="phone"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Phone Number
+              </label>
+              <input
+                type="text"
+                id="phone"
+                name="phone"
+                value={formData.phone}
+                onChange={handleFormChange}
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                maxLength={10}
+                required
+              />
+            </div>
+
+            <PincodeInput
+              value={formData.pincode}
+              onChange={handleFormChange}
+              onBlur={() => {}} // PincodeInput handles its own blur
+              isVerifiedAndDisabled={
+                (addressCreationIntent === "SHIPPING" ||
+                  editingAddress?.type === "SHIPPING") &&
+                !!checkoutData?.verifiedPincodeDetails?.pincode &&
+                formData.pincode === checkoutData.verifiedPincodeDetails.pincode // Only disable if it matches the verified one
+              }
+              verifiedPincodeFromCart={
+                addressCreationIntent === "SHIPPING" ||
+                editingAddress?.type === "SHIPPING"
+                  ? checkoutData?.verifiedPincodeDetails?.pincode
+                  : undefined
+              }
+              cityValue={formData.city}
+              stateValue={formData.state}
+              setCity={(city) => setFormData((prev) => ({ ...prev, city }))}
+              setState={(state) => setFormData((prev) => ({ ...prev, state }))}
+              setLocalPincodeValidationMessage={setPincodeValidationMessage} // Pass callback
+              disabled={
+                editingAddress?.type === "SHIPPING" &&
+                !!checkoutData?.verifiedPincodeDetails?.pincode &&
+                formData.pincode === checkoutData.verifiedPincodeDetails.pincode
+              }
+            />
+
+            <div>
+              <label
+                htmlFor="city"
+                className="block text-sm font-medium text-gray-700"
+              >
+                City
+              </label>
+              <input
+                type="text"
+                id="city"
+                name="city"
+                value={formData.city}
+                onChange={handleFormChange}
+                disabled={
+                  (addressCreationIntent === "SHIPPING" ||
+                    editingAddress?.type === "SHIPPING") &&
+                  !!checkoutData?.verifiedPincodeDetails?.pincode &&
+                  formData.pincode ===
+                    checkoutData.verifiedPincodeDetails.pincode
+                }
+                className={`mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 ${
+                  (addressCreationIntent === "SHIPPING" ||
+                    editingAddress?.type === "SHIPPING") &&
+                  !!checkoutData?.verifiedPincodeDetails?.pincode &&
+                  formData.pincode ===
+                    checkoutData.verifiedPincodeDetails.pincode
+                    ? "bg-gray-100 cursor-not-allowed"
+                    : ""
+                }`}
+                required
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="state"
+                className="block text-sm font-medium text-gray-700"
+              >
+                State
+              </label>
+              <input
+                type="text"
+                id="state"
+                name="state"
+                value={formData.state}
+                onChange={handleFormChange}
+                disabled={
+                  (addressCreationIntent === "SHIPPING" ||
+                    editingAddress?.type === "SHIPPING") &&
+                  !!checkoutData?.verifiedPincodeDetails?.pincode &&
+                  formData.pincode ===
+                    checkoutData.verifiedPincodeDetails.pincode
+                }
+                className={`mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 ${
+                  (addressCreationIntent === "SHIPPING" ||
+                    editingAddress?.type === "SHIPPING") &&
+                  !!checkoutData?.verifiedPincodeDetails?.pincode &&
+                  formData.pincode ===
+                    checkoutData.verifiedPincodeDetails.pincode
+                    ? "bg-gray-100 cursor-not-allowed"
+                    : ""
+                }`}
+                required
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="addressLine"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Address Line
+              </label>
+              <textarea
+                id="addressLine"
+                name="addressLine"
+                value={formData.addressLine}
+                onChange={handleFormChange}
+                rows={3}
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                required
+              ></textarea>
+            </div>
+            <div>
+              <label
+                htmlFor="landmark"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Landmark (Optional)
+              </label>
+              <input
+                type="text"
+                id="landmark"
+                name="landmark"
+                value={formData.landmark}
+                onChange={handleFormChange}
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="type"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Address Type
+              </label>
+              <select
+                id="type"
+                name="type"
+                value={formData.type}
+                onChange={handleFormChange}
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                required
+              >
+                <option value="HOME">HOME</option>
+                <option value="WORK">WORK</option>
+                <option value="BILLING">BILLING</option>
+                <option value="SHIPPING">SHIPPING</option>
+              </select>
+            </div>
+            {pincodeValidationMessage && (
+              <p className="text-red-600 text-sm">{pincodeValidationMessage}</p>
+            )}
+            <button
+              type="submit"
+              className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#213E5A] hover:bg-[#1a324a] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#213E5A]"
+            >
+              {editingAddress ? "Update Address" : "Save Address"}
+            </button>
+          </form>
+        </Modal>
       )}
     </div>
   );

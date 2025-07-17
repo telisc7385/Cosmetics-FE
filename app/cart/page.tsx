@@ -1,6 +1,7 @@
+// src/app/cart/page.tsx (or pages/cart.tsx)
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useAppSelector, useAppDispatch } from "@/store/hooks/hooks";
 import Image from "next/image";
 import Link from "next/link";
@@ -21,6 +22,42 @@ import Lottie from "react-lottie-player";
 import emptyCartAnimationData from "@/public/cart.json";
 import PincodeVerifier from "@/components/Checkout/PincodeVerifier";
 import AuthPromptModal from "@/components/Checkout/AuthPromptModal";
+
+// Define a type for the order summary data
+interface OrderSummaryApiResponse {
+  taxType: string;
+  taxPercentage: number;
+  taxDetails: Array<{
+    name: string;
+    percentage: number;
+  }>;
+  shippingRate: number;
+  isTaxInclusive: boolean;
+}
+
+// Define a type for verified pincode details, including order summary parts
+interface VerifiedPincodeDetails {
+  pincode: string;
+  city: string;
+  state: string;
+  shippingRate?: number; // Optional, as it comes from order summary
+  taxPercentage?: number; // Optional, as it comes from order summary
+  taxType?: string; // Optional, as it comes from order summary
+}
+
+// Define a type for the data passed from CartPage to Checkout
+interface CheckoutDataFromCart {
+  subtotal: number;
+  shippingRate: number;
+  taxableAmount: number; // Added
+  taxAmount: number; // Added
+  taxPercentage: number;
+  taxType: string; // Added
+  total: number;
+  verifiedPincodeDetails: VerifiedPincodeDetails | null;
+  cartItems: CartItem[]; // Pass cart items too if UserCheckout needs them
+}
+
 
 const EmptyCartAnimation = () => (
   <div className="flex flex-col items-center justify-center py-10 bg-white rounded-lg shadow-md animate-fadeIn">
@@ -78,19 +115,76 @@ const CartPage = () => {
 
   const [pincodeVerified, setPincodeVerified] = useState(false);
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
-
-  useEffect(() => {
-    if (
-      typeof window !== "undefined" &&
-      localStorage.getItem("verifiedPincode")
-    ) {
-      setPincodeVerified(true);
-    }
-  }, []);
+  const [orderSummaryData, setOrderSummaryData] =
+    useState<OrderSummaryApiResponse | null>(null);
+  const [verifiedPincodeDetails, setVerifiedPincodeDetails] =
+    useState<VerifiedPincodeDetails | null>(null);
 
   const items = isLoggedIn ? loggedInCartItems : guestCartItems;
   const loading = isLoggedIn ? loggedInLoading : false;
   const error = isLoggedIn ? loggedInError : null;
+
+  // Effect to load initial pincode details and order summary data from localStorage on component mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedPincode = localStorage.getItem("verifiedPincode");
+      const storedCity = localStorage.getItem("verifiedCity");
+      const storedState = localStorage.getItem("verifiedState");
+      const storedShipping = localStorage.getItem("verifiedShipping");
+      const storedTax = localStorage.getItem("verifiedTax");
+      const storedTaxType = localStorage.getItem("verifiedTaxType");
+
+      if (storedPincode && storedCity && storedState) {
+        const pincodeData: VerifiedPincodeDetails = {
+          pincode: storedPincode,
+          city: storedCity,
+          state: storedState,
+          shippingRate: storedShipping ? Number(storedShipping) : undefined,
+          taxPercentage: storedTax ? Number(storedTax) : undefined,
+          taxType: storedTaxType || undefined,
+        };
+        setVerifiedPincodeDetails(pincodeData);
+        setPincodeVerified(true);
+
+        // Populate orderSummaryData from localStorage
+        if (
+          pincodeData.shippingRate !== undefined &&
+          pincodeData.taxPercentage !== undefined
+        ) {
+          setOrderSummaryData({
+            taxType: pincodeData.taxType || "N/A",
+            taxPercentage: pincodeData.taxPercentage,
+            taxDetails: [], // Detailed tax breakdown might need separate handling if not provided by PincodeVerifier
+            shippingRate: pincodeData.shippingRate,
+            isTaxInclusive: false,
+          });
+        }
+      }
+    }
+  }, []); // Runs only once on mount
+
+  // Memoize handlePincodeVerified to ensure its reference is stable
+  const handlePincodeVerified = useCallback((data: VerifiedPincodeDetails) => {
+    setPincodeVerified(true);
+    setVerifiedPincodeDetails(data);
+
+    // Directly set order summary data from the verified data
+    if (data.shippingRate !== undefined && data.taxPercentage !== undefined) {
+      setOrderSummaryData({
+        taxType: data.taxType || "N/A",
+        taxPercentage: data.taxPercentage,
+        taxDetails: [], // As PincodeVerifier doesn't provide this detail, it's empty here
+        shippingRate: data.shippingRate,
+        isTaxInclusive: false,
+      });
+      toast.success(
+        `Delivery available in ${data.city}, ${data.state}. Order summary updated!`
+      );
+    } else {
+      setOrderSummaryData(null);
+      toast.error("Pincode verified, but order summary details are missing.");
+    }
+  }, []); // Dependencies are empty as it only uses its input 'data'
 
   const handleIncrement = (cartItemId: number) => {
     if (isLoggedIn) {
@@ -131,12 +225,70 @@ const CartPage = () => {
     } else {
       dispatch(clearGuestCart());
     }
+    // Also clear order summary and pincode if cart is cleared
+    setOrderSummaryData(null);
+    setVerifiedPincodeDetails(null);
+    setPincodeVerified(false);
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("verifiedPincode");
+      localStorage.removeItem("verifiedCity");
+      localStorage.removeItem("verifiedState");
+      localStorage.removeItem("verifiedShipping");
+      localStorage.removeItem("verifiedTax");
+      localStorage.removeItem("verifiedTaxType");
+      localStorage.removeItem("orderSummaryForCheckout"); // Clear any stored summary for checkout
+    }
   };
+
+  // Calculate order summary values
+  const subtotal = items.reduce(
+    (
+      total: number,
+      item: CartItem // Explicitly typed 'item' as CartItem
+    ) => total + item.sellingPrice * item.quantity,
+    0
+  );
+
+  const shippingRate = orderSummaryData?.shippingRate || 0;
+  const taxableAmount = subtotal + shippingRate;
+  const taxPercentage = orderSummaryData?.taxPercentage || 0;
+  const taxAmount = taxableAmount * (taxPercentage / 100);
+  const total = taxableAmount + taxAmount;
+  const taxType = orderSummaryData?.taxType || "N/A";
+
 
   const handleCheckoutClick = () => {
     if (!pincodeVerified) {
       toast.error("Please verify your pincode first.");
       return;
+    }
+
+    if (!orderSummaryData) {
+      toast.error(
+        "Order summary not available. Please try verifying pincode again."
+      );
+      return;
+    }
+
+    // Prepare data to pass to checkout page
+    const checkoutData: CheckoutDataFromCart = {
+      subtotal,
+      shippingRate,
+      taxableAmount, // New
+      taxAmount,     // New
+      taxPercentage,
+      taxType,       // New
+      total,
+      verifiedPincodeDetails,
+      cartItems: items, // Pass cart items too if UserCheckout needs them
+    };
+
+    // Store data in localStorage for the UserCheckout page to retrieve
+    if (typeof window !== "undefined") {
+      localStorage.setItem(
+        "orderSummaryForCheckout",
+        JSON.stringify(checkoutData)
+      );
     }
 
     if (isLoggedIn) {
@@ -151,13 +303,6 @@ const CartPage = () => {
     router.push("/checkout");
   };
 
-  const subtotal = items.reduce(
-    (total: number, item: CartItem) =>
-      total + item.sellingPrice * item.quantity,
-    0
-  );
-  const tax = 0; // Tax is currently fixed at 0.
-  const total = subtotal + tax;
 
   if (loading && items.length === 0)
     return <div className="text-center py-10">Loading your cart...</div>;
@@ -203,6 +348,7 @@ const CartPage = () => {
                 ) : (
                   <div className="mr-4 sm:mr-6 flex-shrink-0 flex flex-col items-center">
                     {" "}
+                    {/* Reduced font size here */}
                     <Image
                       src={item.image}
                       alt={item.name}
@@ -353,29 +499,46 @@ const CartPage = () => {
 
           <div className="mb-4">
             <PincodeVerifier
-              onVerified={(data) => {
-                setPincodeVerified(!!data.pincode);
-              }}
+              onVerified={handlePincodeVerified} // This prop is now a stable reference
             />
+            {verifiedPincodeDetails && (
+              <div className="mt-2 text-sm text-gray-600">
+                Delivery to:{" "}
+                <span className="font-semibold">
+                  {verifiedPincodeDetails.pincode},{" "}
+                  {verifiedPincodeDetails.city}, {verifiedPincodeDetails.state}
+                </span>
+              </div>
+            )}
           </div>
 
-          {/* Billing and Shipping Addresses Display - Removed, as per request */}
-          {/* Coupon Code Input and Apply Button - Removed, as per request */}
-
           <div className="space-y-2">
-            <div className="flex justify-between pb-2 border-b border-gray-200">
-              <span className="text-gray-700">Subtotal</span>
+            <div className="flex justify-between pb-2">
+              <span className="text-gray-700">Subtotal Price</span>
               <span className="font-medium text-gray-900">
                 ₹{subtotal.toFixed(2)}
               </span>
             </div>
-            <div className="flex justify-between pb-2">
-              <span className="text-gray-700">Tax</span>
+            <div className="flex justify-between pb-2 border-b border-gray-200">
+              <span className="text-gray-700">Shipping Rate</span>
               <span className="font-medium text-gray-900">
-                ₹{tax.toFixed(2)}
+                ₹{shippingRate.toFixed(2)}
               </span>
             </div>
-            {/* Discount display removed as coupon section is removed */}
+            <div className="flex justify-between pb-2">
+              <span className="text-gray-700 font-semibold">Taxable Amount</span>
+              <span className="font-semibold text-gray-900">
+                ₹{taxableAmount.toFixed(2)}
+              </span>
+            </div>
+            <div className="flex justify-between pb-2 border-b border-gray-200">
+              <span className="text-gray-700">
+                {taxType} Tax ({taxPercentage}%)
+              </span>
+              <span className="font-medium text-gray-900">
+                ₹{taxAmount.toFixed(2)}
+              </span>
+            </div>
             <div className="flex justify-between pt-4 border-t-2 border-gray-300">
               <span className="text-xl font-bold text-gray-900">Total</span>
               <span className="text-xl font-bold text-gray-900">
@@ -387,11 +550,13 @@ const CartPage = () => {
           <button
             onClick={handleCheckoutClick}
             className={`w-full py-3 mt-6 text-white font-semibold rounded-md transition-colors ${
-              pincodeVerified && items.length > 0
+              pincodeVerified && items.length > 0 && orderSummaryData
                 ? "bg-[#1A324A] hover:bg-[#142636] cursor-pointer"
                 : "bg-gray-300 cursor-not-allowed"
             }`}
-            disabled={!pincodeVerified || items.length === 0}
+            disabled={
+              !pincodeVerified || items.length === 0 || !orderSummaryData
+            }
           >
             Checkout
           </button>

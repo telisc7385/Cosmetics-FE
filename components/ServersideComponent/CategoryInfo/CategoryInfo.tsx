@@ -82,17 +82,17 @@ export default function CategoryInfo({
   return (
     <div className="w-full bg-white">
       {/* Banner */}
-      <div className="relative w-full h-[220px] sm:h-[350px] lg:h-[290px]">
+      <div className="relative w-full h-[220px] sm:h-[350px] lg:h-[350px] overflow-hidden mx-auto">
         {category.banner ? (
           <>
             <Image
               src={category.banner}
               alt={category.name}
               fill
-              className="object-contain w-full h-full"
+              className="object-cover w-full h-full"
               priority
             />
-            <div className="absolute inset-0 bg-black/30" />
+            {/* <div className="absolute inset-0 bg-black/30" /> */}
           </>
         ) : (
           <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-500">

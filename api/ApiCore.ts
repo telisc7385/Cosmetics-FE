@@ -16,7 +16,7 @@ export const apiCore = async <T>(
 
   if (baseUrl.endsWith('/')) baseUrl = baseUrl.slice(0, -1);
   const finalUrlPath = url.startsWith('/') ? url : `/${url}`;
-  const fullUrl = `${baseUrl}${finalUrlPath}`; // FIX: Corrected variable name from finalUrlUrl to finalUrlPath
+  const fullUrl = `${baseUrl}${finalUrlPath}`;
 
   const headers: Record<string, string> = {};
   if (body && ['POST', 'PUT', 'PATCH'].includes(method)) {
@@ -67,6 +67,8 @@ export const apiCore = async <T>(
       return await res.json() as T;
     } else {
       console.warn(`[ Server ] Non-JSON response for ${fullUrl}: ${res.status}. Returning null.`);
+      // Depending on your API's non-JSON responses, you might want to return an empty object or throw an error.
+      // For now, keeping it as `null as T` to match the previous behavior, but be aware of this.
       return null as T;
     }
   } catch (error) {
@@ -147,7 +149,6 @@ export interface GuestOrderPayload {
   }[];
   totalAmount: number;
   paymentMethod: "COD" | "RAZORPAY";
-  // Added discountCode for guest orders too if applicable
   discountCode?: string;
 }
 
@@ -162,11 +163,17 @@ export interface LoggedInOrderPayload {
   totalAmount: number;
   paymentMethod: string;
   discountAmount: number;
-  discountCode?: string; // Now correctly included for sending the applied coupon
+  discountCode?: string;
   billingAddress: string;
   shippingAddress: string;
   cartId?: number;
   subtotal: number;
+  // Added these properties as per the UserCheckout component's payload
+  taxAmount: number;
+  appliedTaxRate: number;
+  taxType: string;
+  isTaxInclusive: boolean;
+  shippingRate: number;
 }
 
 export interface Address {
@@ -278,24 +285,21 @@ export interface Category {
   parent?: number | null;
 }
 
-// ✅ NEW: Coupon Interface
+// Updated Coupon Interface to match UserCheckout.tsx
 export interface Coupon {
   id: number;
+  name: string; // Added 'name' property
   code: string;
-  discountType: 'percentage' | 'fixed';
-  discountValue: number;
-  minPurchase?: number;
-  maxDiscountAmount?: number;
-  expirationDate: string;
-  isActive: boolean;
-  usageLimitPerUser?: number;
-  totalUsageLimit?: number;
-  description?: string;
+  discount: number; // Changed from discountValue to discount
+  expiresAt: string; // Changed from expirationDate to expiresAt
   createdAt: string;
-  updatedAt: string;
+  show_on_homepage: boolean; // Added
+  redeemCount: number; // Added
+  maxRedeemCount: number; // Added
+  // Removed: discountType, minPurchase, maxDiscountAmount, isActive, usageLimitPerUser, totalUsageLimit, description, updatedAt
 }
 
-// ✅ NEW: Interface for coupon validation response from backend
+// Interface for coupon validation response from backend
 export interface CouponValidationResponse {
   isValid: boolean;
   discountAmount: number;

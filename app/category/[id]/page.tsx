@@ -5,7 +5,6 @@ import { Metadata } from "next";
 
 type Props = {
   params: Promise<{ id: string }>;
-  
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -38,14 +37,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function Page({ params }: Props) {
   const resolvedParams = await params;
   const { id } = resolvedParams;
- 
 
   try {
     const url = new URL(`${process.env.NEXT_PUBLIC_BASE_URL}/category/id`);
     url.searchParams.append("category", id);
-    
+
     url.searchParams.append("limit", "4");
-   
 
     const categoryRes = await fetch(url.toString(), { cache: "no-store" });
     if (!categoryRes.ok) return notFound();
@@ -62,7 +59,7 @@ export default async function Page({ params }: Props) {
     };
 
     return (
-      <div className="pt-8 container mx-auto max-w-7xl space-y-4">
+      <div className="pt-8 container mx-auto max-w-7xl ">
         <CategoryInfo
           category={category}
           initialProducts={products}

@@ -3,7 +3,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { useSearchParams} from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { apiCore } from "@/api/ApiCore"; // Ensure this path is correct
 import { useAppSelector } from "@/store/hooks/hooks"; // Ensure this path is correct
@@ -94,6 +94,7 @@ interface OrderListApiResponse {
 const ThankYouPage = () => {
   const searchParams = useSearchParams();
   const orderId = searchParams.get("orderId");
+  const paymentId = searchParams.get("paymentId"); // Get paymentId from URL
   const token = useAppSelector(selectToken); // This will be null for guest users
 
   const [order, setOrder] = useState<DetailedOrder | null>(null);
@@ -430,6 +431,11 @@ const ThankYouPage = () => {
         <p className="text-sm mt-1">
           Order ID: <span className="font-semibold">{order.id}</span>
         </p>
+        {paymentId && ( // Display paymentId if available
+          <p className="text-sm mt-1">
+            Payment ID: <span className="font-semibold">{paymentId}</span>
+          </p>
+        )}
         <p className="text-sm mt-1">
           We&apos;ve sent an order confirmation to your email:{" "}
           <span className="font-semibold">{order.customer_info.email}</span>
@@ -482,6 +488,12 @@ const ThankYouPage = () => {
                 <span className="font-semibold">
                   {order.payment_info.payment_transaction_id}
                 </span>
+              </p>
+            )}
+            {paymentId && ( // Display paymentId in summary too if available from URL
+              <p className="text-sm text-gray-600">
+                Razorpay Payment ID:{" "}
+                <span className="font-semibold">{paymentId}</span>
               </p>
             )}
           </div>
