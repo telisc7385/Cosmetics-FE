@@ -47,17 +47,17 @@ interface VerifiedPincodeDetails {
 
 // Define a type for the data passed from CartPage to Checkout
 interface CheckoutDataFromCart {
-  subtotal: number;
+  subtotal: number; // This will now be the final calculated subtotal (after discount)
   shippingRate: number;
-  taxableAmount: number; // Added
-  taxAmount: number; // Added
+  taxableAmount: number;
+  taxAmount: number;
   taxPercentage: number;
-  taxType: string; // Added
+  taxType: string;
   total: number;
+  abandonedDiscountApplied: number; // To pass the applied discount to checkout
   verifiedPincodeDetails: VerifiedPincodeDetails | null;
-  cartItems: CartItem[]; // Pass cart items too if UserCheckout needs them
+  cartItems: CartItem[]; // Pass cart items to UserCheckout if needed
 }
-
 
 const EmptyCartAnimation = () => (
   <div className="flex flex-col items-center justify-center py-10 bg-white rounded-lg shadow-md animate-fadeIn">
@@ -111,6 +111,7 @@ const CartPage = () => {
     decrementItemQuantity: decrementLoggedInItem,
     removeCartItem: removeLoggedInItem,
     clearCart: clearLoggedInCart,
+    abandonedDiscount, // This is the discount value from the provider
   } = useLoggedInCart();
 
   const [pincodeVerified, setPincodeVerified] = useState(false);
@@ -154,9 +155,9 @@ const CartPage = () => {
           setOrderSummaryData({
             taxType: pincodeData.taxType || "N/A",
             taxPercentage: pincodeData.taxPercentage,
-            taxDetails: [], // Detailed tax breakdown might need separate handling if not provided by PincodeVerifier
+            taxDetails: [], // This might need to be retrieved if backend provides full details
             shippingRate: pincodeData.shippingRate,
-            isTaxInclusive: false,
+            isTaxInclusive: false, // Assuming false for now based on previous context
           });
         }
       }
@@ -173,9 +174,9 @@ const CartPage = () => {
       setOrderSummaryData({
         taxType: data.taxType || "N/A",
         taxPercentage: data.taxPercentage,
-        taxDetails: [], // As PincodeVerifier doesn't provide this detail, it's empty here
+        taxDetails: [], // Initialize or fetch if needed
         shippingRate: data.shippingRate,
-        isTaxInclusive: false,
+        isTaxInclusive: false, // Assuming false
       });
       toast.success(
         `Delivery available in ${data.city}, ${data.state}. Order summary updated!`
@@ -240,22 +241,23 @@ const CartPage = () => {
     }
   };
 
-  // Calculate order summary values
-  const subtotal = items.reduce(
-    (
-      total: number,
-      item: CartItem // Explicitly typed 'item' as CartItem
-    ) => total + item.sellingPrice * item.quantity,
+  // Calculate the base subtotal (sum of item prices * quantities)
+  const baseSubtotal = items.reduce(
+    (total: number, item: CartItem) => total + item.sellingPrice * item.quantity,
     0
   );
 
+  // Determine the final subtotal after applying the abandoned discount if logged in
+  const finalSubtotal = isLoggedIn && abandonedDiscount > 0
+    ? baseSubtotal - abandonedDiscount
+    : baseSubtotal;
+
   const shippingRate = orderSummaryData?.shippingRate || 0;
-  const taxableAmount = subtotal + shippingRate;
+  const taxableAmount = finalSubtotal + shippingRate; // Tax applied after discount
   const taxPercentage = orderSummaryData?.taxPercentage || 0;
   const taxAmount = taxableAmount * (taxPercentage / 100);
   const total = taxableAmount + taxAmount;
   const taxType = orderSummaryData?.taxType || "N/A";
-
 
   const handleCheckoutClick = () => {
     if (!pincodeVerified) {
@@ -272,13 +274,14 @@ const CartPage = () => {
 
     // Prepare data to pass to checkout page
     const checkoutData: CheckoutDataFromCart = {
-      subtotal,
+      subtotal: finalSubtotal, // Pass the final calculated subtotal (after discount)
       shippingRate,
-      taxableAmount, // New
-      taxAmount,     // New
+      taxableAmount,
+      taxAmount,
       taxPercentage,
-      taxType,       // New
+      taxType,
       total,
+      abandonedDiscountApplied: isLoggedIn ? abandonedDiscount : 0, // Pass the discount amount
       verifiedPincodeDetails,
       cartItems: items, // Pass cart items too if UserCheckout needs them
     };
@@ -302,7 +305,6 @@ const CartPage = () => {
     setShowAuthPrompt(false);
     router.push("/checkout");
   };
-
 
   if (loading && items.length === 0)
     return <div className="text-center py-10">Loading your cart...</div>;
@@ -514,17 +516,40 @@ const CartPage = () => {
 
           <div className="space-y-2">
             <div className="flex justify-between pb-2">
-              <span className="text-gray-700">Subtotal Price</span>
+              <span className="text-gray-700">Subtotal</span>
               <span className="font-medium text-gray-900">
-                ₹{subtotal.toFixed(2)}
+                ₹{baseSubtotal.toFixed(2)} {/* Display original subtotal */}
               </span>
             </div>
+
+            {/* Display the abandoned discount if applied */}
+            {isLoggedIn && abandonedDiscount > 0 && (
+              <div className="flex justify-between pb-2 text-green-600">
+                <span className="text-gray-700 text-sm">Discount Applied</span>
+                <span className="font-medium text-green-600 text-sm">
+                  - ₹{abandonedDiscount.toFixed(2)}
+                </span>
+              </div>
+            )}
+
+            {/* Display the discounted subtotal if a discount was applied */}
+            {isLoggedIn && abandonedDiscount > 0 && (
+              <div className="flex justify-between pb-2 border-b border-gray-200">
+                <span className="text-gray-700 font-semibold">Subtotal (after discount)</span>
+                <span className="font-semibold text-gray-900">
+                  ₹{finalSubtotal.toFixed(2)}
+                </span>
+              </div>
+            )}
+
+
             <div className="flex justify-between pb-2 border-b border-gray-200">
               <span className="text-gray-700">Shipping Rate</span>
               <span className="font-medium text-gray-900">
                 ₹{shippingRate.toFixed(2)}
               </span>
             </div>
+
             <div className="flex justify-between pb-2">
               <span className="text-gray-700 font-semibold">Taxable Amount</span>
               <span className="font-semibold text-gray-900">

@@ -169,4 +169,5 @@ export interface LoggedInCartContextType {
   clearCart: () => Promise<void>;
   refetchCart: () => Promise<void>;
   cartId: number | null;
+  abandonedDiscount: number;
 }

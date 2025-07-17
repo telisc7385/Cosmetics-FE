@@ -225,6 +225,39 @@ export function LoggedInCartProvider({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [cartId, setCartId] = useState<number | null>(null);
+  const [abandonedDiscount, setAbandonedDiscount] = useState<number>(0);
+
+  const autoApplyAbandonedDiscount = useCallback(
+    async () => {
+      if (!cartId || !token) {
+        setAbandonedDiscount(0); // Ensure discount is 0 if no cartId or token
+        return;
+      }
+
+      try {
+        const discountResponse = await apiCore<AbandonedDiscountResponse>(
+          "/abandoned/apply-discount",
+          "POST",
+          { cartId },
+          token
+        );
+
+        // Check if the response indicates success and contains totalDiscount
+        if (discountResponse?.success && typeof discountResponse.totalDiscount === 'number') {
+          console.log("✅ Discount applied:", discountResponse);
+          // Use totalDiscount from the backend response
+          setAbandonedDiscount(discountResponse.totalDiscount);
+        } else {
+          console.log("ℹ️ No discount or discount not applicable:", discountResponse?.message || 'Unknown reason');
+          setAbandonedDiscount(0); // Reset if no discount is provided or applicable
+        }
+      } catch (err) {
+        console.error("❌ Error applying discount:", err);
+        setAbandonedDiscount(0); // Fallback to 0 on any error
+      }
+    },
+    [cartId, token]
+  );
 
   /**
    * Fetches the current cart items from the API.
@@ -235,6 +268,7 @@ export function LoggedInCartProvider({
       setItems([]);
       setCartId(null);
       setLoading(false);
+      setAbandonedDiscount(0); // Also reset discount if no token
       return;
     }
 
@@ -281,6 +315,7 @@ export function LoggedInCartProvider({
       }
       setItems([]);
       setCartId(null);
+      setAbandonedDiscount(0); // Reset discount on fetch error
     } finally {
       setLoading(false);
     }
@@ -289,13 +324,17 @@ export function LoggedInCartProvider({
   // Effect to fetch cart items on component mount or token change
   useEffect(() => {
     if (token) {
-      fetchCartItems();
+      fetchCartItems().then(() => {
+        // Call autoApplyAbandonedDiscount after cart items are fetched and cartId is set
+        autoApplyAbandonedDiscount();
+      });
     } else {
       setItems([]);
       setCartId(null);
+      setAbandonedDiscount(0); // Ensure discount is reset if logged out
       setLoading(false);
     }
-  }, [token, fetchCartItems]);
+  }, [token, fetchCartItems, autoApplyAbandonedDiscount]);
 
   /**
    * Adds an item to the cart.
@@ -407,6 +446,7 @@ export function LoggedInCartProvider({
         await apiCore("/cart/add", "POST", payload, token);
         // After successful add, refetch the cart to get the real cartItemId and updated state
         await fetchCartItems();
+        autoApplyAbandonedDiscount(); // Re-apply discount after cart changes
       } catch (err: any) {
         console.error("LoggedInCartProvider: Failed to add cart item:", err);
         if (err.message && err.message.includes("401")) {
@@ -421,7 +461,7 @@ export function LoggedInCartProvider({
         setLoading(false); // Ensure loading state is reset
       }
     },
-    [token, items, fetchCartItems]
+    [token, items, fetchCartItems, autoApplyAbandonedDiscount] // Added autoApplyAbandonedDiscount
   );
 
   /**
@@ -453,6 +493,7 @@ export function LoggedInCartProvider({
         );
         // After successful removal, refetch the cart to ensure sync
         await fetchCartItems();
+        autoApplyAbandonedDiscount(); // Re-apply discount after cart changes
       } catch (err: any) {
         console.error("LoggedInCartProvider: Failed to remove cart item:", err);
         if (err.message && err.message.includes("401")) {
@@ -467,7 +508,7 @@ export function LoggedInCartProvider({
         setLoading(false);
       }
     },
-    [token, items, fetchCartItems]
+    [token, items, fetchCartItems, autoApplyAbandonedDiscount] // Added autoApplyAbandonedDiscount
   );
 
   /**
@@ -516,8 +557,7 @@ export function LoggedInCartProvider({
           { quantity: newQuantity },
           token
         );
-        // No fetchCartItems here. Rely on optimistic update.
-        // If the backend has a different stock, the next full fetch (e.g., page refresh) will correct it.
+        autoApplyAbandonedDiscount(); // Re-apply discount after cart changes
       } catch (err: any) {
         console.error(
           "LoggedInCartProvider: Failed to increment quantity:",
@@ -535,7 +575,7 @@ export function LoggedInCartProvider({
         setLoading(false);
       }
     },
-    [token, items] // fetchCartItems removed as dependency since it's not called
+    [token, items, autoApplyAbandonedDiscount] // Added autoApplyAbandonedDiscount
   );
 
   /**
@@ -593,7 +633,7 @@ export function LoggedInCartProvider({
             token
           );
         }
-        // No fetchCartItems here. Rely on optimistic update.
+        autoApplyAbandonedDiscount(); // Re-apply discount after cart changes
       } catch (err: any) {
         console.error(
           "LoggedInCartProvider: Failed to decrement quantity:",
@@ -611,7 +651,7 @@ export function LoggedInCartProvider({
         setLoading(false);
       }
     },
-    [token, items] // fetchCartItems removed as dependency since it's not called
+    [token, items, autoApplyAbandonedDiscount] // Added autoApplyAbandonedDiscount
   );
 
   /**
@@ -629,6 +669,7 @@ export function LoggedInCartProvider({
 
     setItems([]); // Optimistic update
     setCartId(null);
+    setAbandonedDiscount(0); // Also reset discount when cart is cleared
     toast.success("Cart cleared successfully!"); // Optimistic toast
 
     try {
@@ -661,6 +702,7 @@ export function LoggedInCartProvider({
     clearCart,
     refetchCart: fetchCartItems, // Expose fetchCartItems for manual re-fetching if needed
     cartId,
+    abandonedDiscount,
   };
 
   return (
@@ -679,3 +721,14 @@ export const useLoggedInCart = () => {
   }
   return context;
 };
+
+// Updated interface to match your backend's response for /abandoned/apply-discount
+interface AbandonedDiscountResponse {
+  success: boolean;
+  message?: string;
+  subtotal?: number; // Backend sends this
+  totalDiscount?: number; // Backend sends this, this is what we need for frontend abandonedDiscount
+  finalTotal?: number; // Backend sends this
+  discountedItems?: any[];
+  unmatchedItems?: any[];
+}
