@@ -176,7 +176,7 @@ const ThankYouPage = () => {
           undefined,
           token // Pass token if available (for logged-in users). For guests, this will be null/undefined.
         );
-
+        
         if (responseData.results && responseData.results.length > 0) {
           setOrder(responseData.results[0]);
           setShowCelebration(true);

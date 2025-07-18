@@ -994,7 +994,7 @@ const UserCheckout = () => {
       name: "consmo",
       description: "Thank you for your purchase",
       order_id: razorpayOrderId, 
-      handler: function (response: any) {
+      handler: function () {
         
         router.push(
           `/thankyou?orderId=${internalOrderId}`
@@ -1012,9 +1012,9 @@ const UserCheckout = () => {
       },
     };
 
-    const rzp = new (window as any).Razorpay(options);
+    const rzp = new window .Razorpay(options);
     rzp.open();
-  } catch (error: any) {
+  } catch (error) {
     toast.error("Failed to start payment.");
     console.error("Razorpay Error:", error);
     setIsPlacingOrder(false);
