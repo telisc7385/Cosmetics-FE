@@ -45,7 +45,7 @@ const NavItems = () => {
           item.name.toLowerCase() === "categories" ? (
             <li
               key={item.id}
-              className="relative group flex items-center gap-1"
+              className="relative group flex items-center gap-0"
             >
               <span
                 className={`text-black hover:text-[#213E5A] flex items-center gap-1 ${
