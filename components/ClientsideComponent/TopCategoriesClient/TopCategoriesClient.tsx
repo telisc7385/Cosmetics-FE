@@ -62,7 +62,7 @@ export default function TopCategoriesClient({ categories }: Props) {
   };
 
   return (
-    <section className="py-20 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden">
+    <section className="p-6 mb-6 lg:my-8 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden">
       <div className="absolute inset-0 z-0 opacity-40 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-50/70 via-white to-white"></div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -75,25 +75,28 @@ export default function TopCategoriesClient({ categories }: Props) {
           />
         </div>
 
-        {/* Category Tabs with Right-to-Left Animation */}
+        {/* ✅ Category Tabs with Right Scroll Hint */}
         <motion.div
           className="relative mt-8"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
         >
+          {/* ✅ Scroll indicator (mobile only) */}
+          <div className="absolute right-0 top-0 bottom-0 w-10 bg-gradient-to-l from-white/80 to-transparent pointer-events-none z-10 sm:hidden" />
+
           <motion.div
-            className="flex flex-nowrap overflow-x-auto justify-start sm:justify-center py-2 px-1 -mx-2 scrollbar-hide snap-x snap-mandatory"
-            variants={{ visible: { transition: { staggerChildren: 0.15 } } }}
+            className="flex flex-nowrap overflow-x-auto scrollbar-hide justify-start sm:justify-center py-2 px-1 -mx-1 snap-x snap-mandatory"
+            variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
           >
             {categories.map((category) => (
               <motion.button
                 key={category.id}
                 onClick={() => handleCategoryClick(category.id)}
-                className={`flex-shrink-0 mx-2 px-6 py-3 transition-colors duration-300 text-base sm:text-lg font-medium whitespace-nowrap relative group snap-center ${
+                className={`flex-shrink-0 mx-1 px-4 py-2 text-sm sm:text-base font-medium whitespace-nowrap relative group snap-center rounded-md transition-colors duration-300 ${
                   selectedId === category.id
-                    ? "text-[#213E5A]"
-                    : "text-gray-600 hover:text-[#213E5A]/80"
+                    ? "bg-[#22365D] text-[#F8F8F8]"
+                    : "bg-transparent text-gray-600 hover:text-[#22365D]"
                 }`}
                 variants={{
                   hidden: { opacity: 0, x: 100 },
@@ -104,18 +107,11 @@ export default function TopCategoriesClient({ categories }: Props) {
                   },
                 }}
                 animate={
-                  selectedId === category.id ? { scale: [1, 1.1, 1] } : {}
+                  selectedId === category.id ? { scale: [1, 1.05, 1] } : {}
                 }
                 transition={{ duration: 0.4, ease: "easeInOut" }}
               >
                 {category.name}
-                {selectedId === category.id && (
-                  <motion.span
-                    layoutId="underline"
-                    className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4/5 h-0.5 bg-[#213E5A]"
-                    transition={{ type: "spring", stiffness: 500, damping: 20 }}
-                  />
-                )}
               </motion.button>
             ))}
           </motion.div>

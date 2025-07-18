@@ -21,6 +21,9 @@ const ProductCard = ({ product }: Props) => {
   const isLoggedIn = useAppSelector(selectIsLoggedIn);
   const { addCartItem } = useLoggedInCart();
 
+  // ✅ Prevent rendering if product is inactive
+  if (!product.isActive) return null;
+
   const firstGeneralImage = product.images.find(
     (img) => img.sequence === 1
   )?.image;
@@ -176,7 +179,7 @@ const ProductCard = ({ product }: Props) => {
             <Link href={`/product/${product.slug}`}>
               <button className="text-[11px] flex items-center gap-1 px-3 py-1.5 bg-pink-600 text-white rounded-full hover:bg-pink-700 transition">
                 <MdTune className="text-xs" />
-                Options
+                Select {/* ✅ Changed from 'Options' to 'Select' */}
               </button>
             </Link>
           ) : (

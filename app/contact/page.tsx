@@ -30,7 +30,7 @@ interface GtagEventParams {
   submitted_email?: string;
   submitted_subject?: string;
   // Add any other specific parameters you might use with gtag events
-  // [key: string]: any; 
+  // [key: string]: any;
 }
 
 declare global {
@@ -138,7 +138,7 @@ export default function ContactFormSection() {
   };
 
   return (
-    <section className="min-h-screen flex items-center justify-center bg-white px-4 sm:px-8 py-16 relative">
+    <section className="min-h-screen max-w-7xl mx-auto flex items-center justify-center bg-white px-4 sm:px-8 pt-32 pb-6  lg:pt-6  relative">
       <div className="lg:hidden absolute inset-0 -z-10">
         <Image
           src="/BG2.jpg"
@@ -149,9 +149,9 @@ export default function ContactFormSection() {
         <div className="absolute inset-0 bg-white/30 backdrop-blur-sm" />
       </div>
 
-      <div className="container mx-auto flex flex-col lg:flex-row items-stretch justify-center gap-10">
+      <div className="container mx-auto flex flex-col lg:flex-row items-stretch justify-center gap-10 ">
         {/* Left: Form */}
-        <div className="w-full lg:w-7/12 bg-white/80 backdrop-blur-md p-6 sm:p-10 rounded-2xl shadow-md border border-[#213e5a] h-full">
+        <div className="w-full lg:w-7/12 bg-white/80 backdrop-blur-md p-2 sm:p-4 rounded-2xl shadow-md border border-[#213e5a] h-full">
           <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
             Contact Us
           </h2>
@@ -360,7 +360,7 @@ export default function ContactFormSection() {
             <iframe
               src={`https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3782.261298492022!2d73.9142750750275!3d18.562759982542564!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc2c125642a8a89%3A0x6b4f74d0d02d338e!2sPhoenix%20Marketcity%2C%20Pune!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin`}
               width="100%"
-              height="290"
+              height="250"
               style={{ border: 0 }}
               allowFullScreen
               loading="lazy"

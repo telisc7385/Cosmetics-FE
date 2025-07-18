@@ -15,6 +15,8 @@ export default async function FeaturedSliderComponent({ product }: Props) {
         <SectionHeader
           title="Shop Our Best Sellers"
           subtitle="Trusted by Thousands, Loved for a Reason."
+          titleClass="text-2xl sm:text-3xl lg:text-4xl"
+          subtitleClass="text-sm sm:text-base lg:text-lg"
         />
       </div>
 

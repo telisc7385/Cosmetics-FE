@@ -82,17 +82,17 @@ export default function CategorySlider({ categories }: Props) {
                     }}
                   />
 
-                  <div className="relative z-10 flex justify-center h-[300px] sm:h-[280px] items-start pt-6">
+                  <div className="relative z-10 flex justify-center h-[300px] sm:h-[280px] items-start">
                     <Image
                       src={cat.imageUrl}
                       alt={cat.name}
                       width={280}
-                      height={280}
+                      height={250}
                       className="object-contain transition-transform duration-500 group-hover:scale-115 group-hover:drop-shadow-lg"
                     />
                   </div>
 
-                  <h3 className="relative z-10 mt-20 text-center text-base font-semibold text-black">
+                  <h3 className="relative z-10 mt-12 lg:mt-16 text-center text-base font-semibold text-black">
                     {cat.name}
                   </h3>
                 </div>

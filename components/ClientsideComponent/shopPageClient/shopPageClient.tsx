@@ -18,6 +18,7 @@ type SortOrder = "" | "price_asc" | "price_desc";
 export default function ShopPageClient({ categories }: Props) {
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedCats, setSelectedCats] = useState<number[]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]); // ✅ NEW
   const [sortOrder, setSortOrder] = useState<SortOrder>("");
   const [min, setMin] = useState(0);
   const [max, setMax] = useState(100000);
@@ -30,6 +31,7 @@ export default function ShopPageClient({ categories }: Props) {
 
   useEffect(() => {
     const qCats = selectedCats.map((id) => `category=${id}`).join("&");
+    const qTags = selectedTags.map((tag) => `product-tag=${tag}`).join("&"); // ✅ NEW
     const sortParam =
       sortOrder === "price_asc"
         ? "selling_price"
@@ -40,6 +42,7 @@ export default function ShopPageClient({ categories }: Props) {
     const url =
       `${base}/product?page=${currentPage}&limit=${limit}` +
       (qCats ? `&${qCats}` : "") +
+      (qTags ? `&${qTags}` : "") + // ✅ NEW
       `&min=${min}&max=${max}` +
       (sortParam ? `&sort=${sortParam}` : "");
 
@@ -56,10 +59,11 @@ export default function ShopPageClient({ categories }: Props) {
 
     const timer = setTimeout(fetchProducts, 300);
     return () => clearTimeout(timer);
-  }, [selectedCats, sortOrder, min, max, currentPage, base]); // ✅ Added base here
+  }, [selectedCats, selectedTags, sortOrder, min, max, currentPage, base]); // ✅ Added selectedTags
 
   const handleClearFilters = () => {
     setSelectedCats([]);
+    setSelectedTags([]); // ✅ Clear tags too
     setSortOrder("");
     setMin(0);
     setMax(100000);
@@ -67,9 +71,7 @@ export default function ShopPageClient({ categories }: Props) {
 
   return (
     <div className="pt-28 container mx-auto max-w-7xl">
-      {/* Top Controls */}
       <div className="flex justify-between items-center mb-4 p-4">
-        {/* Mobile Filter Button */}
         <button
           onClick={() => setShowMobileFilters(true)}
           className="flex items-center gap-2 text-sm text-gray-700 font-medium lg:hidden ml-4 sm:ml-0"
@@ -78,7 +80,6 @@ export default function ShopPageClient({ categories }: Props) {
           Filter
         </button>
 
-        {/* Sort + Clear */}
         <div className="flex items-center gap-1 sm:gap-2 ml-auto mr-4 sm:mr-0">
           <button
             onClick={handleClearFilters}
@@ -96,13 +97,14 @@ export default function ShopPageClient({ categories }: Props) {
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6">
-        {/* Sidebar (Desktop) */}
         <div className="hidden lg:block lg:w-1/4">
           <div className="bg-white p-4 rounded-lg shadow-md border border-gray-100">
             <SidebarFilters
               categories={categories}
               selected={selectedCats}
               setSelected={setSelectedCats}
+              selectedTags={selectedTags} // ✅
+              setSelectedTags={setSelectedTags} // ✅
               min={min}
               max={max}
               setMin={setMin}
@@ -111,7 +113,6 @@ export default function ShopPageClient({ categories }: Props) {
           </div>
         </div>
 
-        {/* Mobile Filter Overlay */}
         {showMobileFilters && (
           <div className="fixed inset-0 bg-black/40 z-40 flex items-end">
             <div className="w-full bg-white rounded-t-2xl p-5 shadow-lg max-h-[90vh] overflow-y-auto">
@@ -129,6 +130,8 @@ export default function ShopPageClient({ categories }: Props) {
                 categories={categories}
                 selected={selectedCats}
                 setSelected={setSelectedCats}
+                selectedTags={selectedTags}
+                setSelectedTags={setSelectedTags}
                 min={min}
                 max={max}
                 setMin={setMin}
@@ -148,13 +151,11 @@ export default function ShopPageClient({ categories }: Props) {
           </div>
         )}
 
-        {/* Product Listing */}
         <div className="lg:w-3/4 w-full">
           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
             <ProductList products={products} />
           </div>
 
-          {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex justify-center mt-6 space-x-2">
               {Array.from({ length: totalPages }).map((_, i) => (

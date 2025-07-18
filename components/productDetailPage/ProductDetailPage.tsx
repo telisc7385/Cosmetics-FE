@@ -361,7 +361,7 @@ export default function ProductDetailClient({
 
           {relatedProducts.length > 0 && (
             <div className="py-10  sm:px-0">
-              <h2 className="text-2xl font-semibold mb-4">
+              <h2 className="text-2xl font-semibold lg:mb-4">
                 You may also like from {product.category.name}
               </h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">

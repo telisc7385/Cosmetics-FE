@@ -16,6 +16,8 @@ export default async function TestimonialSection({ testimonials }: Props) {
         <SectionHeader
           title="What our happy clients say"
           subtitle="Hear from our satisfied customers and why they love our brand."
+          titleClass="text-2xl sm:text-3xl lg:text-4xl"
+          subtitleClass="text-sm sm:text-base lg:text-lg"
         />
       </div>
 

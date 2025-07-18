@@ -47,10 +47,12 @@ export default function HotListWrapper() {
         />
       </div>
 
-      <div className="px-4 md:px-12 mb-10 my-6 max-w-7xl mx-auto">
+      <div className="px-4 md:px-12 mb-10 my-4 max-w-7xl mx-auto">
         <SectionHeader
           title="Hot List"
           subtitle="Out the most popular and trending products."
+          titleClass="text-2xl sm:text-3xl lg:text-4xl"
+          subtitleClass="text-sm sm:text-base lg:text-lg"
         />
 
         <Swiper

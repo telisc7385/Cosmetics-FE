@@ -18,7 +18,6 @@ export default function UserAvatar() {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-
   const customer = useSelector((state: RootState) => state.auth.customer);
 
   const username = customer?.firstName || "";
@@ -35,7 +34,7 @@ export default function UserAvatar() {
           <div className="flex-1 w-full p-4">
             <div className="flex items-center">
               <div className="flex-shrink-0 mr-3">
-                <FiLogOut className="h-6 w-6 text-red-500" aria-hidden="true" />
+                <FiLogOut className="h-6 w-6 text-red-500" />
               </div>
               <div className="flex-1">
                 <p className="text-base font-semibold text-gray-800">
@@ -52,13 +51,13 @@ export default function UserAvatar() {
                 router.push("/auth");
                 router.refresh();
               }}
-              className="w-full px-4 py-3 flex items-center justify-center text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors duration-200"
+              className="w-full px-4 py-3 flex items-center justify-center text-sm font-medium text-white bg-red-600 hover:bg-red-700"
             >
               Yes, Logout
             </button>
             <button
               onClick={() => toast.dismiss(t.id)}
-              className="w-full px-4 py-3 flex items-center justify-center text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors duration-200 border-l border-gray-200"
+              className="w-full px-4 py-3 flex items-center justify-center text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 border-l"
             >
               No, Cancel
             </button>
@@ -87,8 +86,8 @@ export default function UserAvatar() {
     return (
       <Link href="/auth" aria-label="Login">
         <div className="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600">
-          <FiUser size={20} />
-          <span className="whitespace-nowrap">Login</span>
+          <FiUser size={20} className="block" />
+          <span className="hidden md:block">Login</span>
         </div>
       </Link>
     );
@@ -111,22 +110,24 @@ export default function UserAvatar() {
     <div className="relative" ref={menuRef}>
       <div
         onMouseEnter={() => setMenuOpen(true)}
-        className="flex items-center gap-3 cursor-pointer px-8 py-1 rounded-md hover:bg-gray-100 transition-all duration-200"
+        className="flex items-center gap-2 md:gap-3 cursor-pointer px-3 md:px-6 py-1 rounded-md hover:bg-gray-100 transition-all duration-200"
       >
         {customer.imageUrl ? (
           <Image
             src={customer.imageUrl}
             alt="User Avatar"
-            width={40}
-            height={40}
-            className="w-10 h-10 rounded-full object-cover border border-gray-300"
+            width={28}
+            height={28}
+            className="w-7 h-7 md:w-10 md:h-10 rounded-full object-cover border border-gray-300 mt-[2px]"
           />
         ) : (
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-red-500 text-white flex items-center justify-center font-bold text-base uppercase border border-gray-300">
+          <div className="w-7 h-7 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-orange-500 to-red-500 text-white flex items-center justify-center font-bold text-xs md:text-base uppercase border border-gray-300 mt-[2px]">
             {initials}
           </div>
         )}
-        <span className="text-gray-800 font-medium text-sm whitespace-nowrap">
+
+        {/* Username only on md and up */}
+        <span className="text-gray-800 font-medium text-sm whitespace-nowrap hidden md:block">
           {username}
         </span>
       </div>
@@ -155,7 +156,6 @@ export default function UserAvatar() {
           <div className="border-t px-4 py-2">
             <button
               onClick={handleLogout}
-              aria-label="Logout"
               className="flex items-center text-sm text-red-600 hover:text-red-700 w-full"
             >
               <MdLogout className="mr-3" size={16} /> Logout

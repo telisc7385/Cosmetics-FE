@@ -35,59 +35,63 @@ export default function BannerSlider({ banners }: { banners: BannerItem[] }) {
   }, [banners]);
 
   const [sliderRef, instanceRef] = useKeenSlider<HTMLDivElement>(
-    {
-      loop: true,
-      slides: { perView: 1 },
-      slideChanged(s) {
-        setAnimate(false);
-        setTimeout(() => {
-          setAnimate(true);
-          setCurrentSlide(s.track.details.rel);
-        }, 100);
-      },
-    },
-    [
-      (slider) => {
-        let timeout: ReturnType<typeof setTimeout>;
-        let mouseOver = false;
-
-        function clearNextTimeout() {
-          clearTimeout(timeout);
+    filteredBanners.length > 1
+      ? {
+          loop: true,
+          slides: { perView: 1 },
+          slideChanged(s) {
+            setAnimate(false);
+            setTimeout(() => {
+              setAnimate(true);
+              setCurrentSlide(s.track.details.rel);
+            }, 100);
+          },
         }
+      : {},
+    filteredBanners.length > 1
+      ? [
+          (slider) => {
+            let timeout: ReturnType<typeof setTimeout>;
+            let mouseOver = false;
 
-        function nextTimeout() {
-          clearTimeout(timeout);
-          if (mouseOver || filteredBanners.length === 0) return;
-          timeout = setTimeout(() => {
-            slider.next();
-          }, 4000);
-        }
+            function clearNextTimeout() {
+              clearTimeout(timeout);
+            }
 
-        slider.on("created", () => {
-          slider.container.addEventListener("mouseover", () => {
-            mouseOver = true;
-            clearNextTimeout();
-          });
-          slider.container.addEventListener("mouseout", () => {
-            mouseOver = false;
-            nextTimeout();
-          });
-          nextTimeout();
-        });
+            function nextTimeout() {
+              clearTimeout(timeout);
+              if (mouseOver || filteredBanners.length === 0) return;
+              timeout = setTimeout(() => {
+                slider.next();
+              }, 4000);
+            }
 
-        slider.on("dragStarted", clearNextTimeout);
-        slider.on("animationEnded", nextTimeout);
-        slider.on("updated", nextTimeout);
-      },
-    ]
+            slider.on("created", () => {
+              slider.container.addEventListener("mouseover", () => {
+                mouseOver = true;
+                clearNextTimeout();
+              });
+              slider.container.addEventListener("mouseout", () => {
+                mouseOver = false;
+                nextTimeout();
+              });
+              nextTimeout();
+            });
+
+            slider.on("dragStarted", clearNextTimeout);
+            slider.on("animationEnded", nextTimeout);
+            slider.on("updated", nextTimeout);
+          },
+        ]
+      : []
   );
 
   if (filteredBanners.length === 0) return null;
 
   return (
     <>
-      <div className="w-full relative">
-        <div className="relative w-full h-[300px] sm:h-[400px] md:h-[460px] lg:h-[500px] xl:h-[600px] overflow-hidden">
+      <div className="w-full relative pt-28 md:pt-18 lg:pt-18">
+        <div className="relative w-full h-[300px] sm:h-[400px] md:h-[460px] lg:h-[500px] xl:h-[550px] overflow-hidden">
           <div ref={sliderRef} className="keen-slider w-full h-full">
             {filteredBanners.map((banner) => (
               <div
@@ -111,16 +115,17 @@ export default function BannerSlider({ banners }: { banners: BannerItem[] }) {
                 {/* Overlay */}
                 <div className="absolute inset-0 z-10 flex items-center">
                   <div className="max-w-7xl mx-auto w-full px-4 sm:px-8 md:px-16">
-                    <div className="max-w-[600px] text-black">
+                    <div className=" sm:max-w-[600px] text-black text-left">
                       <h2
-                        className={`text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-normal leading-snug sm:leading-snug md:leading-tight drop-shadow-md transition-opacity duration-500 ${
+                        className={` max-w-[66%] lg:max-w-[100%] text-lg sm:text-3xl md:text-5xl lg:text-6xl font-normal leading-snug sm:leading-snug md:leading-tight drop-shadow-md transition-opacity duration-500 ${
                           animate ? "animate-heading opacity-100" : "opacity-0"
                         }`}
                       >
                         {banner.heading}
                       </h2>
+
                       <p
-                        className={`mt-4 text-sm sm:text-base md:text-lg text-black/90 drop-shadow transition-opacity duration-500 ${
+                        className={`max-w-[64%] lg:max-w-[100%] mt-3 text-xs sm:text-base md:text-lg text-black/90 drop-shadow transition-opacity duration-500 ${
                           animate
                             ? "animate-subheading opacity-100"
                             : "opacity-0"
@@ -131,14 +136,22 @@ export default function BannerSlider({ banners }: { banners: BannerItem[] }) {
                           <span> {banner.subheading2}</span>
                         )}
                       </p>
-                      <a
-                        href={banner.buttonLink}
-                        className={`inline-block mt-6 px-6 py-2 bg-black text-white text-sm sm:text-base font-semibold shadow-md transition hover:bg-white hover:text-black border border-black transition-opacity duration-500 ${
-                          animate ? "animate-button opacity-100" : "opacity-0"
-                        }`}
-                      >
-                        {banner.buttonText}
-                      </a>
+
+                      {typeof banner.buttonText === "string" &&
+                        banner.buttonText.trim().toLowerCase() !==
+                          "undefined" &&
+                        banner.buttonText.trim() !== "" && (
+                          <a
+                            href={banner.buttonLink}
+                            className={` mt-10 inline-block mt-5 px-4 py-1.5 sm:px-6 sm:py-2 bg-black text-white text-xs sm:text-base font-semibold shadow-md hover:bg-white hover:text-black border border-black transition transition-opacity duration-500 ${
+                              animate
+                                ? "animate-button opacity-100"
+                                : "opacity-0"
+                            }`}
+                          >
+                            {banner.buttonText}
+                          </a>
+                        )}
                     </div>
                   </div>
                 </div>

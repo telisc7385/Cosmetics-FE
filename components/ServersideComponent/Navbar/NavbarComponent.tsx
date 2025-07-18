@@ -27,11 +27,11 @@ const Navbar = ({ companyDetails }: NavbarProps) => {
 
   return (
     <nav
-      className={`w-full fixed top-0 z-50 transition-all duration-300 ${
-        scrolled ? "bg-white shadow" : "bg-transparent"
+      className={` w-full fixed top-0  z-50 transition-all duration-300 backdrop-blur-md ${
+        scrolled ? "bg-white/80 shadow" : "bg-white/80"
       }`}
     >
-      <div className="max-w-7xl mx-auto w-full px-4 py-2 flex flex-col gap-4">
+      <div className="max-w-7xl mx-auto w-full px-4 flex flex-col gap-4">
         {/* Desktop View */}
         <div className="hidden lg:flex items-center justify-between w-full">
           {/* Left: Nav Items */}
