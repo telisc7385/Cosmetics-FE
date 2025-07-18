@@ -7,7 +7,7 @@ import Image from "next/image";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { useAppSelector } from "@/store/hooks/hooks";
-import { selectToken } from "@/store/slices/authSlice";
+import { selectToken, selectUser } from "@/store/slices/authSlice";
 import Link from "next/link";
 import {
   apiCore,
@@ -23,6 +23,7 @@ import { FaTrashAlt } from "react-icons/fa";
 import { CiEdit } from "react-icons/ci";
 import Modal from "@/components/Modal";
 import { CartItem } from "@/types/cart"; // Import CartItem type
+import { AbandonedItem, getAbendentItems } from "@/api/AbendentDiscountApi";
 
 // Coupon types based on your /coupon/user-coupon API response
 interface Coupon {
@@ -236,11 +237,10 @@ const PincodeInput: React.FC<PincodeInputProps> = ({
         onChange={onChange}
         onBlur={handleBlur}
         disabled={isVerifiedAndDisabled || disabled || checkingPincode} // Disable if autofilled, externally disabled, or checking
-        className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 ${
-          isVerifiedAndDisabled || disabled
-            ? "bg-gray-100 cursor-not-allowed"
-            : ""
-        }`}
+        className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 ${isVerifiedAndDisabled || disabled
+          ? "bg-gray-100 cursor-not-allowed"
+          : ""
+          }`}
         maxLength={6}
       />
       {internalValidationMessage && (
@@ -274,6 +274,7 @@ const UserCheckout = () => {
   } = useLoggedInCart();
   const router = useRouter();
   const token = useAppSelector(selectToken);
+  const customer = useAppSelector(selectUser);
 
   // Use the updated CheckoutDataFromCart interface
   const [checkoutData, setCheckoutData] = useState<CheckoutDataFromCart | null>(
@@ -302,15 +303,55 @@ const UserCheckout = () => {
   const [finalTotalAmount, setFinalTotalAmount] = useState<number>(0); // This will be updated below
   const [copiedCouponCode, setCopiedCouponCode] = useState<string | null>(null);
   const [isPlacingOrder, setIsPlacingOrder] = useState<boolean>(false);
+  const [abandentApplied, setAbandentApplied] = useState<boolean>(false);
+  const [abandentDiscountAmount, setAbandentDiscountAmount] = useState<number>(0);
 
   // Calculate final total amount based on new logic
   useEffect(() => {
     let calculatedTotal = taxableAmount + taxAmount; // Start with taxable amount + tax
     if (appliedCoupon && discountAmount > 0) {
       calculatedTotal -= discountAmount;
+
+      setAbandentApplied(false)
+    } else {
+      calculatedTotal -= abandentDiscountAmount;
     }
+
     setFinalTotalAmount(Math.max(0, calculatedTotal));
-  }, [taxableAmount, taxAmount, appliedCoupon, discountAmount]);
+  }, [taxableAmount, taxAmount, appliedCoupon, discountAmount, abandentDiscountAmount]);
+
+  useEffect(() => {
+    if (abandentApplied) {
+      if (!items || !Array.isArray(items)) return;
+      if (!abendonedItems || !Array.isArray(abendonedItems)) return;
+      let totalDiscount = 0;
+      items.forEach((cartItem) => {
+        const matched = abendonedItems.find(
+          (item) =>
+            item.product === cartItem.id &&
+            item.variant === cartItem?.variantId,
+        );
+        if (matched) {
+          const unitPrice = cartItem.sellingPrice;
+          console.log("unitPrice", unitPrice)
+          const itemDiscount =
+            ((unitPrice * matched.discount_for_single_unit * matched.quantity) /
+              100);
+          totalDiscount += itemDiscount;
+          console.log("itemDiscount", itemDiscount)
+        }
+        console.log("matched", matched)
+
+      });
+
+      console.log("items", items);
+      console.log("abendonedItems", abendonedItems)
+
+      setAbandentDiscountAmount(totalDiscount);
+    } else {
+      setAbandentDiscountAmount(0);
+    }
+  }, [abandentApplied, items])
 
   const [address, setAddress] = useState<LocalAddressItem[]>([]);
   const [selectedBillingAddressId, setSelectedBillingAddressId] = useState<
@@ -327,6 +368,9 @@ const UserCheckout = () => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [editingAddress, setEditingAddress] = useState<LocalAddressItem | null>(
     null
+  );
+  const [abendonedItems, setAbendonedItems] = useState<AbandonedItem[] | null>(
+    null,
   );
   const [formData, setFormData] = useState<AddressInput>({
     fullName: "",
@@ -362,6 +406,18 @@ const UserCheckout = () => {
     }
   }, [router]);
 
+  useEffect(() => {
+
+    const fetchAbbendentItems = async () => {
+      if (customer && token) {
+        const response = await getAbendentItems(String(token), Number(customer.id))
+        setAbendonedItems(response?.items);
+        console.log("response", response)
+      }
+    }
+    fetchAbbendentItems()
+  }, [customer, token])
+
   // Fetch addresses on token or initial load
   useEffect(() => {
     async function fetchAddresses() {
@@ -393,7 +449,7 @@ const UserCheckout = () => {
             billingAddresses.find((a) => a.isDefault) || billingAddresses[0];
           const initialBillingId =
             storedSelectedBillingId &&
-            billingAddresses.some((a) => a.id === storedSelectedBillingId)
+              billingAddresses.some((a) => a.id === storedSelectedBillingId)
               ? storedSelectedBillingId
               : defaultBillingAddr?.id;
           setSelectedBillingAddressId(initialBillingId || null);
@@ -422,7 +478,7 @@ const UserCheckout = () => {
               deliveryAddresses[0];
             const initialDeliveryId =
               storedSelectedDeliveryId &&
-              deliveryAddresses.some((a) => a.id === storedSelectedDeliveryId)
+                deliveryAddresses.some((a) => a.id === storedSelectedDeliveryId)
                 ? storedSelectedDeliveryId
                 : defaultDeliveryAddr?.id;
             setSelectedDeliveryAddressId(initialDeliveryId || null);
@@ -898,16 +954,12 @@ const UserCheckout = () => {
     setIsPlacingOrder(true);
 
     // Format the address objects into strings for the payload
-    const formattedBillingAddress = `${billingAddressObj.addressLine}, ${
-      billingAddressObj.landmark ? billingAddressObj.landmark + ", " : ""
-    }${billingAddressObj.city}, ${billingAddressObj.state} - ${
-      billingAddressObj.pincode
-    }`;
-    const formattedShippingAddress = `${deliveryAddressObj.addressLine}, ${
-      deliveryAddressObj.landmark ? deliveryAddressObj.landmark + ", " : ""
-    }${deliveryAddressObj.city}, ${deliveryAddressObj.state} - ${
-      deliveryAddressObj.pincode
-    }`;
+    const formattedBillingAddress = `${billingAddressObj.addressLine}, ${billingAddressObj.landmark ? billingAddressObj.landmark + ", " : ""
+      }${billingAddressObj.city}, ${billingAddressObj.state} - ${billingAddressObj.pincode
+      }`;
+    const formattedShippingAddress = `${deliveryAddressObj.addressLine}, ${deliveryAddressObj.landmark ? deliveryAddressObj.landmark + ", " : ""
+      }${deliveryAddressObj.city}, ${deliveryAddressObj.state} - ${deliveryAddressObj.pincode
+      }`;
 
     // Construct the payload with the EXACT NEW STRUCTURE provided
     const payload: LoggedInOrderPayload = {
@@ -922,6 +974,7 @@ const UserCheckout = () => {
       paymentMethod,
       discountAmount: Number(discountAmount),
       ...(appliedCoupon && { discountCode: appliedCoupon.code }), // Include discountCode if a coupon is applied
+      abandentDiscountAmount,
       billingAddress: formattedBillingAddress,
       shippingAddress: formattedShippingAddress,
       cartId: cartId, // CartId is now always expected as a number by this payload (if it was optional, remove this line)
@@ -953,72 +1006,72 @@ const UserCheckout = () => {
     // --- END CRUCIAL DEBUGGING LOGS ---
 
     try {
-    
+
       if (paymentMethod === "RAZORPAY") {
-  try {
-    // 1. Create order in backend first
-    const order = await apiCore<OrderResponse>(
-      "/order",
-      "POST",
-      payload,
-      token
-    );
+        try {
+          // 1. Create order in backend first
+          const order = await apiCore<OrderResponse>(
+            "/order",
+            "POST",
+            payload,
+            token
+          );
 
-    const razorpayOrderId = order.razorpayOrderId;
-    const internalOrderId = order.id;
+          const razorpayOrderId = order.razorpayOrderId;
+          const internalOrderId = order.id;
 
-    // 2. Load Razorpay script
-    const loadScript = (src: string): Promise<boolean> => {
-      return new Promise((resolve) => {
-        const script = document.createElement("script");
-        script.src = src;
-        script.onload = () => resolve(true);
-        script.onerror = () => resolve(false);
-        document.body.appendChild(script);
-      });
-    };
+          // 2. Load Razorpay script
+          const loadScript = (src: string): Promise<boolean> => {
+            return new Promise((resolve) => {
+              const script = document.createElement("script");
+              script.src = src;
+              script.onload = () => resolve(true);
+              script.onerror = () => resolve(false);
+              document.body.appendChild(script);
+            });
+          };
 
-    const scriptLoaded = await loadScript("https://checkout.razorpay.com/v1/checkout.js");
+          const scriptLoaded = await loadScript("https://checkout.razorpay.com/v1/checkout.js");
 
-    if (!scriptLoaded) {
-      toast.error("Failed to load Razorpay. Please try again.");
-      setIsPlacingOrder(false);
-      return;
-    }
+          if (!scriptLoaded) {
+            toast.error("Failed to load Razorpay. Please try again.");
+            setIsPlacingOrder(false);
+            return;
+          }
 
-   
-    const options = {
-      key: "rzp_live_s1XxBl5X5Jx4lU", 
-      amount: Math.round(payload.totalAmount * 100), 
-      currency: "INR",
-      name: "consmo",
-      description: "Thank you for your purchase",
-      order_id: razorpayOrderId, 
-      handler: function () {
-        
-        router.push(
-          `/thank-you?orderId=${internalOrderId}`
-        );
-      },
-      prefill: {
-        name: billingAddressObj.fullName,
-        // email: "ganesh@gamil.com", 
-      },
-      modal: {
-        ondismiss: function () {
-          toast.error("Payment cancelled.");
+
+          const options = {
+            key: "rzp_live_s1XxBl5X5Jx4lU",
+            amount: Math.round(payload.totalAmount * 100),
+            currency: "INR",
+            name: "consmo",
+            description: "Thank you for your purchase",
+            order_id: razorpayOrderId,
+            handler: function () {
+
+              router.push(
+                `/thank-you?orderId=${internalOrderId}`
+              );
+            },
+            prefill: {
+              name: billingAddressObj.fullName,
+              email: customer?.email || "",
+            },
+            modal: {
+              ondismiss: function () {
+                toast.error("Payment cancelled.");
+                setIsPlacingOrder(false);
+              },
+            },
+          };
+
+          const rzp = new window.Razorpay(options);
+          rzp.open();
+        } catch (error) {
+          toast.error("Failed to start payment.");
+          console.error("Razorpay Error:", error);
           setIsPlacingOrder(false);
-        },
-      },
-    };
-
-    const rzp = new window .Razorpay(options);
-    rzp.open();
-  } catch (error) {
-    toast.error("Failed to start payment.");
-    console.error("Razorpay Error:", error);
-    setIsPlacingOrder(false);
-  }
+        }
 
 
       } else {
@@ -1032,8 +1085,7 @@ const UserCheckout = () => {
         toast.success("Order placed successfully!");
         clearCart(); // Clear cart after successful order placement
         router.push(
-          `/thankyou?orderId=${
-            order.id || ""
+          `/thank-you?orderId=${order.id || ""
           }&billingAddress=${encodeURIComponent(
             formattedBillingAddress
           )}&shippingAddress=${encodeURIComponent(formattedShippingAddress)}`
@@ -1074,11 +1126,10 @@ const UserCheckout = () => {
             <div
               key={a.id}
               onClick={() => onSelect(a.id)}
-              className={`border rounded-lg p-3 cursor-pointer transition-all duration-200 ${
-                selected === a.id
-                  ? "border-[#213E5A] bg-[#e6f0f7] shadow-sm"
-                  : "border-gray-200 bg-white hover:border-gray-300"
-              }`}
+              className={`border rounded-lg p-3 cursor-pointer transition-all duration-200 ${selected === a.id
+                ? "border-[#213E5A] bg-[#e6f0f7] shadow-sm"
+                : "border-gray-200 bg-white hover:border-gray-300"
+                }`}
             >
               <div className="flex justify-between items-start">
                 <div>
@@ -1428,7 +1479,8 @@ const UserCheckout = () => {
               if (!showCouponSection) fetchCoupons(); // Fetch coupons when opening
             }}
           >
-            Apply Coupon
+            {(abendonedItems && abendonedItems?.length > 0) ? "Apply Coupon or Abandoned Cart Discount" : "Apply Your Coupon Now"}
+
             <span>{showCouponSection ? "▲" : "▼"}</span>
           </h2>
           {showCouponSection && (
@@ -1459,11 +1511,10 @@ const UserCheckout = () => {
                       <div className="flex space-x-2">
                         <button
                           onClick={() => handleCopyCoupon(coupon.code)}
-                          className={`text-sm px-3 py-1 rounded-md ${
-                            copiedCouponCode === coupon.code
-                              ? "bg-green-100 text-green-700"
-                              : "bg-blue-100 text-blue-700 hover:bg-blue-200"
-                          }`}
+                          className={`text-sm px-3 py-1 rounded-md ${copiedCouponCode === coupon.code
+                            ? "bg-green-100 text-green-700"
+                            : "bg-blue-100 text-blue-700 hover:bg-blue-200"
+                            }`}
                         >
                           {copiedCouponCode === coupon.code
                             ? "Copied!"
@@ -1483,6 +1534,32 @@ const UserCheckout = () => {
                   ))}
                 </div>
               )}
+
+              {(abendonedItems && abendonedItems?.length > 0) &&
+                <div
+                  className="border border-gray-200 rounded-md p-3 flex justify-between items-center my-3"
+                >
+                  <div>
+                    <p className="font-semibold text-gray-800">
+                      Abandoned Cart Discount
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Discount: {abendonedItems?.[0]?.discount_given_in_percent}%
+                    </p>
+                  </div>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => (setAbandentApplied(!abandentApplied), setShowCouponSection(!showCouponSection))}
+                      // disabled={abandentApplied}
+                      className="bg-[#213E5A] text-white text-sm px-3 py-1 rounded-md hover:bg-[#1a324a] disabled:opacity-50"
+                    >
+                      {abandentApplied
+                        ? "Applied"
+                        : "Apply"}
+                    </button>
+                  </div>
+                </div>
+              }
             </div>
           )}
           {appliedCoupon && (
@@ -1498,6 +1575,19 @@ const UserCheckout = () => {
               </button>
             </div>
           )}
+          {abandentApplied && (
+            <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-md flex justify-between items-center">
+              <p className="text-green-700 font-semibold text-sm">
+                Abandoned Cart Discount applied!
+              </p>
+              <button
+                onClick={() => (setAbandentApplied(!abandentApplied), setShowCouponSection(!showCouponSection))}
+                className="text-red-500 hover:text-red-700 text-sm"
+              >
+                Remove
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Order Summary */}
@@ -1507,13 +1597,32 @@ const UserCheckout = () => {
           </h2>
           <div className="space-y-3">
             <div className="flex justify-between pb-2">
-              <span className="text-gray-700">Subtotal Price</span>
+              <span className="text-gray-700 font-semibold">Subtotal</span>
               <span className="font-medium text-gray-900">
                 ₹{currentSubtotal.toFixed(2)}
               </span>
             </div>
+
+            {abandentDiscountAmount > 0 &&
+              <div className="flex justify-between pb-2">
+                <span className="text-gray-700">Abandent Discount</span>
+                <span className="font-medium text-red-600">
+                  - ₹{abandentDiscountAmount.toFixed(2)}
+                </span>
+              </div>
+            }
+
+            {discountAmount > 0 && appliedCoupon &&
+              <div className="flex justify-between pb-2">
+                <span className="text-gray-700">Discount ({appliedCoupon.discount}%)</span>
+                <span className="font-medium text-red-600">
+                  - ₹{discountAmount.toFixed(2)}
+                </span>
+              </div>
+            }
+
             <div className="flex justify-between pb-2 border-b border-gray-200">
-              <span className="text-gray-700">Shipping Rate</span>
+              <span className="text-gray-700">Shipping Charges</span>
               <span className="font-medium text-gray-900">
                 ₹{shippingRate.toFixed(2)}
               </span>
@@ -1528,27 +1637,23 @@ const UserCheckout = () => {
             </div>
             <div className="flex justify-between pb-2 border-b border-gray-200">
               <span className="text-gray-700">
-                {taxType} Tax ({taxPercentage}%)
+                Tax ({taxPercentage}%)
               </span>
               <span className="font-medium text-gray-900">
                 ₹{taxAmount.toFixed(2)}
               </span>
             </div>
             {/* Display Total before discount */}
-            <div className="flex justify-between pb-2">
+            {/* <div className="flex justify-between pb-2">
               <span className="text-gray-700 font-semibold">
                 Total (before discount)
               </span>
               <span className="font-semibold text-gray-900">
                 ₹{(taxableAmount + taxAmount).toFixed(2)}
               </span>
-            </div>
-            <div className="flex justify-between border-b pb-2">
-              <span className="text-gray-700">Discount</span>
-              <span className="font-medium text-red-600">
-                - ₹{discountAmount.toFixed(2)}
-              </span>
-            </div>
+            </div> */}
+
+
             <div className="flex justify-between pt-4 border-t-2 border-gray-300">
               <span className="text-xl font-bold text-gray-900">Total</span>
               <span className="text-xl font-bold text-gray-900">
@@ -1564,221 +1669,220 @@ const UserCheckout = () => {
               !selectedDeliveryAddressId ||
               items.length === 0
             }
-            className={`w-full py-3 mt-6 text-white font-semibold rounded-md transition-colors ${
-              !isPlacingOrder &&
+            className={`w-full py-3 mt-6 text-white font-semibold rounded-md transition-colors ${!isPlacingOrder &&
               selectedBillingAddressId &&
               selectedDeliveryAddressId &&
               items.length > 0
-                ? "bg-[#1A324A] hover:bg-[#142835]"
-                : "bg-gray-300 cursor-not-allowed"
-            }`}
+              ? "bg-[#1A324A] hover:bg-[#142835]"
+              : "bg-gray-300 cursor-not-allowed"
+              }`}
           >
             {isPlacingOrder ? "Placing Order..." : "Place Order"}
           </button>
         </div>
       </div>
 
-      {showModal && (
-        <Modal
-          title={editingAddress ? "Edit Address" : "Add New Address"}
-          onClose={() => setShowModal(false)}
-        >
-          <form onSubmit={handleFormSubmit} className="space-y-4">
-            <div>
-              <label
-                htmlFor="fullName"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Full Name
-              </label>
-              <input
-                type="text"
-                id="fullName"
-                name="fullName"
-                value={formData.fullName}
-                onChange={handleFormChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                required
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="phone"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Phone Number
-              </label>
-              <input
-                type="text"
-                id="phone"
-                name="phone"
-                value={formData.phone}
-                onChange={handleFormChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                maxLength={10}
-                required
-              />
-            </div>
+      {
+        showModal && (
+          <Modal
+            title={editingAddress ? "Edit Address" : "Add New Address"}
+            onClose={() => setShowModal(false)}
+          >
+            <form onSubmit={handleFormSubmit} className="space-y-4">
+              <div>
+                <label
+                  htmlFor="fullName"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  id="fullName"
+                  name="fullName"
+                  value={formData.fullName}
+                  onChange={handleFormChange}
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                  required
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="phone"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Phone Number
+                </label>
+                <input
+                  type="text"
+                  id="phone"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleFormChange}
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                  maxLength={10}
+                  required
+                />
+              </div>
 
-            <PincodeInput
-              value={formData.pincode}
-              onChange={handleFormChange}
-              onBlur={() => {}} // PincodeInput handles its own blur
-              isVerifiedAndDisabled={
-                (addressCreationIntent === "SHIPPING" ||
-                  editingAddress?.type === "SHIPPING") &&
-                !!checkoutData?.verifiedPincodeDetails?.pincode &&
-                formData.pincode === checkoutData.verifiedPincodeDetails.pincode // Only disable if it matches the verified one
-              }
-              verifiedPincodeFromCart={
-                addressCreationIntent === "SHIPPING" ||
-                editingAddress?.type === "SHIPPING"
-                  ? checkoutData?.verifiedPincodeDetails?.pincode
-                  : undefined
-              }
-              cityValue={formData.city}
-              stateValue={formData.state}
-              setCity={(city) => setFormData((prev) => ({ ...prev, city }))}
-              setState={(state) => setFormData((prev) => ({ ...prev, state }))}
-              setLocalPincodeValidationMessage={setPincodeValidationMessage} // Pass callback
-              disabled={
-                editingAddress?.type === "SHIPPING" &&
-                !!checkoutData?.verifiedPincodeDetails?.pincode &&
-                formData.pincode === checkoutData.verifiedPincodeDetails.pincode
-              }
-            />
-
-            <div>
-              <label
-                htmlFor="city"
-                className="block text-sm font-medium text-gray-700"
-              >
-                City
-              </label>
-              <input
-                type="text"
-                id="city"
-                name="city"
-                value={formData.city}
+              <PincodeInput
+                value={formData.pincode}
                 onChange={handleFormChange}
-                disabled={
+                onBlur={() => { }} // PincodeInput handles its own blur
+                isVerifiedAndDisabled={
                   (addressCreationIntent === "SHIPPING" ||
                     editingAddress?.type === "SHIPPING") &&
                   !!checkoutData?.verifiedPincodeDetails?.pincode &&
-                  formData.pincode ===
-                    checkoutData.verifiedPincodeDetails.pincode
+                  formData.pincode === checkoutData.verifiedPincodeDetails.pincode // Only disable if it matches the verified one
                 }
-                className={`mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 ${
-                  (addressCreationIntent === "SHIPPING" ||
-                    editingAddress?.type === "SHIPPING") &&
+                verifiedPincodeFromCart={
+                  addressCreationIntent === "SHIPPING" ||
+                    editingAddress?.type === "SHIPPING"
+                    ? checkoutData?.verifiedPincodeDetails?.pincode
+                    : undefined
+                }
+                cityValue={formData.city}
+                stateValue={formData.state}
+                setCity={(city) => setFormData((prev) => ({ ...prev, city }))}
+                setState={(state) => setFormData((prev) => ({ ...prev, state }))}
+                setLocalPincodeValidationMessage={setPincodeValidationMessage} // Pass callback
+                disabled={
+                  editingAddress?.type === "SHIPPING" &&
                   !!checkoutData?.verifiedPincodeDetails?.pincode &&
-                  formData.pincode ===
+                  formData.pincode === checkoutData.verifiedPincodeDetails.pincode
+                }
+              />
+
+              <div>
+                <label
+                  htmlFor="city"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  City
+                </label>
+                <input
+                  type="text"
+                  id="city"
+                  name="city"
+                  value={formData.city}
+                  onChange={handleFormChange}
+                  disabled={
+                    (addressCreationIntent === "SHIPPING" ||
+                      editingAddress?.type === "SHIPPING") &&
+                    !!checkoutData?.verifiedPincodeDetails?.pincode &&
+                    formData.pincode ===
+                    checkoutData.verifiedPincodeDetails.pincode
+                  }
+                  className={`mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 ${(addressCreationIntent === "SHIPPING" ||
+                    editingAddress?.type === "SHIPPING") &&
+                    !!checkoutData?.verifiedPincodeDetails?.pincode &&
+                    formData.pincode ===
                     checkoutData.verifiedPincodeDetails.pincode
                     ? "bg-gray-100 cursor-not-allowed"
                     : ""
-                }`}
-                required
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="state"
-                className="block text-sm font-medium text-gray-700"
-              >
-                State
-              </label>
-              <input
-                type="text"
-                id="state"
-                name="state"
-                value={formData.state}
-                onChange={handleFormChange}
-                disabled={
-                  (addressCreationIntent === "SHIPPING" ||
-                    editingAddress?.type === "SHIPPING") &&
-                  !!checkoutData?.verifiedPincodeDetails?.pincode &&
-                  formData.pincode ===
+                    }`}
+                  required
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="state"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  State
+                </label>
+                <input
+                  type="text"
+                  id="state"
+                  name="state"
+                  value={formData.state}
+                  onChange={handleFormChange}
+                  disabled={
+                    (addressCreationIntent === "SHIPPING" ||
+                      editingAddress?.type === "SHIPPING") &&
+                    !!checkoutData?.verifiedPincodeDetails?.pincode &&
+                    formData.pincode ===
                     checkoutData.verifiedPincodeDetails.pincode
-                }
-                className={`mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 ${
-                  (addressCreationIntent === "SHIPPING" ||
+                  }
+                  className={`mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 ${(addressCreationIntent === "SHIPPING" ||
                     editingAddress?.type === "SHIPPING") &&
-                  !!checkoutData?.verifiedPincodeDetails?.pincode &&
-                  formData.pincode ===
+                    !!checkoutData?.verifiedPincodeDetails?.pincode &&
+                    formData.pincode ===
                     checkoutData.verifiedPincodeDetails.pincode
                     ? "bg-gray-100 cursor-not-allowed"
                     : ""
-                }`}
-                required
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="addressLine"
-                className="block text-sm font-medium text-gray-700"
+                    }`}
+                  required
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="addressLine"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Address Line
+                </label>
+                <textarea
+                  id="addressLine"
+                  name="addressLine"
+                  value={formData.addressLine}
+                  onChange={handleFormChange}
+                  rows={3}
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                  required
+                ></textarea>
+              </div>
+              <div>
+                <label
+                  htmlFor="landmark"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Landmark (Optional)
+                </label>
+                <input
+                  type="text"
+                  id="landmark"
+                  name="landmark"
+                  value={formData.landmark}
+                  onChange={handleFormChange}
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="type"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Address Type
+                </label>
+                <select
+                  id="type"
+                  name="type"
+                  value={formData.type}
+                  onChange={handleFormChange}
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                  required
+                >
+                  <option value="HOME">HOME</option>
+                  <option value="WORK">WORK</option>
+                  <option value="BILLING">BILLING</option>
+                  <option value="SHIPPING">SHIPPING</option>
+                </select>
+              </div>
+              {pincodeValidationMessage && (
+                <p className="text-red-600 text-sm">{pincodeValidationMessage}</p>
+              )}
+              <button
+                type="submit"
+                className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#213E5A] hover:bg-[#1a324a] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#213E5A]"
               >
-                Address Line
-              </label>
-              <textarea
-                id="addressLine"
-                name="addressLine"
-                value={formData.addressLine}
-                onChange={handleFormChange}
-                rows={3}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                required
-              ></textarea>
-            </div>
-            <div>
-              <label
-                htmlFor="landmark"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Landmark (Optional)
-              </label>
-              <input
-                type="text"
-                id="landmark"
-                name="landmark"
-                value={formData.landmark}
-                onChange={handleFormChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="type"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Address Type
-              </label>
-              <select
-                id="type"
-                name="type"
-                value={formData.type}
-                onChange={handleFormChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                required
-              >
-                <option value="HOME">HOME</option>
-                <option value="WORK">WORK</option>
-                <option value="BILLING">BILLING</option>
-                <option value="SHIPPING">SHIPPING</option>
-              </select>
-            </div>
-            {pincodeValidationMessage && (
-              <p className="text-red-600 text-sm">{pincodeValidationMessage}</p>
-            )}
-            <button
-              type="submit"
-              className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#213E5A] hover:bg-[#1a324a] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#213E5A]"
-            >
-              {editingAddress ? "Update Address" : "Save Address"}
-            </button>
-          </form>
-        </Modal>
-      )}
-    </div>
+                {editingAddress ? "Update Address" : "Save Address"}
+              </button>
+            </form>
+          </Modal>
+        )
+      }
+    </div >
   );
 };
 

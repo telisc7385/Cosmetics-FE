@@ -174,6 +174,7 @@ export interface LoggedInOrderPayload {
   taxType: string;
   isTaxInclusive: boolean;
   shippingRate: number;
+  abandentDiscountAmount: number;
 }
 
 export interface Address {
