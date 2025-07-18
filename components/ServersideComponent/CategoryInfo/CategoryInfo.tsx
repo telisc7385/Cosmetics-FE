@@ -59,12 +59,11 @@ export default function CategoryInfo({
         sortOrder === "price_asc"
           ? "selling_price"
           : sortOrder === "price_desc"
-          ? "-selling_price"
-          : "";
+            ? "-selling_price"
+            : "";
 
-      const url = `${base}/product?page=${currentPage}&limit=${limit}&category=${
-        category.id
-      }${sortParam ? `&sort=${sortParam}` : ""}`;
+      const url = `${base}/product?page=${currentPage}&limit=${limit}&category=${category.id
+        }${sortParam ? `&sort=${sortParam}` : ""}`;
 
       try {
         const res = await fetch(url);
@@ -79,6 +78,8 @@ export default function CategoryInfo({
     fetchProducts();
   }, [category.id, sortOrder, currentPage]);
 
+  const activeProducts = products.filter((product) => product.isActive)
+  console.log("Active Products:", activeProducts);
   return (
     <div className="w-full bg-white">
       {/* Banner */}
@@ -101,7 +102,7 @@ export default function CategoryInfo({
         )}
       </div>
 
-      <div className="w-full lg:max-w-7xl lg:mx-auto lg:flex lg:flex-col lg:items-center">
+      <div className="container mx-auto lg:flex lg:flex-col lg:items-center">
         {/* Description */}
         <section className="w-full px-4 py-6 mt-2 sm:mt-3 lg:flex lg:justify-center">
           <div className="bg-white rounded-lg shadow-lg p-6 relative overflow-hidden lg:w-[90%]">
@@ -140,14 +141,14 @@ export default function CategoryInfo({
 
         {/* Product Grid */}
         <section className="px-4 pb-10 w-full lg:flex lg:justify-center">
-          {products.length === 0 ? (
+          {activeProducts.length === 0 ? (
             <div className="bg-white border p-6 rounded shadow text-center text-gray-500 w-full lg:w-[90%]">
               No products found in this category.
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 w-full lg:w-[90%]">
-              {products.map((product) => (
-                
+              {activeProducts.map((product) => (
+
                 <div key={product.id} className="w-full">
                   <ProductCard product={product} />
                 </div>
@@ -163,11 +164,10 @@ export default function CategoryInfo({
               <button
                 key={i}
                 onClick={() => handlePageChange(i + 1)}
-                className={`px-3 py-1 border rounded text-sm transition ${
-                  currentPage === i + 1
+                className={`px-3 py-1 border rounded text-sm transition ${currentPage === i + 1
                     ? "bg-black text-white"
                     : "bg-white text-gray-800 border-gray-300 hover:bg-gray-100"
-                }`}
+                  }`}
               >
                 {i + 1}
               </button>

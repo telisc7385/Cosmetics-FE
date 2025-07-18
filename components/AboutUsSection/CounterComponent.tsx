@@ -43,11 +43,11 @@ const CounterItem: React.FC<CounterItemProps> = ({ target, label, start }) => {
 
   return (
     <div className="flex flex-col items-center justify-center">
-      <span className="text-4xl sm:text-5xl font-bold text-[#213e5a]">
+      <span className="text-4xl sm:text-6xl font-bold text-[#213e5a]">
         {display}
         {label === "Happy Customers" ? ` CR+` : ``}
       </span>
-      <p className="text-base sm:text-lg mt-2 text-gray-700">{label}</p>
+      <p className="text-base sm:text-xl mt-2 text-gray-700">{label}</p>
     </div>
   );
 };
@@ -88,7 +88,10 @@ const CounterComponent: React.FC<Props> = ({ sectionData }) => {
       </div>
 
       {/* ✅ Foreground Container */}
-      <div className="relative z-20 max-w-7xl mx-auto px-4 py-16 sm:py-20 lg:py-24">
+      <div className="relative z-20 max-w-7xl mx-auto px-4 py-6 md:py-10">
+        <h2 className={`text-[#213E5A] text-2xl sm:text-3xl lg:text-4xl mx-auto text-center mb-4 lg:mb-8`}>
+          {sectionData.heading}
+        </h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-10 text-center">
           {sectionData.components.map((item, idx) => (
             <div key={item.id || idx} className="py-4">

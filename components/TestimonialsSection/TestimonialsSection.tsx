@@ -10,11 +10,11 @@ export default async function TestimonialSection({ testimonials }: Props) {
     // Outer section: Handles full-width gray background and vertical padding.
     <section className="w-full py-0 bg-gray-50">
       {/* This div is for the SectionHeader, constrained to max-w-[84rem] and centered. */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mb-5 mt-7">
+      <div className="max-w-7xl mx-auto p-4">
         {" "}
         {/* Added mb-10 for spacing */}
         <SectionHeader
-          title="What our happy clients say"
+          title="What Our Happy Clients Say"
           subtitle="Hear from our satisfied customers and why they love our brand."
           titleClass="text-2xl sm:text-3xl lg:text-4xl"
           subtitleClass="text-sm sm:text-base lg:text-lg"

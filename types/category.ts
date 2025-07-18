@@ -14,12 +14,18 @@ export interface SubCategory {
 }
 
 export interface Category {
-  title: React.ReactNode;
+  title?: React.ReactNode;
   products: Product[];
   id: number;
   name: string;
   isDeleted?: boolean;
+  publicId?: string;
+  createdAt?: string;
+  sequence_number?: number;
+  is_active?: boolean;
   subcategories?: SubCategory[];
+  seo_title?: string;
+  seo_description?: string;
   imageUrl: string;
   banner?: string;
   description?: string;

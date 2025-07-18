@@ -28,19 +28,18 @@ export default function TestimonialSlider({ testimonials }: Props) {
   return (
     <div className="relative w-full overflow-hidden">
       {/* ✅ Background image */}
-      <div className="absolute inset-0 z-0">
+      {/* <div className="absolute inset-0 z-0">
         <Image
           src="/testimonialbg2.jpg" // 🔁 Replace with your image path
           alt="Testimonial Background"
           fill
           className="object-cover object-center"
         />
-        {/* ✅ Overlay with soft tint */}
         <div className="absolute inset-0 bg-[#F7EFE0] opacity-0 z-10" />
-      </div>
+      </div> */}
 
       {/* ✅ Swiper Content */}
-      <div className="relative z-20 py-6 sm:py-10">
+      <div className="relative z-20 pb-4 md:py-6">
         <div className="max-w-7xl mx-auto sm:px-6 lg:px-10">
           <Swiper
             modules={[Autoplay]}
@@ -63,10 +62,9 @@ export default function TestimonialSlider({ testimonials }: Props) {
                   className={`
                     transition-transform duration-300 ease-in-out bg-white rounded-xl shadow-md p-4 sm:p-6 mx-auto my-4
                     max-w-[85%] sm:max-w-md
-                    ${
-                      index === activeIndex
-                        ? "scale-105 sm:scale-110"
-                        : "scale-95 sm:scale-90"
+                    ${index === activeIndex
+                      ? "scale-105 sm:scale-110"
+                      : "scale-95 sm:scale-90"
                     }
                     h-[220px] sm:h-[250px] overflow-hidden
                   `}
