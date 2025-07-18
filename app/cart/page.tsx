@@ -178,9 +178,9 @@ const CartPage = () => {
         shippingRate: data.shippingRate,
         isTaxInclusive: false, // Assuming false
       });
-      toast.success(
-        `Delivery available in ${data.city}, ${data.state}. Order summary updated!`
-      );
+      // toast.success(
+      //   `Delivery available in ${data.city}, ${data.state}. Order summary updated!`
+      // );
     } else {
       setOrderSummaryData(null);
       toast.error("Pincode verified, but order summary details are missing.");
@@ -243,14 +243,16 @@ const CartPage = () => {
 
   // Calculate the base subtotal (sum of item prices * quantities)
   const baseSubtotal = items.reduce(
-    (total: number, item: CartItem) => total + item.sellingPrice * item.quantity,
+    (total: number, item: CartItem) =>
+      total + item.sellingPrice * item.quantity,
     0
   );
 
   // Determine the final subtotal after applying the abandoned discount if logged in
-  const finalSubtotal = isLoggedIn && abandonedDiscount > 0
-    ? baseSubtotal - abandonedDiscount
-    : baseSubtotal;
+  const finalSubtotal =
+    isLoggedIn && abandonedDiscount > 0
+      ? baseSubtotal - abandonedDiscount
+      : baseSubtotal;
 
   const shippingRate = orderSummaryData?.shippingRate || 0;
   const taxableAmount = finalSubtotal + shippingRate; // Tax applied after discount
@@ -503,7 +505,7 @@ const CartPage = () => {
             <PincodeVerifier
               onVerified={handlePincodeVerified} // This prop is now a stable reference
             />
-            {verifiedPincodeDetails && (
+            {/* {verifiedPincodeDetails && (
               <div className="mt-2 text-sm text-gray-600">
                 Delivery to:{" "}
                 <span className="font-semibold">
@@ -511,7 +513,7 @@ const CartPage = () => {
                   {verifiedPincodeDetails.city}, {verifiedPincodeDetails.state}
                 </span>
               </div>
-            )}
+            )} */}
           </div>
 
           <div className="space-y-2">
@@ -535,13 +537,14 @@ const CartPage = () => {
             {/* Display the discounted subtotal if a discount was applied */}
             {isLoggedIn && abandonedDiscount > 0 && (
               <div className="flex justify-between pb-2 border-b border-gray-200">
-                <span className="text-gray-700 font-semibold">Subtotal (after discount)</span>
+                <span className="text-gray-700 font-semibold">
+                  Subtotal (after discount)
+                </span>
                 <span className="font-semibold text-gray-900">
                   ₹{finalSubtotal.toFixed(2)}
                 </span>
               </div>
             )}
-
 
             <div className="flex justify-between pb-2 border-b border-gray-200">
               <span className="text-gray-700">Shipping Rate</span>
@@ -551,7 +554,9 @@ const CartPage = () => {
             </div>
 
             <div className="flex justify-between pb-2">
-              <span className="text-gray-700 font-semibold">Taxable Amount</span>
+              <span className="text-gray-700 font-semibold">
+                Taxable Amount
+              </span>
               <span className="font-semibold text-gray-900">
                 ₹{taxableAmount.toFixed(2)}
               </span>

@@ -90,7 +90,7 @@ export default function BannerSlider({ banners }: { banners: BannerItem[] }) {
 
   return (
     <>
-      <div className="w-full relative pt-28 md:pt-18 lg:pt-18">
+      <div className="w-full relative pt-4">
         <div className="relative w-full h-[300px] sm:h-[400px] md:h-[460px] lg:h-[500px] xl:h-[550px] overflow-hidden">
           <div ref={sliderRef} className="keen-slider w-full h-full">
             {filteredBanners.map((banner) => (

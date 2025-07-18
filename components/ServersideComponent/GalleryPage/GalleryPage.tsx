@@ -21,8 +21,6 @@ const GalleryPage = ({ gallery }: GalleryPageProps) => {
         <SectionHeader
           title="Our Gallery"
           subtitle="A glimpse into beauty, confidence, and satisfaction."
-          titleClass="text-2xl sm:text-3xl lg:text-4xl"
-          subtitleClass="text-sm sm:text-base lg:text-lg"
         />
         <p className="text-gray-600 mt-5">
           No active gallery images found at the moment.
@@ -30,6 +28,16 @@ const GalleryPage = ({ gallery }: GalleryPageProps) => {
       </div>
     );
   }
+
+  return (
+    <div className="h-auto bg-white px-4 pt-10 md:px-[40px] max-w-7xl mx-auto">
+      <SectionHeader
+        title="Our Gallery"
+        subtitle="A glimpse into beauty, confidence, and satisfaction."
+      />
+      <Gallery images={images} />
+    </div>
+  );
 };
 
 export default GalleryPage;

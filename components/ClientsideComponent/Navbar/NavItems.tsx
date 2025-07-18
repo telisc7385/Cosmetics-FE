@@ -39,7 +39,7 @@ const NavItems = () => {
   );
 
   return (
-    <ul className="flex gap-10">
+    <ul className="flex gap-10 ">
       {navItems.map((item) =>
         item.is_active ? (
           item.name.toLowerCase() === "categories" ? (

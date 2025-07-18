@@ -59,7 +59,7 @@ export default async function Page({ params }: Props) {
     };
 
     return (
-      <div className="pt-8 container  lg:pt-18 md:pt-18 pt-28">
+      <div className="pt-4 container">
         <CategoryInfo
           category={category}
           initialProducts={products}
