@@ -26,10 +26,7 @@ const Counter = () => {
   }, [inView, startCount]);
 
   return (
-    <div
-      ref={ref}
-      className="w-full my-10 rounded-xl px-4 sm:px-6 lg:px-8 py-10"
-    >
+    <div ref={ref} className="w-full my-10 rounded-xl px-4 sm:px-6 lg:px-8 ">
       {/* Section header shown only once at top */}
       <div className="px-[20px] mt-2 max-w-7xl mx-auto mb-8 text-center">
         <SectionHeader
