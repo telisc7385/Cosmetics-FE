@@ -18,10 +18,10 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
   subtitleClass = "text-base", // Default classes for subtitle
 }) => {
   return (
-    <div className="text-center mb-4 px-4">
+    <div className="text-center px-4">
       {" "}
       {/* Added px-4 for better mobile padding and text-center for alignment */}
-      <h2 className={`text-[#213E5A] mb-2 ${titleClass}`}>{title}</h2>
+      <h2 className={`text-[#213E5A] mb-2 ${titleClass} capitalize`}>{title}</h2>
       {subtitle && (
         <p className={`text-[#213E5A] mb-2 ${subtitleClass}`}>{subtitle}</p>
       )}

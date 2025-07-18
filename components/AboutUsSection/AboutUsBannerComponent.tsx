@@ -9,7 +9,7 @@ type Props = {
 const AboutUsBannerComponent = ({ BannerData }: Props) => {
   console.log("Banner", BannerData);
   return (
-    <div className="w-full h-[300px] lg:h-[600px] flex items-center justify-center relative">
+    <div className="w-full h-[300px] sm:h-[400px] md:h-[460px] lg:h-[500px] xl:h-[550px] flex items-center justify-center relative mt-4">
       <Image
         src={BannerData.image}
         alt={BannerData?.heading || "Banner Image"}
@@ -19,7 +19,7 @@ const AboutUsBannerComponent = ({ BannerData }: Props) => {
       />
       <div className="absolute inset-0 z-10 flex items-center">
         <div className="max-w-7xl mx-auto w-full px-4 sm:px-8 md:px-16">
-          <div className="max-w-[500px] text-white">
+          <div className="max-w-[250px] md:max-w-[500px] text-black">
             <h2
               className={`text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-normal leading-snug sm:leading-snug md:leading-tight drop-shadow-md transition-opacity duration-500`}
             >

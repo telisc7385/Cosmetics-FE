@@ -1,3 +1,4 @@
+// PriceRangeSlider.tsx (renamed from PriceFilter in the original snippet, assuming it's the component for the slider)
 "use client";
 
 import { Range } from "react-range";
@@ -12,7 +13,7 @@ interface Props {
 
 const STEP = 10;
 const MIN = 0;
-const MAX = 4000;
+const MAX = 4000; // This max value might need to be adjusted based on your actual product prices
 
 const clamp = (value: number, min: number, max: number) => {
   return Math.min(Math.max(value, min), max);
@@ -25,8 +26,14 @@ const PriceRangeSlider = ({ min, max, setMin, setMax }: Props) => {
   const [values, setValues] = useState([clampedMin, clampedMax]);
 
   useEffect(() => {
-    setValues([clamp(min, MIN, MAX), clamp(max, MIN, MAX)]);
-  }, [min, max]);
+    // Only update internal state if min/max from props actually change
+    // and are within the allowed range to prevent infinite loops or unnecessary re-renders
+    const newClampedMin = clamp(min, MIN, MAX);
+    const newClampedMax = clamp(max, MIN, MAX);
+    if (values[0] !== newClampedMin || values[1] !== newClampedMax) {
+      setValues([newClampedMin, newClampedMax]);
+    }
+  }, [min, max]); // Depend on min and max props
 
   const handleChange = (vals: number[]) => {
     setValues(vals);
@@ -58,7 +65,7 @@ const PriceRangeSlider = ({ min, max, setMin, setMax }: Props) => {
               className="w-full h-2 rounded-full bg-purple-200 relative"
             >
               <div
-                className="absolute h-2 bg-purple-600 rounded-full"
+                className="absolute h-2 bg-[#22365D] rounded-full"
                 style={{
                   left: left,
                   right: right,
@@ -71,7 +78,7 @@ const PriceRangeSlider = ({ min, max, setMin, setMax }: Props) => {
         renderThumb={({ props }) => (
           <div
             {...props}
-            className="w-4 h-4 bg-purple-600 rounded-full border-2 border-white shadow-md cursor-pointer"
+            className="w-4 h-4 bg-white rounded-full border-2 border-black shadow-md cursor-pointer"
           />
         )}
       />

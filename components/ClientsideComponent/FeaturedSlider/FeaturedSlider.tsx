@@ -28,11 +28,11 @@ export default function FeaturedSlider({ products }: { products: Product[] }) {
       </div>
 
       {/* ✅ Swiper content */}
-      <div className="relative z-20 py-6 px-4 sm:px-6 lg:px-10">
-        <div className="max-w-7xl mx-auto">
+      <div className="relative z-20 py-4 px-3 sm:px-4 lg:px-6">
+        <div className="max-w-6xl mx-auto">
           <Swiper
             modules={[Navigation, Autoplay]}
-            spaceBetween={30}
+            spaceBetween={20}
             slidesPerView={1}
             navigation
             autoplay={{ delay: 5000 }}
@@ -56,8 +56,8 @@ export default function FeaturedSlider({ products }: { products: Product[] }) {
 
               return (
                 <SwiperSlide key={product.id}>
-                  <div className="flex flex-col lg:flex-row items-center gap-6 lg:gap-10 min-h-[400px] lg:min-h-[350px] px-2 sm:px-6 lg:px-10">
-                    {/* ✅ IMAGE - Alternate direction */}
+                  <div className="flex flex-col lg:flex-row items-center gap-4 lg:gap-6 min-h-[320px] lg:min-h-[300px] px-2">
+                    {/* ✅ IMAGE */}
                     <motion.div
                       initial={imageInitial}
                       animate={imageAnimate}
@@ -67,45 +67,45 @@ export default function FeaturedSlider({ products }: { products: Product[] }) {
                       <Image
                         src={product.images[0]?.image || "/placeholder.jpg"}
                         alt={product.name}
-                        width={350}
-                        height={350}
-                        className="rounded w-[250px] h-[250px] sm:w-[300px] sm:h-[300px] lg:w-[350px] lg:h-[350px] object-contain"
+                        width={280}
+                        height={280}
+                        className="rounded w-[140px] h-[140px] sm:w-[180px] sm:h-[180px] lg:w-[280px] lg:h-[280px] object-contain"
                       />
                     </motion.div>
 
-                    {/* ✅ TEXT - Alternate direction */}
+                    {/* ✅ TEXT */}
                     <motion.div
                       initial={textInitial}
                       animate={textAnimate}
                       transition={{ duration: 0.7 }}
                       className="w-full lg:w-1/2 text-center lg:text-left"
                     >
-                      <p className="text-sm text-[#213e5a]">
+                      <p className="text-xs sm:text-sm text-[#213e5a]">
                         {product.category?.name}
                       </p>
-                      <h3 className="text-xl text-[#213e5a] sm:text-2xl font-bold mt-1">
+                      <h3 className="text-lg sm:text-xl text-[#213e5a] font-bold mt-1">
                         {product.name}
                       </h3>
-                      <p className="text-[#e60076] font-semibold text-lg sm:text-xl mt-2">
+                      <p className="text-[#e60076] font-semibold text-base sm:text-lg mt-2">
                         ₹{product.basePrice}
-                        <span className="line-through text-gray-500 text-sm ml-2">
+                        <span className="line-through text-gray-500 text-xs ml-2">
                           ₹{product.sellingPrice}
                         </span>
                       </p>
 
                       <p
-                        className="mt-2 text-gray-700 text-sm"
+                        className="mt-2 text-gray-700 text-xs sm:text-sm"
                         dangerouslySetInnerHTML={{
                           __html: product.description,
                         }}
                       ></p>
-                      <p className="text-sm text-green-700 mt-1">
+                      <p className="text-xs sm:text-sm text-green-700 mt-1">
                         ● In Stock ({product.stock} available)
                       </p>
-                      <div className="mt-4 flex flex-col sm:flex-row gap-2 justify-center lg:justify-start">
+                      <div className="mt-3 flex flex-col sm:flex-row gap-2 justify-center lg:justify-start">
                         <Link
                           href={`/product/${product.slug}`}
-                          className="px-4 py-2 border text-gray-600 rounded hover:bg-gray-100 text-center"
+                          className="px-3 py-1.5 text-sm border text-gray-600 rounded hover:bg-gray-100 text-center"
                         >
                           Details →
                         </Link>

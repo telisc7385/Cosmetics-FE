@@ -1,3 +1,4 @@
+// ProductList.tsx
 "use client";
 import { Product } from "@/types/product";
 import ProductCard from "@/components/CommonComponents/ProductCard/ProductCard";

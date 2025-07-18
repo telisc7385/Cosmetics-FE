@@ -47,6 +47,7 @@ export default async function HomePage() {
       <TestimonialsSection testimonials={testimonials} />
       <GalleryPage gallery={gallery} />
       <NewsletterSignup />
+
       {/* <PromotionBanner />  */}
     </div>
   );

@@ -94,101 +94,133 @@ const GuestCheckout = () => {
   };
 
   const handlePlaceOrder = async () => {
-    // Input Validations
-    if (!formData.email) return toast.error("Email is required.");
-    if (
-      !formData.fullName ||
-      !formData.phone ||
-      !formData.addressLine ||
-      !city ||
-      !formData.state ||
-      !formData.pincode // Added pincode to required fields validation
-    ) {
-      return toast.error("Please fill all required address fields.");
-    }
-    if (!/^\d{10}$/.test(formData.phone)) {
-      return toast.error("Please enter a valid 10-digit phone number.");
-    }
-    if (!/^\d{6}$/.test(formData.pincode)) {
-      // Added pincode format validation
-      return toast.error("Please enter a valid 6-digit pincode.");
-    }
-    if (cartItems.length === 0) {
-      return toast.error("Your cart is empty. Please add items to proceed.");
+  // Input Validations
+  if (!formData.email) return toast.error("Email is required.");
+  if (
+    !formData.fullName ||
+    !formData.phone ||
+    !formData.addressLine ||
+    !city ||
+    !formData.state ||
+    !formData.pincode
+  ) {
+    return toast.error("Please fill all required address fields.");
+  }
+  if (!/^\d{10}$/.test(formData.phone)) {
+    return toast.error("Please enter a valid 10-digit phone number.");
+  }
+  if (!/^\d{6}$/.test(formData.pincode)) {
+    return toast.error("Please enter a valid 6-digit pincode.");
+  }
+  if (cartItems.length === 0) {
+    return toast.error("Your cart is empty.");
+  }
+
+  // Prepare payload
+  const itemsForPayload = cartItems.map((item: CartItem) => ({
+    quantity: item.quantity,
+    price: item.sellingPrice,
+    ...(item.variantId !== null && item.variantId !== undefined
+      ? { variantId: item.variantId }
+      : { productId: item.id }),
+  }));
+
+  const payload = {
+    email: formData.email,
+    address: {
+      fullName: formData.fullName,
+      phone: formData.phone,
+      pincode: formData.pincode,
+      state: formData.state,
+      city: city,
+      addressLine: formData.addressLine,
+      landmark: formData.landmark,
+    },
+    items: itemsForPayload,
+    totalAmount: 1,
+    paymentMethod: formData.paymentMethod,
+  };
+
+  setIsPlacingOrder(true);
+
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/guest/checkout`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || "Checkout failed.");
+
+    const order = data.order;
+    if (!order || !order.id) throw new Error("Order creation failed.");
+
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("lastGuestOrder", JSON.stringify(order));
     }
 
-    // Prepare payload
-    const itemsForPayload = cartItems.map((item: CartItem) => ({
-      quantity: item.quantity,
-      price: item.sellingPrice,
-      ...(item.variantId !== null && item.variantId !== undefined
-        ? { variantId: item.variantId }
-        : { productId: item.id }),
-    }));
+    if (formData.paymentMethod.toLowerCase() === "razorpay") {
+      const razorpayOrderId = order.razorpayOrderId;
+      const internalOrderId = order.id;
 
-    const payload = {
-      email: formData.email,
-      address: {
-        fullName: formData.fullName,
-        phone: formData.phone,
-        pincode: formData.pincode,
-        state: formData.state,
-        city: city,
-        addressLine: formData.addressLine,
-        landmark: formData.landmark,
-      },
-      items: itemsForPayload,
-      totalAmount: parseFloat(subtotal.toFixed(2)),
-      paymentMethod: formData.paymentMethod,
-    };
+      const loadScript = (src: string): Promise<boolean> => {
+        return new Promise((resolve) => {
+          const script = document.createElement("script");
+          script.src = src;
+          script.onload = () => resolve(true);
+          script.onerror = () => resolve(false);
+          document.body.appendChild(script);
+        });
+      };
 
-    setIsPlacingOrder(true);
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/guest/checkout`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        }
-      );
+      const scriptLoaded = await loadScript("https://checkout.razorpay.com/v1/checkout.js");
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Order failed. Please try again.");
+      if (!scriptLoaded) {
+        toast.error("Failed to load Razorpay. Please try again.");
+        setIsPlacingOrder(false);
+        return;
       }
 
-      const data = await response.json();
-      console.log("Order placed successfully (backend response):", data); // Debugging
+      const options = {
+        key: "rzp_live_s1XxBl5X5Jx4lU", // Change to your actual key
+        amount: Math.round(order.totalAmount * 100),
+        currency: "INR",
+        name: "consmo",
+        description: "Thank you for your purchase",
+        order_id: razorpayOrderId,
+        prefill: {
+          name: formData.fullName,
+          email: formData.email,
+        },
+        handler: function () {
+          dispatch(clearCart());
+          toast.success("Payment successful!");
+          router.replace(`/thank-you?orderId=${internalOrderId}`);
+        },
+        modal: {
+          ondismiss: function () {
+            toast.error("Payment cancelled.");
+            setIsPlacingOrder(false);
+          },
+        },
+      };
 
-      // Store the entire order object in sessionStorage for the ThankYouPage
-      // Ensure data.order exists before stringifying and storing
-      if (typeof window !== "undefined" && data.order) {
-        sessionStorage.setItem("lastGuestOrder", JSON.stringify(data.order));
-      }
-
-      // **IMPORTANT CHANGE:** Clear cart and redirect ONLY if order ID is confirmed
-      if (data.order?.id) {
-        dispatch(clearCart()); // Clear cart AFTER successful order AND before redirect
-        toast.success("Order placed successfully!");
-        router.replace(`/thank-you?orderId=${data.order.id}`);
-      } else {
-        // Fallback if order ID is missing from response, but order was "ok"
-        toast.error(
-          "Order placed, but couldn't confirm details. Please check your email for confirmation."
-        );
-        router.replace("/"); // Redirect to homepage or a generic success page
-      }
-    } catch (error: unknown) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "An unexpected error occurred while placing your order.";
-      toast.error(message);
-    } finally {
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } else {
+      // For COD
+      dispatch(clearCart());
+      toast.success("Order placed successfully!");
+      router.replace(`/thank-you?orderId=${order.id}`);
       setIsPlacingOrder(false);
     }
-  };
+  } catch (err: any) {
+    toast.error(err.message || "Something went wrong.");
+    setIsPlacingOrder(false);
+  }
+};
+
 
   // (Conditional rendering for isPlacingOrder and cartItems.length === 0 are unchanged and correct)
   if (isPlacingOrder) {
