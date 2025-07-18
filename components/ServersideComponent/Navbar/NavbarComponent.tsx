@@ -32,7 +32,7 @@ const Navbar = ({ companyDetails }: NavbarProps) => {
           scrolled ? "bg-white/80 shadow" : "bg-white/80"
         }`}
       >
-        <div className="max-w-7xl mx-auto w-full px-4 flex flex-col gap-4">
+        <div className="max-w-7xl mx-auto w-full px-4 flex flex-col gap-4 mb-2">
           {/* Desktop View */}
           <div className="hidden lg:flex items-center justify-between w-full">
             {/* Left: Nav Items */}

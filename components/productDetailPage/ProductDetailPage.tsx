@@ -252,26 +252,20 @@ export default function ProductDetailClient({
                 dangerouslySetInnerHTML={{ __html: product.description || "" }}
               />
 
-              <div className="flex items-baseline space-x-2">
-                <div className="text-2xl font-bold text-gray-800">
-                  ₹{basePrice}
+              <div className="flex items-center gap-2">
+                <div className="text-sm text-[#213E5A] line-through decoration-dashed decoration-1">
+                  ₹{sellingPrice}
                 </div>
-                {priceDifferencePercent > 0 && (
-                  <div className="text-green-600 font-semibold text-base">
-                    {priceDifferencePercent}% Off
+                {basePrice > 0 && (
+                  <div className="text-lg text-[#213E5A]">
+                    ₹{basePrice}
+                    {priceDifferencePercent > 0 && (
+                      <span className="text-green-600 text-xs ml-1">
+                        ({priceDifferencePercent}% OFF)
+                      </span>
+                    )}
                   </div>
                 )}
-              </div>
-
-              <div className="flex items-center gap-2">
-                {basePrice > 0 && (
-                  <span className="text-gray-500 text-base">
-                    MRP ₹<span className="line-through">{sellingPrice}</span>
-                  </span>
-                )}
-                <span className="text-gray-500 text-sm">
-                  Inclusive of all taxes
-                </span>
               </div>
 
               {currentStock === 0 ? (

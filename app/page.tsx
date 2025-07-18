@@ -38,12 +38,13 @@ export default async function HomePage() {
     <div className="bg-white">
       <HeroBanner banners={banners} />
       <CategorySection categories={categories} />
+      <Counter />
       <TopCategoriesClient categories={categories} />
       <FeaturesBanner />
       <HotListWrapper />
 
       <FeaturedSliderComponent product={product} />
-      <Counter />
+
       <TestimonialsSection testimonials={testimonials} />
       <GalleryPage gallery={gallery} />
       <NewsletterSignup />
