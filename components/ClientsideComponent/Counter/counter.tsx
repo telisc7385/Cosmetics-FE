@@ -26,15 +26,12 @@ const Counter = () => {
   }, [inView, startCount]);
 
   return (
-    <div
-      ref={ref}
-      className="w-full my-10 rounded-xl px-4 sm:px-6 lg:px-8 py-10"
-    >
+    <div ref={ref} className="w-full my-10 rounded-xl px-4 sm:px-6 lg:px-8 ">
       {/* Section header shown only once at top */}
       <div className="px-[20px] mt-2 max-w-7xl mx-auto mb-8 text-center">
         <SectionHeader
-          title="Shop Our Best Sellers"
-          subtitle="Trusted by Thousands, Loved for a Reason."
+          title="Our Company Progress"
+          subtitle="Track how we’ve grown over time."
           titleClass="text-2xl sm:text-3xl lg:text-4xl"
           subtitleClass="text-sm sm:text-base lg:text-lg"
         />
@@ -56,9 +53,7 @@ const Counter = () => {
             {/* Mobile divider logic (only when 2 items per row) */}
             {index % 2 === 0 && index + 1 < stats.length && (
               <>
-                {/* Horizontal divider between top and bottom row */}
-                <div className="block lg:hidden absolute left-1/2 -translate-x-1/2 bottom-[-16px] w-10 h-[2px] bg-gradient-to-r from-[#10626B] via-[#50A1A8] to-[#10626B] rounded-full" />
-                {/* Vertical divider between 2 columns */}
+                {/* Vertical divider between 2 columns (keep only this for mobile) */}
                 <div className="block lg:hidden absolute top-1/2 -translate-y-1/2 right-0 h-10 w-[2px] bg-gradient-to-b from-[#10626B] via-[#50A1A8] to-[#10626B] rounded-full" />
               </>
             )}

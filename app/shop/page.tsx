@@ -5,7 +5,7 @@ export default async function ShopPage() {
   const { categories } = await fetchCategories();
 
   return (
-    <div className="mb-5 bg-white container mx-auto max-w-7xl">
+    <div className="mb-5 bg-white container ">
       <ShopPageClient categories={categories} />
     </div>
   );

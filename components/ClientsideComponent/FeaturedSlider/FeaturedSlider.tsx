@@ -67,9 +67,9 @@ export default function FeaturedSlider({ products }: { products: Product[] }) {
                       <Image
                         src={product.images[0]?.image || "/placeholder.jpg"}
                         alt={product.name}
-                        width={300}
-                        height={300}
-                        className="rounded w-[180px] h-[180px] sm:w-[240px] sm:h-[240px] lg:w-[280px] lg:h-[280px] object-contain"
+                        width={280}
+                        height={280}
+                        className="rounded w-[140px] h-[140px] sm:w-[180px] sm:h-[180px] lg:w-[280px] lg:h-[280px] object-contain"
                       />
                     </motion.div>
 
