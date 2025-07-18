@@ -970,7 +970,7 @@ const UserCheckout = () => {
         variantId: item.variantId || item.variant?.id || null, // Ensure variantId is number or null
       })),
       addressId: Number(deliveryAddressObj.id), // Ensure addressId is a NUMBER
-      totalAmount: 1,
+      totalAmount: Number(finalTotalAmount),
       paymentMethod,
       discountAmount: Number(discountAmount),
       ...(appliedCoupon && { discountCode: appliedCoupon.code }), // Include discountCode if a coupon is applied

@@ -137,7 +137,7 @@ const GuestCheckout = () => {
       landmark: formData.landmark,
     },
     items: itemsForPayload,
-    totalAmount: 1,
+    totalAmount:  parseFloat(subtotal.toFixed(2)),
     paymentMethod: formData.paymentMethod,
   };
 
