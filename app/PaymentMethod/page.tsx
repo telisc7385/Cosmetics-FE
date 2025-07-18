@@ -23,7 +23,7 @@ interface RazorpayOptions {
   handler: (response: RazorpaySuccessResponse) => void;
   prefill: {
     name: string;
-    email: string;
+    email?: string;
     contact?: string; // Optional contact field
   };
   modal: {

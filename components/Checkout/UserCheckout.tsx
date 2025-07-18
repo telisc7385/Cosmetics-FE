@@ -997,12 +997,12 @@ const UserCheckout = () => {
       handler: function () {
         
         router.push(
-          `/thankyou?orderId=${internalOrderId}`
+          `/thank-you?orderId=${internalOrderId}`
         );
       },
       prefill: {
         name: billingAddressObj.fullName,
-        email: "ganesh@gamil.com", 
+        // email: "ganesh@gamil.com", 
       },
       modal: {
         ondismiss: function () {
