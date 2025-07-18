@@ -56,9 +56,7 @@ const Counter = () => {
             {/* Mobile divider logic (only when 2 items per row) */}
             {index % 2 === 0 && index + 1 < stats.length && (
               <>
-                {/* Horizontal divider between top and bottom row */}
-                <div className="block lg:hidden absolute left-1/2 -translate-x-1/2 bottom-[-16px] w-10 h-[2px] bg-gradient-to-r from-[#10626B] via-[#50A1A8] to-[#10626B] rounded-full" />
-                {/* Vertical divider between 2 columns */}
+                {/* Vertical divider between 2 columns (keep only this for mobile) */}
                 <div className="block lg:hidden absolute top-1/2 -translate-y-1/2 right-0 h-10 w-[2px] bg-gradient-to-b from-[#10626B] via-[#50A1A8] to-[#10626B] rounded-full" />
               </>
             )}
