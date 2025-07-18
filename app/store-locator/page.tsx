@@ -1,34 +1,44 @@
-// app/store-locator/page.tsx  (or pages/store-locator.tsx)
+import { getStoreLocatorData } from "@/api/storeLocatorApi";
+import StoreLocator from "@/components/StoreLocator/StoreLocator";
+import Image from "next/image";
 
-"use client";
+const StoreLocatorPage = async () => {
 
-import dynamic from "next/dynamic";
-
-const StoreLocator = dynamic(
-  () => import("@/components/StoreLocator/StoreLocator"),
-  { ssr: false }
-);
-
-export default function StoreLocatorPage() {
+  const storeItems = await getStoreLocatorData()
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Banner with heading */}
-      <div
-        className="h-[300px] md:h-[400px] bg-cover bg-center py-5 lg:py-10 flex justify-center items-center flex-col"
-        style={{
-          backgroundImage:
-            "url(/testimonialbg.png)",
-        }}
-      >
-        <h2
-          className={`text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-normal leading-snug sm:leading-snug md:leading-tight drop-shadow-md transition-opacity duration-500`}
-        >          Find Your Glow Near You
-        </h2>
-      </div>
+
+      <div className="w-full h-[300px] sm:h-[400px] md:h-[400px] flex items-center justify-center relative mt-4">
+            <Image
+              src="/testimonialbg.png"
+              alt="store Banner"
+              layout="fill"
+              objectFit="cover"
+              className="absolute"
+            />
+            <div className="absolute inset-0 z-10 flex items-center">
+              <div className="max-w-7xl mx-auto w-full px-4 sm:px-8 md:px-16">
+                <div className="text-black text-center">
+                  <h2
+                    className={`text-center text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-normal leading-snug sm:leading-snug md:leading-tight drop-shadow-md transition-opacity duration-500`}
+                  >
+                    Find Your Glow Near You
+                  </h2>
+                </div>
+              </div>
+            </div>
+      
+            {/* <h2 className="text-white text-4xl lg:text-6xl md:text-2xl font-extrabold z-10">{BannerData?.heading}</h2> */}
+          </div>
 
       <div className="max-w-7xl mx-auto py-8 md:px-4">
-        <StoreLocator />
+        <StoreLocator
+          storeItems={storeItems}
+        />
       </div>
     </div>
   );
 }
+
+export default StoreLocatorPage;

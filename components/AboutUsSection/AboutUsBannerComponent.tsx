@@ -7,7 +7,6 @@ type Props = {
 };
 
 const AboutUsBannerComponent = ({ BannerData }: Props) => {
-  console.log("Banner", BannerData);
   return (
     <div className="w-full h-[300px] sm:h-[400px] md:h-[460px] lg:h-[500px] xl:h-[550px] flex items-center justify-center relative mt-4">
       <Image
