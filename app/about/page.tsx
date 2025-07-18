@@ -1,13 +1,16 @@
-import DevelopedBy from "@/components/ClientsideComponent/DevelopedBy";
-import DiscoverBeauty from "@/components/ClientsideComponent/DiscoverBeauty/DiscoverBeauty";
+import { getAboutUsData } from "@/api/aboutUsApi";
+import AboutUsJunctionComponents from "@/components/AboutUsSection/AboutUsJunctionComponents";
+
 import React from "react";
 
-const page = () => {
+const page = async () => {
+  const response: any = await getAboutUsData();
+  // console.log("sectionData", response);
+
   return (
-    <>
-      <DiscoverBeauty />
-      <DevelopedBy />
-    </>
+    <div>
+      <AboutUsJunctionComponents sectionData={response.results} />
+    </div>
   );
 };
 

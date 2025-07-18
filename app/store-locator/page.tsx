@@ -1,4 +1,13 @@
-import StoreLocator from "@/components/StoreLocator/StoreLocator";
+// app/store-locator/page.tsx  (or pages/store-locator.tsx)
+
+"use client";
+
+import dynamic from "next/dynamic";
+
+const StoreLocator = dynamic(
+  () => import("@/components/StoreLocator/StoreLocator"),
+  { ssr: false }
+);
 
 export default function StoreLocatorPage() {
   return (
@@ -14,11 +23,9 @@ export default function StoreLocatorPage() {
         <h1 className="text-white text-4xl lg:text-6xl font-extrabold">
           Find Our Stores
         </h1>
-        {/* <p className="text-white text-center px-4">
-          Locate our stores across India and get directions to visit us
-        </p> */}
       </div>
-      <div className="max-w-7xl mx-auto py-8 md:x-4 ">
+
+      <div className="max-w-7xl mx-auto py-8 md:px-4">
         <StoreLocator />
       </div>
     </div>

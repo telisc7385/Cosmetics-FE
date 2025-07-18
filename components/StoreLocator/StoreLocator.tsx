@@ -63,14 +63,17 @@ function formatDuration(seconds: number) {
   return parts.join(", ") || "0 min";
 }
 
+let mapRef: Map | null = null;
 // Capture map instance
+// Capture map instance into both state (for logic) and the module‑scope ref
 const SetMapInstance = ({ setMap }: { setMap: (m: Map) => void }) => {
   const map = useMap();
   useEffect(() => {
     setMap(map);
+    mapRef = map;
   }, [map, setMap]);
   return null;
-};
+};;
 
 // Individual store marker
 const StoreMarker = ({
@@ -388,6 +391,16 @@ const StoreLocator = () => {
       7,
     );
 
+  // **Cleanup on unmount**:
+  useEffect(() => {
+    return () => {
+      if (mapRef) {
+        mapRef.remove();
+        mapRef = null;
+      }
+    };
+  }, []);
+
   return (
     <div className="flex flex-col-reverse md:flex-row w-full border">
       {/* Sidebar */}
@@ -528,6 +541,7 @@ const StoreLocator = () => {
         </div>
         <div className="flex-1">
           <MapContainer
+            key={userLocation?.toString() || "default"}
             center={[20.92492, 77.32356]}
             zoom={6}
             className="min-h-[300px] h-full w-full"
