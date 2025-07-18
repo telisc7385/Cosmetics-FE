@@ -17,7 +17,7 @@ export default function SortDropdown({
       value={sortOrder}
       onChange={(e) => setSortOrder(e.target.value as SortOrder)}
       // Added mobile-specific sizing classes (text-xs, h-8, px-2) and responsive classes for larger screens
-      className="border text-black h-8 rounded px-2 py-1 text-xs shadow-sm bg-white focus:outline-none focus:ring-1 focus:ring-black sm:h-10 sm:px-3 sm:text-sm"
+      className="w-full border text-black h-12 rounded px-2 py-2.5 text-xs shadow-sm bg-white focus:outline-none focus:ring-1 focus:ring-black sm:h-10 sm:px-3 sm:text-sm"
     >
       <option value="">Sort by</option>
       <option value="price_asc">Price: Low to High</option>

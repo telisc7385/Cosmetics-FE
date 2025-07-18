@@ -62,8 +62,8 @@ const ProductCard = ({ product }: Props) => {
     selectedVariant && selectedVariant.images.length > 0
       ? mainDisplayImage
       : hovered && secondGeneralImage
-      ? secondGeneralImage
-      : firstGeneralImage || "/placeholder.jpg";
+        ? secondGeneralImage
+        : firstGeneralImage || "/placeholder.jpg";
 
   const currentSellingPrice = Number(
     selectedVariant?.selling_price || product.sellingPrice || 0
@@ -123,50 +123,52 @@ const ProductCard = ({ product }: Props) => {
 
   return (
     <div
-      className="group bg-white rounded-2xl border border-pink-100 shadow-sm transition-shadow duration-300 w-full max-w-[250px] mx-auto overflow-hidden"
+      className="group bg-white rounded-lg md:rounded-xl border border-blue-100 shadow-sm transition-shadow duration-300 w-full max-w-[250px] mx-auto overflow-hidden"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
       {/* Product Image */}
       <Link
         href={`/product/${product.slug}`}
-        className="block relative h-52 bg-pink-50"
+        className="block relative h-[180px] md:h-52"
       >
         <Image
           src={currentMainImageSrc}
           alt={product.name}
           fill
-          className="object-cover transition-transform duration-300 ease-in-out scale-100 group-hover:scale-110"
+          className="object-contain transition-transform duration-300 ease-in-out scale-100 group-hover:scale-105"
         />
-        <div className="absolute top-3 left-3 bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-semibold shadow-sm">
-          {product.priceDifferencePercent}% OFF
-        </div>
+        {product.priceDifferencePercent < 0 && (
+          <div className="absolute top-3 left-3 bg-red-500 text-white text-[10px] md:text-[12px] px-2 py-0.5 rounded-full font-semibold shadow-sm">
+            {product.priceDifferencePercent.toFixed(0)}% OFF
+          </div>
+        )}
       </Link>
 
       {/* Content */}
-      <div className="p-3 flex flex-col text-left">
+      <div className="p-1 md:p-3 flex flex-col text-left">
         {/* Product Name */}
         <Link href={`/product/${product.slug}`}>
-          <h3 className="text-[13px] text-gray-800 font-semibold mb-1 group-hover:text-[#213C66] transition-colors line-clamp-2 min-h-[34px]">
+          <h3 className="text-[16px] text-gray-800 font-semibold mb-1 group-hover:text-[#213C66] transition-colors line-clamp-2 min-h-[48px]">
             {product.name}
           </h3>
         </Link>
 
         {/* Price + Button */}
-        <div className="flex justify-between items-start mt-2 mb-1">
+        <div className="flex justify-between items-start mt-1  md:mt-2 mb-1">
           {/* Price */}
           <div className="flex flex-col">
             {!isNaN(currentBasePrice) && currentBasePrice > 0 ? (
-              <span className="text-sm font-bold text-[#007C85]">
+              <span className="text-sm md:text-lg font-semibold md:font-bold text-[#007C85]">
                 ₹{currentSellingPrice.toFixed(2)}
               </span>
             ) : (
               <span className="text-sm text-gray-500">Price Unavailable</span>
             )}
 
-            {!isNaN(currentSellingPrice) &&
-              currentSellingPrice > currentBasePrice && (
-                <span className="text-xs text-gray-400 line-through mt-0.5">
+            {
+              currentBasePrice > currentSellingPrice && (
+                <span className="text-sm text-red-700 line-through ">
                   ₹{currentBasePrice.toFixed(2)}
                 </span>
               )}
@@ -175,8 +177,8 @@ const ProductCard = ({ product }: Props) => {
           {/* Action Button */}
           {product.variants && product.variants.length > 0 ? (
             <Link href={`/product/${product.slug}`}>
-              <button className="text-[11px] flex items-center gap-1 px-3 py-1.5 bg-[#213C66] text-white rounded-full hover:bg-[#213C66] transition">
-                <MdTune className="text-xs" />
+              <button className="text-sm md:text-base flex items-center gap-1 px-3 py-1.5 bg-[#213C66] text-white rounded-full hover:bg-[#213C66] transition">
+                <MdTune className="text-sm md:text-base" />
                 Select {/* ✅ Changed from 'Options' to 'Select' */}
               </button>
             </Link>
@@ -184,14 +186,13 @@ const ProductCard = ({ product }: Props) => {
             <button
               onClick={handleAddToCart}
               disabled={isOutOfStock}
-              className={`text-[11px] flex items-center gap-1 px-3 py-1.5 rounded-full transition ${
-                isOutOfStock
-                  ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-                  : "bg-[#213C66] text-white hover:bg-[#213C66]"
-              }`}
+              className={`text-sm md:text-base flex items-center gap-1 px-1 md:px-3 py-1 md:py-1.5 rounded -xl md:rounded-full transition cursor-pointer ${isOutOfStock
+                ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                : "bg-[#213C66] text-white hover:bg-[#213C66]"
+                }`}
             >
-              <HiOutlineShoppingBag className="text-xs" />
-              Add
+              <HiOutlineShoppingBag className="text-lg md:text-base" />
+              <span className="hidden md:flex">Add</span>
             </button>
           )}
         </div>

@@ -37,7 +37,7 @@ export default function CategoryInfo({
     searchParams.get("page") ?? initialPage.toString(),
     10
   );
-  const limit = 4;
+  const limit = 10;
 
   const handleSortChange = (value: SortOrder) => {
     const newParams = new URLSearchParams(searchParams.toString());
@@ -62,7 +62,7 @@ export default function CategoryInfo({
             ? "-selling_price"
             : "";
 
-      const url = `${base}/product?page=${currentPage}&limit=${limit}&category=${category.id
+      const url = `${base}/product?is_active=true&page=${currentPage}&limit=${limit}&category=${category.id
         }${sortParam ? `&sort=${sortParam}` : ""}`;
 
       try {
@@ -81,7 +81,7 @@ export default function CategoryInfo({
   // const activeProducts = products.filter((product) => product.isActive)
   // console.log("Active Products:", activeProducts);
   return (
-    <div className="w-full bg-white">
+    <div className="flex flex-col gap-4 md:gap-8">
       {/* Banner */}
       <div className="relative w-full h-[220px] sm:h-[350px] lg:h-[350px] overflow-hidden mx-auto">
         {category.banner ? (
@@ -102,33 +102,31 @@ export default function CategoryInfo({
         )}
       </div>
 
-      <div className="container mx-auto lg:flex lg:flex-col lg:items-center">
+      <div className="container mx-auto max-w-7xl flex flex-col gap-4 p-4 md:p-6">
         {/* Description */}
-        <section className="w-full px-4 py-6 mt-2 sm:mt-3 lg:flex lg:justify-center">
-          <div className="bg-white rounded-lg shadow-lg p-6 relative overflow-hidden lg:w-[90%]">
-            <div className="absolute top-0 left-0 w-24 h-24 bg-orange-100 rounded-full opacity-30 -translate-x-1/2 -translate-y-1/2" />
-            <div className="absolute bottom-0 right-0 w-24 h-24 bg-orange-100 rounded-full opacity-30 translate-x-1/2 translate-y-1/2" />
-            <h2 className="text-[#213E5A] text-2xl font-semibold mb-4">
-              {category.name}
-            </h2>
-            <p className="text-[#213E5A] text-lg leading-relaxed">
-              {category.description ||
-                "Discover premium, handpicked products tailored to your needs in this category."}
-            </p>
-          </div>
-        </section>
+        <div className="bg-white rounded-lg shadow-lg p-6 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-24 h-24 bg-blue-100 rounded-full opacity-30 -translate-x-1/2 -translate-y-1/2" />
+          <div className="absolute bottom-0 right-0 w-24 h-24 bg-blue-100 rounded-full opacity-30 translate-x-1/2 translate-y-1/2" />
+          <h2 className="text-[#213E5A] text-2xl font-semibold mb-4 text-center">
+            {category.name}
+          </h2>
+          <p className="text-[#213E5A] text-lg leading-relaxed text-center">
+            {category.description ||
+              "Discover premium, handpicked products tailored to your needs in this category."}
+          </p>
+        </div>
 
         {/* Breadcrumb and Sort */}
-        <div className="w-full px-4 lg:flex lg:justify-between lg:items-center lg:w-[90%]">
+        <div className="w-full lg:flex lg:justify-between lg:items-center">
           <h3 className="pt-4 pb-2 text-xl font-semibold text-gray-800 flex items-center gap-2">
             <Link
               href="/shop"
-              className="text-blue-600 hover:text-blue-800 underline underline-offset-4 transition-colors duration-200"
+              className="text-black-600 hover:text-blue-800 underline underline-offset-4 transition-colors duration-200"
             >
               All Products
             </Link>
-            <span className="text-gray-400">/</span>
-            <span className="text-gray-700">{category.name}</span>
+            <span className="text-[#213E5A]">/</span>
+            <span className="text-[#213E5A]">{category.name}</span>
           </h3>
 
           <div className="mb-2 lg:mb-0">
@@ -140,13 +138,13 @@ export default function CategoryInfo({
         </div>
 
         {/* Product Grid */}
-        <section className="px-4 pb-10 w-full lg:flex lg:justify-center">
+        <section className="w-full lg:flex lg:justify-center">
           {products.length === 0 ? (
             <div className="bg-white border p-6 rounded shadow text-center text-gray-500 w-full lg:w-[90%]">
               No products found in this category.
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 w-full lg:w-[90%]">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 w-full">
               {products.map((product) => (
 
                 <div key={product.id} className="w-full">
@@ -164,9 +162,9 @@ export default function CategoryInfo({
               <button
                 key={i}
                 onClick={() => handlePageChange(i + 1)}
-                className={`px-3 py-1 border rounded text-sm transition ${currentPage === i + 1
-                    ? "bg-black text-white"
-                    : "bg-white text-gray-800 border-gray-300 hover:bg-gray-100"
+                className={`cursor-pointer not-first:min-w-[36px] h-10 px-3 py-1.5 rounded-md text-sm font-medium border transition-all duration-200 ${currentPage === i + 1
+                  ? "bg-[#22365D] text-white border--[#22365D]"
+                  : "bg-white text-[#22365D] border-gray-300 hover:bg-gray-100"
                   }`}
               >
                 {i + 1}

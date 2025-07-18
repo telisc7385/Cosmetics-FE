@@ -47,7 +47,7 @@ export default function HotListWrapper() {
         />
       </div>
 
-      <div className="px-4 md:px-12 mb-10 my-4 max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto relative z-10 flex flex-col gap-4 p-2 md:p-4">
         <SectionHeader
           title="Hot List"
           subtitle="Out the most popular and trending products."
@@ -55,36 +55,38 @@ export default function HotListWrapper() {
           subtitleClass="text-sm sm:text-base lg:text-lg"
         />
 
-        <Swiper
-          modules={[Autoplay, Pagination]}
-          loop={true}
-          autoplay={{
-            delay: 2500,
-            disableOnInteraction: false,
-            pauseOnMouseEnter: false,
-          }}
-          pagination={{
-            clickable: true,
-            el: ".hotlist-pagination",
-          }}
-          spaceBetween={16}
-          slidesPerView={2}
-          breakpoints={{
-            640: { slidesPerView: 2 },
-            768: { slidesPerView: 3 },
-            1024: { slidesPerView: 5 },
-            1280: { slidesPerView: 5 },
-          }}
-          className="py-4"
-        >
-          {products.map((product) => (
-            <SwiperSlide key={product.id} className="py-0 my-2">
-              <ProductCard product={product} />
-            </SwiperSlide>
-          ))}
-        </Swiper>
+        <div className="relative pb-6">
+          <Swiper
+            modules={[Autoplay, Pagination]}
+            loop={true}
+            autoplay={{
+              delay: 2500,
+              disableOnInteraction: false,
+              pauseOnMouseEnter: false,
+            }}
+            pagination={{
+              clickable: true,
+              el: ".hotlist-pagination",
+            }}
+            spaceBetween={16}
+            slidesPerView={2}
+            breakpoints={{
+              640: { slidesPerView: 2 },
+              768: { slidesPerView: 3 },
+              1024: { slidesPerView: 5 },
+              1280: { slidesPerView: 5 },
+            }}
+            className="py-4"
+          >
+            {products.map((product) => (
+              <SwiperSlide key={product.id} className="py-0 my-2">
+                <ProductCard product={product} />
+              </SwiperSlide>
+            ))}
+          </Swiper>
 
-        <div className="hotlist-pagination mt-4 flex justify-center space-x-2" />
+          <div className="swiper-pagination-custom absolute bottom-0 left-0 right-0 flex justify-center space-x-3" />
+        </div>
       </div>
     </div>
   );

@@ -33,7 +33,7 @@ export const getShop = async (params: GetShopParams): Promise<GetShopResponse> =
     query.append("category", String(catId));
   });
 
-  const url = `/product?${query.toString()}`;
+  const url = `/product?is_active=true&${query.toString()}`;
 
   try {
     const data = await apiCore<GetShopResponse>(url, "GET");

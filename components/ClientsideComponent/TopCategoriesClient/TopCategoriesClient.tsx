@@ -62,10 +62,8 @@ export default function TopCategoriesClient({ categories }: Props) {
   };
 
   return (
-    <section className="p-6 mb-6 lg:my-8 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden">
-      <div className="absolute inset-0 z-0 opacity-40 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-50/70 via-white to-white"></div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+    <section className="p-2 md:p-4 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden">
+      <div className="max-w-7xl mx-auto relative z-10 flex flex-col gap-4">
         <div className="text-center">
           <SectionHeader
             title="Our Signature Collections"
@@ -77,7 +75,7 @@ export default function TopCategoriesClient({ categories }: Props) {
 
         {/* ✅ Category Tabs with Right Scroll Hint */}
         <motion.div
-          className="relative mt-8"
+          className="relative"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
@@ -163,12 +161,12 @@ export default function TopCategoriesClient({ categories }: Props) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 40 }}
               transition={{ duration: 0.6 }}
-              className="mt-12 relative pb-10"
+              className="relative pb-6"
             >
               <Swiper
                 modules={[Autoplay, Pagination]}
                 slidesPerView={2}
-                spaceBetween={20}
+                spaceBetween={16}
                 loop={true}
                 autoplay={{ delay: 3000, disableOnInteraction: false }}
                 pagination={{
@@ -179,9 +177,9 @@ export default function TopCategoriesClient({ categories }: Props) {
                 }}
                 breakpoints={{
                   320: { slidesPerView: 2, spaceBetween: 16 },
-                  640: { slidesPerView: 3, spaceBetween: 24 },
-                  1024: { slidesPerView: 4, spaceBetween: 32 },
-                  1280: { slidesPerView: 5, spaceBetween: 32 },
+                  640: { slidesPerView: 3, spaceBetween: 16 },
+                  1024: { slidesPerView: 4, spaceBetween: 16 },
+                  1280: { slidesPerView: 5, spaceBetween: 16 },
                 }}
                 className="px-2 py-10"
               >

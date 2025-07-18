@@ -1,6 +1,6 @@
 export async function getNewArrivalProducts() {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/product`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/product?is_active=true`, {
       cache: "no-store",
     });
  if (!res.ok) {
