@@ -1,3 +1,4 @@
+// CategoryFilter.tsx
 "use client";
 import { Category } from "@/types/category";
 

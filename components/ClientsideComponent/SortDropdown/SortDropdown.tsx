@@ -1,3 +1,6 @@
+// SortDropdown.tsx
+"use client";
+
 type SortOrder = "" | "price_asc" | "price_desc";
 
 interface SortDropdownProps {
@@ -13,9 +16,10 @@ export default function SortDropdown({
     <select
       value={sortOrder}
       onChange={(e) => setSortOrder(e.target.value as SortOrder)}
-      className="border h-10 rounded px-3 py-1 text-sm shadow-sm bg-white focus:outline-none focus:ring-1 focus:ring-black"
+      // Added mobile-specific sizing classes (text-xs, h-8, px-2) and responsive classes for larger screens
+      className="border text-black h-8 rounded px-2 py-1 text-xs shadow-sm bg-white focus:outline-none focus:ring-1 focus:ring-black sm:h-10 sm:px-3 sm:text-sm"
     >
-      <option value="">Default</option>
+      <option value="">Sort by</option>
       <option value="price_asc">Price: Low to High</option>
       <option value="price_desc">Price: High to Low</option>
     </select>

@@ -30,7 +30,7 @@ const Counter = () => {
       {/* Section header shown only once at top */}
       <div className="px-[20px] mt-2 max-w-7xl mx-auto mb-8 text-center">
         <SectionHeader
-          title="Our Company Progress"
+          title="Our Achievement"
           subtitle="Track how we’ve grown over time."
           titleClass="text-2xl sm:text-3xl lg:text-4xl"
           subtitleClass="text-sm sm:text-base lg:text-lg"
