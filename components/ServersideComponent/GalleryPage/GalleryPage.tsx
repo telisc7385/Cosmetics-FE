@@ -34,6 +34,8 @@ const GalleryPage = ({ gallery }: GalleryPageProps) => {
       <SectionHeader
         title="Our Gallery"
         subtitle="A glimpse into beauty, confidence, and satisfaction."
+        titleClass="text-2xl sm:text-3xl lg:text-4xl"
+        subtitleClass="text-sm sm:text-base lg:text-lg"
       />
       <Gallery images={images} />
     </div>

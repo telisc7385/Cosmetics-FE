@@ -101,10 +101,10 @@ const PincodeVerifier = ({ onVerified }: Props) => {
       localStorage.setItem("verifiedTax", String(summaryRes.taxPercentage));
       localStorage.setItem("verifiedTaxType", summaryRes.taxType);
 
-      onVerified?.(pincodeInfo); // Pass the full data to the parent
-      toast.success(
-        `Delivery available in ${pincodeInfo.city}, ${pincodeInfo.state}`
-      );
+      // onVerified?.(pincodeInfo); // Pass the full data to the parent
+      // toast.success(
+      //   `Delivery available in ${pincodeInfo.city}, ${pincodeInfo.state}`
+      // );
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : "Pincode verification failed.";
