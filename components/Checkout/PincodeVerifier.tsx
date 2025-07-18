@@ -1,10 +1,8 @@
-// src/components/Checkout/PincodeVerifier.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
-// Assuming you have an apiCore utility at this path
-import { apiCore } from "@/api/ApiCore";
+import { apiCore } from "@/api/ApiCore"; // Assuming you have an apiCore utility at this path
 
 type PincodeData = {
   pincode: string;
@@ -16,13 +14,14 @@ type PincodeData = {
 };
 
 type Props = {
-  onVerified?: (data: PincodeData) => void;
+  onVerified?: (data: PincodeData | null) => void; // Modified to accept null for unverified state
 };
 
 const PincodeVerifier = ({ onVerified }: Props) => {
   const [enteredPincode, setEnteredPincode] = useState("");
   const [verifying, setVerifying] = useState(false);
   const [verifiedData, setVerifiedData] = useState<PincodeData | null>(null);
+  const [pincodeError, setPincodeError] = useState<string | null>(null); // New state for error message
 
   // Restore saved data on mount
   useEffect(() => {
@@ -44,13 +43,23 @@ const PincodeVerifier = ({ onVerified }: Props) => {
       };
       setEnteredPincode(savedPincode);
       setVerifiedData(data);
+      setPincodeError(null); // Clear any previous error on successful restore
       onVerified?.(data); // Call onVerified with the restored data
+    } else {
+      // If no stored data, ensure parent is notified of unverified state
+      onVerified?.(null);
     }
   }, [onVerified]); // onVerified is a dependency because it's used inside useEffect
 
   const handleVerify = async () => {
+    setPincodeError(null); // Clear previous errors on new attempt
+
     if (!enteredPincode || enteredPincode.length !== 6) {
-      toast.error("Enter a valid 6-digit pincode");
+      const message = "Please enter a valid 6-digit pincode.";
+      toast.error(message);
+      setPincodeError(message);
+      setVerifiedData(null);
+      onVerified?.(null); // Notify parent of unverified state
       return;
     }
 
@@ -66,10 +75,11 @@ const PincodeVerifier = ({ onVerified }: Props) => {
         message?: string;
       }>("/pincode/check", "POST", { pincode: enteredPincode });
 
-      if (!res.available)
-        throw new Error(
-          res.message || "Invalid pincode or service not available."
-        );
+      if (!res.available) {
+        const message =
+          res.message || "Invalid pincode or service not available.";
+        throw new Error(message);
+      }
 
       // 2. Fetch order summary info (tax, shipping, etc.)
       // In a real app, 'items' should be passed from the cart context
@@ -101,15 +111,16 @@ const PincodeVerifier = ({ onVerified }: Props) => {
       localStorage.setItem("verifiedTax", String(summaryRes.taxPercentage));
       localStorage.setItem("verifiedTaxType", summaryRes.taxType);
 
-      // onVerified?.(pincodeInfo); // Pass the full data to the parent
-      // toast.success(
-      //   `Delivery available in ${pincodeInfo.city}, ${pincodeInfo.state}`
-      // );
+      onVerified?.(pincodeInfo); // Pass the full data to the parent
+      toast.success(
+        `Delivery available in ${pincodeInfo.city}, ${pincodeInfo.state}`
+      );
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : "Pincode verification failed.";
       toast.error(message);
-      setVerifiedData(null);
+      setPincodeError(message); // Set the error message
+      setVerifiedData(null); // Clear verified data
       // Clear all related localStorage items on error
       localStorage.removeItem("verifiedPincode");
       localStorage.removeItem("verifiedCity");
@@ -117,7 +128,7 @@ const PincodeVerifier = ({ onVerified }: Props) => {
       localStorage.removeItem("verifiedShipping");
       localStorage.removeItem("verifiedTax");
       localStorage.removeItem("verifiedTaxType");
-      onVerified?.({ pincode: "", city: "", state: "" }); // Notify parent of cleared state
+      onVerified?.(null); // Notify parent of unverified state
     } finally {
       setVerifying(false);
     }
@@ -126,13 +137,14 @@ const PincodeVerifier = ({ onVerified }: Props) => {
   const handleClearVerification = () => {
     setEnteredPincode("");
     setVerifiedData(null);
+    setPincodeError(null); // Clear error message
     localStorage.removeItem("verifiedPincode");
     localStorage.removeItem("verifiedCity");
     localStorage.removeItem("verifiedState");
     localStorage.removeItem("verifiedShipping");
     localStorage.removeItem("verifiedTax");
     localStorage.removeItem("verifiedTaxType");
-    onVerified?.({ pincode: "", city: "", state: "" }); // Notify parent of cleared state
+    onVerified?.(null); // Notify parent of cleared state
   };
 
   return (
@@ -151,11 +163,12 @@ const PincodeVerifier = ({ onVerified }: Props) => {
           value={enteredPincode}
           onChange={(e) => setEnteredPincode(e.target.value)}
           className="border text-[#213E5A] border-gray-300 rounded-md px-4 py-2 w-72 bg-gray-100 focus:bg-white outline-none"
+          disabled={verifying || verifiedData !== null} // Disable input if verifying or already verified
         />
         <button
           type="button"
           onClick={handleVerify}
-          disabled={verifying || verifiedData !== null}
+          disabled={verifying || verifiedData !== null} // Disable button if verifying or already verified
           className="bg-[#1A324A] text-white px-4 py-2 rounded-md hover:bg-[#142835] disabled:opacity-50"
         >
           {verifying ? "Checking..." : "Apply"}
@@ -163,20 +176,33 @@ const PincodeVerifier = ({ onVerified }: Props) => {
       </div>
 
       {verifiedData && (
-        <>
-          <p className="text-green-600 text-sm mt-2">
+        <div className="flex items-center gap-18 mt-2">
+          <p className="text-green-600 text-sm">
             Delivery available to {verifiedData.city}, {verifiedData.state}
           </p>
-          {/* Removed tax/shipping display here as per request, now shown in CartPage Order Summary */}
           <button
             type="button"
             onClick={handleClearVerification}
-            className="text-red-500 hover:text-red-700 font-medium mt-2"
+            className="text-red-500 hover:text-red-700 font-medium text-sm"
           >
             Clear
           </button>
-        </>
+        </div>
       )}
+
+      {!verifiedData &&
+        pincodeError && ( // Show error message and clear button if not verified and there's an error
+          <div className="flex items-center gap-2 mt-2">
+            <p className="text-red-600 text-sm">{pincodeError}</p>
+            <button
+              type="button"
+              onClick={handleClearVerification}
+              className="text-red-500 hover:text-red-700 font-medium text-sm"
+            >
+              Clear
+            </button>
+          </div>
+        )}
     </div>
   );
 };

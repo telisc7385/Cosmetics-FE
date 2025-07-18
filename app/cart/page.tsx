@@ -1,4 +1,3 @@
-// src/app/cart/page.tsx (or pages/cart.tsx)
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
@@ -56,7 +55,7 @@ interface CheckoutDataFromCart {
   total: number;
   abandonedDiscountApplied: number; // To pass the applied discount to checkout
   verifiedPincodeDetails: VerifiedPincodeDetails | null;
-  cartItems: CartItem[]; // Pass cart items to UserCheckout if needed
+  cartItems: CartItem[]; // Pass cart items too if UserCheckout needs them
 }
 
 const EmptyCartAnimation = () => (
@@ -160,32 +159,42 @@ const CartPage = () => {
             isTaxInclusive: false, // Assuming false for now based on previous context
           });
         }
+      } else {
+        // If no stored pincode, ensure pincodeVerified is false
+        setPincodeVerified(false);
+        setVerifiedPincodeDetails(null);
+        setOrderSummaryData(null);
       }
     }
   }, []); // Runs only once on mount
 
   // Memoize handlePincodeVerified to ensure its reference is stable
-  const handlePincodeVerified = useCallback((data: VerifiedPincodeDetails) => {
-    setPincodeVerified(true);
-    setVerifiedPincodeDetails(data);
-
-    // Directly set order summary data from the verified data
-    if (data.shippingRate !== undefined && data.taxPercentage !== undefined) {
-      setOrderSummaryData({
-        taxType: data.taxType || "N/A",
-        taxPercentage: data.taxPercentage,
-        taxDetails: [], // Initialize or fetch if needed
-        shippingRate: data.shippingRate,
-        isTaxInclusive: false, // Assuming false
-      });
-      // toast.success(
-      //   `Delivery available in ${data.city}, ${data.state}. Order summary updated!`
-      // );
-    } else {
-      setOrderSummaryData(null);
-      toast.error("Pincode verified, but order summary details are missing.");
-    }
-  }, []); // Dependencies are empty as it only uses its input 'data'
+  const handlePincodeVerified = useCallback(
+    (data: VerifiedPincodeDetails | null) => {
+      if (
+        data &&
+        data.shippingRate !== undefined &&
+        data.taxPercentage !== undefined
+      ) {
+        setPincodeVerified(true);
+        setVerifiedPincodeDetails(data);
+        setOrderSummaryData({
+          taxType: data.taxType || "N/A",
+          taxPercentage: data.taxPercentage,
+          taxDetails: [], // Initialize or fetch if needed
+          shippingRate: data.shippingRate,
+          isTaxInclusive: false, // Assuming false
+        });
+      } else {
+        // Pincode not verified or cleared
+        setPincodeVerified(false);
+        setVerifiedPincodeDetails(null);
+        setOrderSummaryData(null);
+        // toast.error("Pincode verification failed or cleared."); // PincodeVerifier will show its own toast
+      }
+    },
+    []
+  ); // Dependencies are empty as it only uses its input 'data'
 
   const handleIncrement = (cartItemId: number) => {
     if (isLoggedIn) {
@@ -321,14 +330,24 @@ const CartPage = () => {
   if (items.length === 0 && !loading) return <EmptyCartAnimation />;
 
   return (
-    <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 bg-[#F3F6F7]">
-      <h1 className="text-xl font-bold text-gray-800 mb-6">Shopping Cart</h1>
+    <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 lg:py-8 bg-[#F3F6F7]">
+      <div className="flex gap-52 items-center mb-6 lg:mb-4">
+        {" "}
+        {/* Flex container for title and clear all */}
+        <h1 className="text-xl font-bold text-gray-800">Shopping Cart</h1>
+        <button
+          onClick={handleClearCart}
+          className="text-[#007BFF] hover:text-[#0056B3] text-sm font-semibold cursor-pointer"
+        >
+          Clear all
+        </button>
+      </div>
       <div className="flex flex-col lg:flex-row gap-8">
         <div className="w-full lg:w-3/5">
           {items.map((item) => (
             <div
               key={item.cartItemId}
-              className="bg-white rounded-lg p-2 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between border border-gray-200 shadow-sm mb-4 relative"
+              className="bg-white rounded-lg p-2 sm:p-6 lg:py-3 lg:px-4 flex flex-col sm:flex-row items-start sm:items-center justify-between border border-gray-200 shadow-sm mb-4 relative"
             >
               {/* Common Left Section (Image and main text container) */}
               <div className="flex items-start sm:items-center w-full sm:w-auto mb-1 sm:mb-0">
@@ -487,15 +506,8 @@ const CartPage = () => {
         </div>
 
         {/* Order Summary */}
-        <div className="w-full lg:w-2/5 bg-white rounded-lg p-6 shadow-md border border-gray-200 self-start">
-          <div className="flex justify-end mb-4">
-            <button
-              onClick={handleClearCart}
-              className="text-[#007BFF] hover:text-[#0056B3] text-sm font-semibold cursor-pointer"
-            >
-              Clear all
-            </button>
-          </div>
+        <div className="w-full lg:w-2/5 bg-white rounded-lg p-6 lg:p-4 shadow-md border border-gray-200 self-start">
+          {/* Removed the clear all button from here */}
 
           <h2 className="text-lg font-bold text-gray-800 mb-4">
             Order Summary
@@ -505,15 +517,6 @@ const CartPage = () => {
             <PincodeVerifier
               onVerified={handlePincodeVerified} // This prop is now a stable reference
             />
-            {/* {verifiedPincodeDetails && (
-              <div className="mt-2 text-sm text-gray-600">
-                Delivery to:{" "}
-                <span className="font-semibold">
-                  {verifiedPincodeDetails.pincode},{" "}
-                  {verifiedPincodeDetails.city}, {verifiedPincodeDetails.state}
-                </span>
-              </div>
-            )} */}
           </div>
 
           <div className="space-y-2">
