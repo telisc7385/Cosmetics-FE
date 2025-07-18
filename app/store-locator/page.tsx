@@ -17,12 +17,13 @@ export default function StoreLocatorPage() {
         className="h-[300px] md:h-[400px] bg-cover bg-center py-5 lg:py-10 flex justify-center items-center flex-col"
         style={{
           backgroundImage:
-            "linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(/counter04.png)",
+            "url(/testimonialbg.png)",
         }}
       >
-        <h1 className="text-white text-4xl lg:text-6xl font-extrabold">
-          Find Our Stores
-        </h1>
+        <h2
+          className={`text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-normal leading-snug sm:leading-snug md:leading-tight drop-shadow-md transition-opacity duration-500`}
+        >          Find Your Glow Near You
+        </h2>
       </div>
 
       <div className="max-w-7xl mx-auto py-8 md:px-4">
