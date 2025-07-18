@@ -22,7 +22,7 @@ const ProductCard = ({ product }: Props) => {
   const { addCartItem } = useLoggedInCart();
 
   // ✅ Prevent rendering if product is inactive
-  // if (!product.isActive) return null;
+  if (!product.isActive) return null;
 
   const firstGeneralImage = product.images.find(
     (img) => img.sequence === 1
@@ -138,18 +138,16 @@ const ProductCard = ({ product }: Props) => {
           fill
           className="object-cover transition-transform duration-300 ease-in-out scale-100 group-hover:scale-110"
         />
-        {product.priceDifferencePercent > 0 && (
-          <div className="absolute top-3 left-3 bg-pink-600 text-white text-[10px] px-2 py-0.5 rounded-full font-semibold shadow-sm">
-            {product.priceDifferencePercent}% OFF
-          </div>
-        )}
+        <div className="absolute top-3 left-3 bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-semibold shadow-sm">
+          {product.priceDifferencePercent}% OFF
+        </div>
       </Link>
 
       {/* Content */}
       <div className="p-3 flex flex-col text-left">
         {/* Product Name */}
         <Link href={`/product/${product.slug}`}>
-          <h3 className="text-[13px] text-gray-800 font-semibold mb-1 group-hover:text-pink-700 transition-colors line-clamp-2 min-h-[34px]">
+          <h3 className="text-[13px] text-gray-800 font-semibold mb-1 group-hover:text-[#213C66] transition-colors line-clamp-2 min-h-[34px]">
             {product.name}
           </h3>
         </Link>
@@ -160,7 +158,7 @@ const ProductCard = ({ product }: Props) => {
           <div className="flex flex-col">
             {!isNaN(currentBasePrice) && currentBasePrice > 0 ? (
               <span className="text-sm font-bold text-[#007C85]">
-                ₹{currentBasePrice.toFixed(2)}
+                ₹{currentSellingPrice.toFixed(2)}
               </span>
             ) : (
               <span className="text-sm text-gray-500">Price Unavailable</span>
@@ -169,7 +167,7 @@ const ProductCard = ({ product }: Props) => {
             {!isNaN(currentSellingPrice) &&
               currentSellingPrice > currentBasePrice && (
                 <span className="text-xs text-gray-400 line-through mt-0.5">
-                  ₹{currentSellingPrice.toFixed(2)}
+                  ₹{currentBasePrice.toFixed(2)}
                 </span>
               )}
           </div>
@@ -177,7 +175,7 @@ const ProductCard = ({ product }: Props) => {
           {/* Action Button */}
           {product.variants && product.variants.length > 0 ? (
             <Link href={`/product/${product.slug}`}>
-              <button className="text-[11px] flex items-center gap-1 px-3 py-1.5 bg-pink-600 text-white rounded-full hover:bg-pink-700 transition">
+              <button className="text-[11px] flex items-center gap-1 px-3 py-1.5 bg-[#213C66] text-white rounded-full hover:bg-[#213C66] transition">
                 <MdTune className="text-xs" />
                 Select {/* ✅ Changed from 'Options' to 'Select' */}
               </button>
@@ -189,7 +187,7 @@ const ProductCard = ({ product }: Props) => {
               className={`text-[11px] flex items-center gap-1 px-3 py-1.5 rounded-full transition ${
                 isOutOfStock
                   ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-                  : "bg-pink-600 text-white hover:bg-pink-700"
+                  : "bg-[#213C66] text-white hover:bg-[#213C66]"
               }`}
             >
               <HiOutlineShoppingBag className="text-xs" />
