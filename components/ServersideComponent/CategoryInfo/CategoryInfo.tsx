@@ -78,8 +78,8 @@ export default function CategoryInfo({
     fetchProducts();
   }, [category.id, sortOrder, currentPage]);
 
-  const activeProducts = products.filter((product) => product.isActive)
-  console.log("Active Products:", activeProducts);
+  // const activeProducts = products.filter((product) => product.isActive)
+  // console.log("Active Products:", activeProducts);
   return (
     <div className="w-full bg-white">
       {/* Banner */}
@@ -141,13 +141,13 @@ export default function CategoryInfo({
 
         {/* Product Grid */}
         <section className="px-4 pb-10 w-full lg:flex lg:justify-center">
-          {activeProducts.length === 0 ? (
+          {products.length === 0 ? (
             <div className="bg-white border p-6 rounded shadow text-center text-gray-500 w-full lg:w-[90%]">
               No products found in this category.
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 w-full lg:w-[90%]">
-              {activeProducts.map((product) => (
+              {products.map((product) => (
 
                 <div key={product.id} className="w-full">
                   <ProductCard product={product} />

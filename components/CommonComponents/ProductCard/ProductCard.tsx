@@ -22,7 +22,7 @@ const ProductCard = ({ product }: Props) => {
   const { addCartItem } = useLoggedInCart();
 
   // ✅ Prevent rendering if product is inactive
-  if (!product.isActive) return null;
+  // if (!product.isActive) return null;
 
   const firstGeneralImage = product.images.find(
     (img) => img.sequence === 1
