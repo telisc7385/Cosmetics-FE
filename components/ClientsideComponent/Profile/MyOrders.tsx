@@ -8,7 +8,6 @@ import { apiCore } from "@/api/ApiCore";
 import { Product } from "@/types/product";
 import Image from "next/image";
 
-// ✅ Address & Variant — NEW (from Step 1)
 interface Address {
   id: number;
   userId: number;
@@ -137,7 +136,6 @@ export default function MyOrders() {
     setExpandedOrderId((prevId) => (prevId === orderId ? null : orderId));
   };
 
-  // Function to determine the status badge class
   const getStatusBadgeClass = (status: string) => {
     switch (status.toUpperCase()) {
       case "DELIVERED":
@@ -146,10 +144,9 @@ export default function MyOrders() {
         return "bg-red-100 text-red-800";
       case "PENDING":
         return "bg-yellow-100 text-yellow-800";
-      case "SHIPPED": // Assuming SHIPPED uses blue, as per original logic for non-specific statuses
+      case "SHIPPED":
         return "bg-blue-100 text-blue-800";
       default:
-        // Default for any other status
         return "bg-gray-100 text-gray-800";
     }
   };
@@ -183,35 +180,39 @@ export default function MyOrders() {
       {orders.length === 0 ? (
         <p className="text-gray-600">No orders found.</p>
       ) : (
-        <ul className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {orders.map((order) => (
-            <li
+            <div
               key={order.id}
-              className="border border-gray-200 rounded-lg p-5 shadow-sm bg-white cursor-pointer transition-all duration-300 ease-in-out hover:shadow-md"
-              onClick={() => handleCardClick(order.id)}
+              className="flex flex-col h-full border border-gray-200 rounded-lg shadow-sm bg-white transition-all duration-300"
             >
-              <div className="flex justify-between items-center mb-2">
-                <p className="text-lg font-semibold text-indigo-700">
-                  Order ID: {order.id}
+              <div
+                onClick={() => handleCardClick(order.id)}
+                className="p-5 cursor-pointer hover:bg-gray-50"
+              >
+                <div className="flex justify-between items-center mb-2">
+                  <p className="text-lg font-semibold text-indigo-700">
+                    Order ID: {order.id}
+                  </p>
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusBadgeClass(
+                      order.status
+                    )}`}
+                  >
+                    {order.status}
+                  </span>
+                </div>
+                <p className="text-gray-700 mb-1">
+                  Total Amount: ₹{order.totalAmount.toFixed(2)}
                 </p>
-                <span
-                  className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusBadgeClass(
-                    order.status
-                  )}`}
-                >
-                  {order.status}
-                </span>
+                <p className="text-gray-600 text-sm">
+                  Ordered on:{" "}
+                  {new Date(order.createdAt).toLocaleDateString("en-IN")}
+                </p>
               </div>
-              <p className="text-gray-700 mb-1">
-                Total Amount: ₹{order.totalAmount.toFixed(2)}
-              </p>
-              <p className="text-gray-600 text-sm">
-                Ordered on:{" "}
-                {new Date(order.createdAt).toLocaleDateString("en-IN")}
-              </p>
 
               {expandedOrderId === order.id && (
-                <div className="mt-4 pt-4 border-t border-gray-200">
+                <div className="border-t border-gray-200 p-5 bg-gray-50 rounded-b-lg">
                   <h3 className="font-medium text-gray-700 mb-2">Items:</h3>
                   <ul className="list-disc list-inside space-y-1 text-gray-600">
                     {order.items.length > 0 ? (
@@ -237,7 +238,6 @@ export default function MyOrders() {
                                 width={32}
                                 height={32}
                                 className="object-cover rounded"
-                                style={{ width: "32px", height: "32px" }}
                               />
                             )}
                             <span>
@@ -275,9 +275,9 @@ export default function MyOrders() {
                   <p className="text-gray-600">Phone: {order.address.phone}</p>
                 </div>
               )}
-            </li>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );
