@@ -73,7 +73,7 @@ const SetMapInstance = ({ setMap }: { setMap: (m: Map) => void }) => {
     mapRef = map;
   }, [map, setMap]);
   return null;
-};;
+};
 
 // Individual store marker
 const StoreMarker = ({
@@ -184,6 +184,15 @@ const StoreLocator = () => {
   const [loadingDistances, setLoadingDistances] = useState(false);
   const [loadingRoute, setLoadingRoute] = useState(false);
   const [maxStoresForDistanceCalculation] = useState(25); // Limit API calls to top 25 closest stores
+
+  useEffect(() => {
+    return () => {
+      if (mapRef) {
+        mapRef.remove();
+        mapRef = null;
+      }
+    };
+  }, []);
 
   // 1) Fetch stores
   useEffect(() => {
@@ -541,7 +550,7 @@ const StoreLocator = () => {
         </div>
         <div className="flex-1">
           <MapContainer
-            key={userLocation?.toString() || "default"}
+            // key={userLocation?.toString() || "default"}
             center={[20.92492, 77.32356]}
             zoom={6}
             className="min-h-[300px] h-full w-full"
