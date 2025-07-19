@@ -22,7 +22,6 @@ const testimonials = await getTestimonials(); // Assuming this function fetches 
 const gallery = await getGallery(); // Assuming this function fetches gallery images
 
 const AboutUsJunctionComponents = ({ sectionData }: Props) => {
-  console.log("sectionData", sectionData);
   return (
     <div className="">
       <div className="flex flex-col w-full gap-6 md:gap-10 mb-4 md:mb-8">

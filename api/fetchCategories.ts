@@ -19,3 +19,10 @@ export const fetchCategories = async (): Promise<GetCategoriesResponse> => {
 
 // ✅ Use `export type` for isolatedModules compatibility
 export type { Category };
+
+
+
+export async function fetchCategoryBySlug(slug: string) {
+  const response = await apiCore<Category>(`/category/getCategory/${slug}`, "GET");
+  return response;
+}

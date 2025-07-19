@@ -60,7 +60,7 @@ const NavItems = () => {
               <ul className="absolute top-full left-0 mt-2 text-black bg-white border border-gray-300 rounded shadow-lg opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all duration-200 z-50 min-w-[220px]">
                 {categories.map((cat) => (
                   <li key={cat.id} className="relative group/subcat">
-                    <Link href={`/category/${cat.id}`}>
+                    <Link href={`/category/${cat.slug}`}>
                       <span className="block px-4 py-2 text-black hover:bg-[#edf3f8] flex items-center gap-1">
                         {cat.name}
                         {Array.isArray(cat.subcategories) &&
@@ -76,7 +76,7 @@ const NavItems = () => {
                         <ul className="absolute top-0 left-full mt-0 ml-1 bg-white border border-gray-300 rounded shadow-lg opacity-0 group-hover/subcat:opacity-100 invisible group-hover/subcat:visible transition-all duration-200 min-w-[220px] z-50">
                           {cat.subcategories.map((sub) => (
                             <li key={sub.id} className="relative group/subsub">
-                              <Link href={`/category/${sub.id}`}>
+                              <Link href={`/category/${sub.slug}`}>
                                 <span className="block px-4 py-2 text-black hover:bg-[#edf3f8] flex items-center gap-1 text-sm">
                                   {sub.name}
                                   {(sub.subsubcategories?.length ?? 0) > 0 && (

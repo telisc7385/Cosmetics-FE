@@ -6,6 +6,8 @@ import { FiSearch } from "react-icons/fi";
 import { IoClose } from "react-icons/io5";
 import Image from "next/image";
 import { Product } from "@/types/product";
+import { apiCore } from "@/api/ApiCore";
+import { GetShopResponse } from "@/api/getShop";
 
 const SearchBar = () => {
   const [query, setQuery] = useState("");
@@ -24,14 +26,11 @@ const SearchBar = () => {
     const fetchSuggestions = async () => {
       try {
         setLoading(true);
-        const res = await fetch(
-          `https://cosmaticadmin.twilightparadox.com/product/filter/?search=${encodeURIComponent(
-            term
-          )}`
-        );
-        const data = await res.json();
-        console.log("🔍 API search results:", data.products); // Debug log
-        setFiltered(data.products?.slice(0, 6) || []);
+        
+        const url = `/product?is_active=true&page=1&limit=6&search=${query.toString()}`;
+        const res = await apiCore<GetShopResponse>(url, "GET");
+        console.log("🔍 API search results:", res); // Debug log
+        setFiltered(res.products || []);
       } catch (err) {
         console.error(" Failed to fetch search suggestions:", err);
       } finally {

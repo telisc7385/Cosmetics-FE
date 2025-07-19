@@ -7,7 +7,6 @@ export const apiCore = async <T>(
   token?: string | null
 ): Promise<T> => {
   let baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
-  console.log("Body received in apiCore:", body);
 
   if (!baseUrl) {
     console.warn("NEXT_PUBLIC_BASE_URL is not set. Falling back to default: https://cosmaticadmin.twilightparadox.com");
@@ -38,7 +37,6 @@ export const apiCore = async <T>(
   }
 
   try {
-    console.log(`[API Call] ${method} ${fullUrl}`);
     const res = await fetch(fullUrl, requestOptions);
     const contentType = res.headers.get("Content-Type");
 
@@ -66,7 +64,6 @@ export const apiCore = async <T>(
     if (contentType?.includes("application/json")) {
       return await res.json() as T;
     } else {
-      console.warn(`[ Server ] Non-JSON response for ${fullUrl}: ${res.status}. Returning null.`);
       // Depending on your API's non-JSON responses, you might want to return an empty object or throw an error.
       // For now, keeping it as `null as T` to match the previous behavior, but be aware of this.
       return null as T;
