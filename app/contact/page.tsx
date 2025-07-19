@@ -139,7 +139,7 @@ export default function ContactFormSection() {
         />
       </div>
 
-      <section className="min-h-screen max-w-7xl mx-auto flex items-center justify-center bg-white px-4 pt-5 sm:px-8 pb-6 relative">
+      <section className=" max-w-7xl mx-auto flex items-center justify-center bg-white px-4 py-10 sm:px-8 pb-6 relative">
         <div className="container mx-auto flex flex-col lg:flex-row items-stretch justify-center gap-10 ">
           {/* Left: Form */}
           <div className="w-full lg:w-7/12 bg-white/80 backdrop-blur-md p-2 sm:p-4 rounded-2xl shadow-md border border-[#213e5a] h-full">
@@ -214,7 +214,6 @@ export default function ContactFormSection() {
                 rows={4}
                 value={formData.message}
                 onChange={handleChange}
-                required
                 className="col-span-1 sm:col-span-2 border border-[#213E5A] text-[#213E5A] rounded-md px-2 py-1 sm:px-4 sm:py-2 bg-white text-[16px]"
               />
 

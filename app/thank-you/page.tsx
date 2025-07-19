@@ -44,14 +44,23 @@ interface CustomerInfo {
 }
 
 interface OrderInfo {
+  abandentDiscountAmount: number;
+  shippingRate: number;
+  applied_tax_rate: number;
   sub_total: number;
-  discount: number;
-  discount_coupon_code: string;
+  discount: number; // This should be a number
+  discount_coupon_code: string | null; // This is string or null, NOT boolean
   final_total: number;
   order_status: string;
   invoice_url: string;
   created_at_formatted: string;
   created_at: string;
+  abandoned_discount_amount?: number; // This is number | undefined
+  coupon_discount_amount?: number; // This is number | undefined
+  shipping_charges: number; // This is number
+  taxable_amount: number; // This is number
+  tax_percentage: number; // This is number
+  tax_amount: number; // This is number
 }
 
 interface PaymentInfo {
@@ -135,7 +144,7 @@ const ThankYouPage = () => {
               // IMPORTANT: Remove it from sessionStorage after successful retrieval
               // to prevent showing it again on subsequent page loads/navs.
               sessionStorage.removeItem("lastGuestOrder");
-              handleRemovePincode()
+              handleRemovePincode(); // This function likely clears pincode data from local storage/session.
               console.log(
                 "ThankYouPage: Loaded guest order from sessionStorage."
               );
@@ -178,7 +187,7 @@ const ThankYouPage = () => {
           undefined,
           token // Pass token if available (for logged-in users). For guests, this will be null/undefined.
         );
-        
+
         if (responseData.results && responseData.results.length > 0) {
           setOrder(responseData.results[0]);
           setShowCelebration(true);
@@ -410,7 +419,7 @@ const ThankYouPage = () => {
         }
       `}</style>
 
-      <div className="max-w-4xl mx-auto bg-gradient-to-r from-green-400 to-green-600 text-white p-3 rounded-lg shadow-md mb-4 text-center sm:p-5">
+      <div className="max-w-4xl mx-auto bg-gradient-to-r from-green-400 to-green-600 text-white p-3 rounded-lg shadow-md mb-4 text-center sm:p-5 mt-10">
         <svg
           className="w-14 h-14 sm:w-16 sm:h-16 text-white mx-auto mb-2 animate-bounce"
           fill="none"
@@ -684,14 +693,40 @@ const ThankYouPage = () => {
             <span>Subtotal:</span>
             <span>₹{(order.order_info.sub_total ?? 0).toFixed(2)}</span>
           </div>
-          {(order.order_info.discount ?? 0) > 0 && (
+
+          {/* Abandent Discount */}
+          {(order.order_info.abandentDiscountAmount ?? 0) > 0 && (
             <div className="flex justify-between text-sm font-semibold text-gray-700">
-              <span>Discount:</span>
-              <span className="text-red-600">
-                -₹{(order.order_info.discount ?? 0).toFixed(2)}
+              <span>Abandent Discount:</span>
+              <span className="font-medium text-red-600">
+                - ₹
+                {(order.order_info.abandentDiscountAmount ?? 0).toFixed(2)}
               </span>
             </div>
           )}
+
+          {/* Generic Discount if 'discount' field is used for total discount and no specific types are present */}
+          {/* This condition ensures it doesn't duplicate if abandoned or coupon discount is already shown */}
+          {(order.order_info.discount ?? 0) > 0 &&
+            !(order.order_info.coupon_discount_amount ?? 0) && (
+              <div className="flex justify-between text-sm font-semibold text-gray-700">
+                <span>Discount:</span>
+                <span className="font-medium text-red-600">
+                  - ₹{(order.order_info.discount ?? 0).toFixed(2)}
+                </span>
+              </div>
+            )}
+
+          <div className="flex justify-between text-sm font-semibold text-gray-700 pb-2 border-b border-gray-200">
+            <span>Shipping Charges:</span>
+            <span>₹{(order.order_info.shippingRate ?? 0).toFixed(2)}</span>
+          </div>
+
+          <div className="flex justify-between text-sm font-semibold text-gray-700 pb-2 border-b border-gray-200">
+            <span>Tax ({order.order_info.applied_tax_rate ?? 0}%):</span>
+            <span>₹{(order.order_info.tax_amount ?? 0).toFixed(2)}</span>
+          </div>
+
           <div className="flex justify-between text-lg font-bold text-blue-700 border-t pt-2 mt-2">
             <span>Total Paid:</span>
             <span>₹{(order.order_info.final_total ?? 0).toFixed(2)}</span>

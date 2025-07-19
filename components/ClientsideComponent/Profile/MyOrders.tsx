@@ -132,7 +132,8 @@ export default function MyOrders() {
     fetchOrders();
   }, [isLoggedIn, token]);
 
-  const handleCardClick = (orderId: number) => {
+  const handleCardClick = (orderId: number, event: React.MouseEvent) => {
+    event.stopPropagation(); // Prevent event bubbling to parent elements
     setExpandedOrderId((prevId) => (prevId === orderId ? null : orderId));
   };
 
@@ -152,7 +153,9 @@ export default function MyOrders() {
   };
 
   if (loading) {
-    return <div className="p-4 text-center">Loading orders...</div>;
+    return (
+      <div className="p-4 text-center text-gray-600">Loading orders...</div>
+    );
   }
 
   if (error) {
@@ -168,7 +171,7 @@ export default function MyOrders() {
 
   if (!isLoggedIn) {
     return (
-      <div className="p-4 text-center">
+      <div className="p-4 text-center text-gray-600">
         <p>Please log in to view your orders.</p>
       </div>
     );
@@ -187,7 +190,7 @@ export default function MyOrders() {
               className="flex flex-col h-full border border-gray-200 rounded-lg shadow-sm bg-white transition-all duration-300"
             >
               <div
-                onClick={() => handleCardClick(order.id)}
+                onClick={(e) => handleCardClick(order.id, e)}
                 className="p-5 cursor-pointer hover:bg-gray-50"
               >
                 <div className="flex justify-between items-center mb-2">
