@@ -670,7 +670,6 @@ export function LoggedInCartProvider({
     setItems([]); // Optimistic update
     setCartId(null);
     setAbandonedDiscount(0); // Also reset discount when cart is cleared
-    toast.success("Cart cleared successfully!"); // Optimistic toast
 
     try {
       await apiCore("/cart/clear", "DELETE", undefined, token);

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { apiCore } from "@/api/ApiCore"; // Assuming you have an apiCore utility at this path
+import { handleRemovePincode } from "@/utils/removePincodeData";
 
 type PincodeData = {
   pincode: string;
@@ -138,12 +139,7 @@ const PincodeVerifier = ({ onVerified }: Props) => {
     setEnteredPincode("");
     setVerifiedData(null);
     setPincodeError(null); // Clear error message
-    localStorage.removeItem("verifiedPincode");
-    localStorage.removeItem("verifiedCity");
-    localStorage.removeItem("verifiedState");
-    localStorage.removeItem("verifiedShipping");
-    localStorage.removeItem("verifiedTax");
-    localStorage.removeItem("verifiedTaxType");
+    handleRemovePincode()
     onVerified?.(null); // Notify parent of cleared state
   };
 

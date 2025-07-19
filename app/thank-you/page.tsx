@@ -11,6 +11,7 @@ import { selectToken } from "@/store/slices/authSlice"; // Ensure this path is c
 import Image from "next/image";
 import Lottie from "react-lottie-player"; // Import Lottie
 import ShoppingCart from "@/public/ShoppingCart.json"; // Assuming your Lottie animation file path
+import { handleRemovePincode } from "@/utils/removePincodeData";
 
 // Interface Definitions (Ensure these match your backend response structure)
 interface CustomerInfo {
@@ -134,6 +135,7 @@ const ThankYouPage = () => {
               // IMPORTANT: Remove it from sessionStorage after successful retrieval
               // to prevent showing it again on subsequent page loads/navs.
               sessionStorage.removeItem("lastGuestOrder");
+              handleRemovePincode()
               console.log(
                 "ThankYouPage: Loaded guest order from sessionStorage."
               );

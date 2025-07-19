@@ -39,7 +39,7 @@ export default function TopCategoriesClient({ categories, type }: Props) {
         if (type === "category") {
           params.append("category", selectedId.toString());
         } else {
-          params.append("tag", selectedId.toString());
+          params.append("tags", selectedId.toString());
         }
         params.append("page", "1");
         params.append("limit", "20");
