@@ -20,6 +20,7 @@ import {
 } from "@/api/fetchWhyChooseUs";
 import { getProducts } from "@/api/fetchFeaturedSlider";
 import Counter from "@/components/ClientsideComponent/Counter/counter";
+import TagProductFilter from "@/components/ClientsideComponent/TagProductFilter/TagProductFilter";
 
 export default async function HomePage() {
   const [banners, categoriesResponse, , product, testimonials, gallery] =
@@ -42,6 +43,7 @@ export default async function HomePage() {
       <TopCategoriesClient categories={categories} />
       <FeaturesBanner />
       <HotListWrapper />
+      <TagProductFilter />
 
       <FeaturedSliderComponent product={product} />
 

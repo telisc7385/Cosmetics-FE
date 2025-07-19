@@ -27,6 +27,11 @@ const nextConfig = {
         hostname: 'via.placeholder.com',
         pathname: '/**',
       },
+      { // Add this new entry for placehold.co
+        protocol: 'https',
+        hostname: 'placehold.co',
+        pathname: '/**',
+      },
       // Optional: Add your API domain if it returns images
       // {
       //   protocol: 'https',

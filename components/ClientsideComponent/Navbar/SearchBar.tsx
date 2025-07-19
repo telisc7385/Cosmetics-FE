@@ -70,7 +70,7 @@ const SearchBar = () => {
             placeholder="Search products..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full px-8 py-2 border border-gray-300 rounded focus:outline-none focus:ring-0.5 focus:ring-orange-500"
+            className="w-full px-8 py-1 border border-gray-300 rounded focus:outline-none focus:ring-0.5 focus:ring-orange-500"
           />
           <FiSearch
             className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-300 "

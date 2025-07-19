@@ -227,37 +227,37 @@ export function LoggedInCartProvider({
   const [cartId, setCartId] = useState<number | null>(null);
   const [abandonedDiscount, setAbandonedDiscount] = useState<number>(0);
 
-  const autoApplyAbandonedDiscount = useCallback(
-    async () => {
-      if (!cartId || !token) {
-        setAbandonedDiscount(0); // Ensure discount is 0 if no cartId or token
-        return;
-      }
+  // const autoApplyAbandonedDiscount = useCallback(
+  //   async () => {
+  //     if (!cartId || !token) {
+  //       setAbandonedDiscount(0); // Ensure discount is 0 if no cartId or token
+  //       return;
+  //     }
 
-      try {
-        const discountResponse = await apiCore<AbandonedDiscountResponse>(
-          "/abandoned/apply-discount",
-          "POST",
-          { cartId },
-          token
-        );
+  //     try {
+  //       const discountResponse = await apiCore<AbandonedDiscountResponse>(
+  //         "/abandoned/apply-discount",
+  //         "POST",
+  //         { cartId },
+  //         token
+  //       );
 
-        // Check if the response indicates success and contains totalDiscount
-        if (discountResponse?.success && typeof discountResponse.totalDiscount === 'number') {
-          console.log("✅ Discount applied:", discountResponse);
-          // Use totalDiscount from the backend response
-          setAbandonedDiscount(discountResponse.totalDiscount);
-        } else {
-          console.log("ℹ️ No discount or discount not applicable:", discountResponse?.message || 'Unknown reason');
-          setAbandonedDiscount(0); // Reset if no discount is provided or applicable
-        }
-      } catch (err) {
-        console.error("❌ Error applying discount:", err);
-        setAbandonedDiscount(0); // Fallback to 0 on any error
-      }
-    },
-    [cartId, token]
-  );
+  //       // Check if the response indicates success and contains totalDiscount
+  //       if (discountResponse?.success && typeof discountResponse.totalDiscount === 'number') {
+  //         console.log("✅ Discount applied:", discountResponse);
+  //         // Use totalDiscount from the backend response
+  //         setAbandonedDiscount(discountResponse.totalDiscount);
+  //       } else {
+  //         console.log("ℹ️ No discount or discount not applicable:", discountResponse?.message || 'Unknown reason');
+  //         setAbandonedDiscount(0); // Reset if no discount is provided or applicable
+  //       }
+  //     } catch (err) {
+  //       console.error("❌ Error applying discount:", err);
+  //       setAbandonedDiscount(0); // Fallback to 0 on any error
+  //     }
+  //   },
+  //   [cartId, token]
+  // );
 
   /**
    * Fetches the current cart items from the API.
@@ -326,7 +326,7 @@ export function LoggedInCartProvider({
     if (token) {
       fetchCartItems().then(() => {
         // Call autoApplyAbandonedDiscount after cart items are fetched and cartId is set
-        autoApplyAbandonedDiscount();
+        // autoApplyAbandonedDiscount();
       });
     } else {
       setItems([]);
@@ -334,7 +334,7 @@ export function LoggedInCartProvider({
       setAbandonedDiscount(0); // Ensure discount is reset if logged out
       setLoading(false);
     }
-  }, [token, fetchCartItems, autoApplyAbandonedDiscount]);
+  }, [token, fetchCartItems]);
 
   /**
    * Adds an item to the cart.
@@ -446,7 +446,7 @@ export function LoggedInCartProvider({
         await apiCore("/cart/add", "POST", payload, token);
         // After successful add, refetch the cart to get the real cartItemId and updated state
         await fetchCartItems();
-        autoApplyAbandonedDiscount(); // Re-apply discount after cart changes
+        // autoApplyAbandonedDiscount();
       } catch (err: any) {
         console.error("LoggedInCartProvider: Failed to add cart item:", err);
         if (err.message && err.message.includes("401")) {
@@ -461,7 +461,7 @@ export function LoggedInCartProvider({
         setLoading(false); // Ensure loading state is reset
       }
     },
-    [token, items, fetchCartItems, autoApplyAbandonedDiscount] // Added autoApplyAbandonedDiscount
+    [token, items, fetchCartItems] // Added autoApplyAbandonedDiscount
   );
 
   /**
@@ -493,7 +493,7 @@ export function LoggedInCartProvider({
         );
         // After successful removal, refetch the cart to ensure sync
         await fetchCartItems();
-        autoApplyAbandonedDiscount(); // Re-apply discount after cart changes
+        // autoApplyAbandonedDiscount(); // Re-apply discount after cart changes
       } catch (err: any) {
         console.error("LoggedInCartProvider: Failed to remove cart item:", err);
         if (err.message && err.message.includes("401")) {
@@ -508,7 +508,7 @@ export function LoggedInCartProvider({
         setLoading(false);
       }
     },
-    [token, items, fetchCartItems, autoApplyAbandonedDiscount] // Added autoApplyAbandonedDiscount
+    [token, items, fetchCartItems] // Added autoApplyAbandonedDiscount
   );
 
   /**
@@ -557,7 +557,7 @@ export function LoggedInCartProvider({
           { quantity: newQuantity },
           token
         );
-        autoApplyAbandonedDiscount(); // Re-apply discount after cart changes
+        // autoApplyAbandonedDiscount(); // Re-apply discount after cart changes
       } catch (err: any) {
         console.error(
           "LoggedInCartProvider: Failed to increment quantity:",
@@ -575,7 +575,7 @@ export function LoggedInCartProvider({
         setLoading(false);
       }
     },
-    [token, items, autoApplyAbandonedDiscount] // Added autoApplyAbandonedDiscount
+    [token, items] // Added autoApplyAbandonedDiscount
   );
 
   /**
@@ -633,7 +633,7 @@ export function LoggedInCartProvider({
             token
           );
         }
-        autoApplyAbandonedDiscount(); // Re-apply discount after cart changes
+        // autoApplyAbandonedDiscount(); // Re-apply discount after cart changes
       } catch (err: any) {
         console.error(
           "LoggedInCartProvider: Failed to decrement quantity:",
@@ -651,7 +651,7 @@ export function LoggedInCartProvider({
         setLoading(false);
       }
     },
-    [token, items, autoApplyAbandonedDiscount] // Added autoApplyAbandonedDiscount
+    [token, items] // Added autoApplyAbandonedDiscount
   );
 
   /**

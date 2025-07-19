@@ -9,6 +9,7 @@ import { fetchTopCategories } from "@/api/fetchTopCategories";
 import ReduxProviderWrapper from "@/CartProvider/ReduxProviderWrapper";
 import { getCompanySettings, CompanySettings } from "@/api/CompanyApi";
 import Script from "next/script"; // Import Script component from next/script
+import HomeCoupon from "@/components/ClientsideComponent/HomeCoupon/HomeCoupon";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -69,6 +70,7 @@ export default async function RootLayout({
       >
         <ReduxProviderWrapper>
           <Toaster position="top-center" />
+         
           <Navbar companyDetails={companyDetails} />
           <main className="pt-0 bg-white">{children}</main>
           <Footer

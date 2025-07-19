@@ -8,6 +8,7 @@ import SearchBar from "@/components/ClientsideComponent/Navbar/SearchBar";
 import NavbarIconsWrapper from "@/components/ClientsideComponent/Navbar/NavbarIconsWrapper";
 import MobileMenu from "@/components/ClientsideComponent/Navbar/MobileMenu";
 import { CompanySettings } from "@/api/CompanyApi";
+import HomeCoupon from "@/components/ClientsideComponent/HomeCoupon/HomeCoupon"; // Ensure this path is correct
 
 interface NavbarProps {
   companyDetails?: CompanySettings;
@@ -17,18 +18,31 @@ const Navbar = ({ companyDetails }: NavbarProps) => {
   const [scrolled, setScrolled] = useState(false);
   const logoUrl = companyDetails?.logo || "/logo1.png";
 
+  // Define the approximate height of the HomeCoupon banner
+  const homeCouponHeight = 40; // px, based on py-2 (16px) + text height, rounded up for safety
+
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 10);
+      // Adjust scroll check to account for the coupon banner
+      setScrolled(window.scrollY > 10 + homeCouponHeight);
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [homeCouponHeight]);
 
   return (
     <>
+      {/* HomeCoupon component - fixed at the very top with a higher z-index */}
+      <div className="fixed top-0 left-0 w-full z-[51] mb-5">
+        {" "}
+        {/* Increased z-index to 51 */}
+        <HomeCoupon />
+      </div>
+
+      {/* Main Navbar component - fixed below the HomeCoupon */}
       <nav
-        className={`w-full fixed top-0 z-50 transition-all duration-300 backdrop-blur-md ${
+        // The 'top' property is set dynamically based on the homeCouponHeight
+        className={`w-full fixed top-[${homeCouponHeight}px] z-50 transition-all duration-300 backdrop-blur-md mt-6 ${
           scrolled ? "bg-white/80 shadow" : "bg-white/80"
         }`}
       >
@@ -83,15 +97,22 @@ const Navbar = ({ companyDetails }: NavbarProps) => {
                 <MobileMenu companyDetails={companyDetails} />
               </div>
             </div>
-            <div className="mt-2">
+            <div >
               <SearchBar />
             </div>
           </div>
         </div>
       </nav>
 
-      {/* Spacer div to add margin under the fixed navbar */}
-      <div className="h-[100px] lg:h-[60px]" aria-hidden="true" />
+      {/* Spacer div to add margin under the fixed HomeCoupon and Navbar */}
+      {/* Total height = HomeCoupon height + Navbar height */}
+      {/* Navbar height: ~100px for mobile, ~60px for desktop (based on original spacer) */}
+      <div
+        className={`h-[${homeCouponHeight + 100}px] lg:h-[${
+          homeCouponHeight + 60
+        }px]`}
+        aria-hidden="true"
+      />
     </>
   );
 };

@@ -73,14 +73,13 @@ export default function TopCategoriesClient({ categories }: Props) {
           />
         </div>
 
-        {/* ✅ Category Tabs with Right Scroll Hint */}
+        {/* Category Tabs with Animation */}
         <motion.div
           className="relative"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
         >
-          {/* ✅ Scroll indicator (mobile only) */}
           <div className="absolute right-0 top-0 bottom-0 w-10 bg-gradient-to-l from-white/80 to-transparent pointer-events-none z-10 sm:hidden" />
 
           <motion.div
@@ -104,10 +103,6 @@ export default function TopCategoriesClient({ categories }: Props) {
                     transition: { duration: 0.5 },
                   },
                 }}
-                animate={
-                  selectedId === category.id ? { scale: [1, 1.05, 1] } : {}
-                }
-                transition={{ duration: 0.4, ease: "easeInOut" }}
               >
                 {category.name}
               </motion.button>
@@ -115,7 +110,7 @@ export default function TopCategoriesClient({ categories }: Props) {
           </motion.div>
         </motion.div>
 
-        {/* Loader */}
+        {/* Loading Spinner */}
         {loading && (
           <div className="flex flex-col items-center justify-center min-h-[300px] text-gray-600">
             <svg
@@ -144,6 +139,7 @@ export default function TopCategoriesClient({ categories }: Props) {
           </div>
         )}
 
+        {/* Empty State */}
         {!loading && filteredProducts.length === 0 && selectedId && (
           <div className="min-h-[300px] flex flex-col items-center justify-center text-gray-500 text-xl font-medium">
             <p>This collection is awaiting its star products! ✨</p>
@@ -153,6 +149,7 @@ export default function TopCategoriesClient({ categories }: Props) {
           </div>
         )}
 
+        {/* Product Cards with Swiper & Animation */}
         <AnimatePresence mode="wait">
           {!loading && filteredProducts.length > 0 && (
             <motion.div
