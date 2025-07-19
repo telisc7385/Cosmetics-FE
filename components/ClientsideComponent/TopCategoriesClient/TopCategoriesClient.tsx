@@ -71,14 +71,24 @@ export default function TopCategoriesClient({ categories, type }: Props) {
   return (
     <section className="p-2 md:p-4 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden">
       <div className="max-w-7xl mx-auto relative z-10 flex flex-col gap-4">
-        <div className="text-center">
-          <SectionHeader
-            title="Our Signature Collections"
-            subtitle="Immerse yourself in our meticulously curated beauty collections, designed to inspire and enhance your natural radiance."
-            titleClass="text-2xl sm:text-3xl lg:text-4xl"
-            subtitleClass="text-sm sm:text-base lg:text-lg"
-          />
-        </div>
+        {type === "category" ?
+          <div className="text-center">
+            <SectionHeader
+              title="Our Signature Collections"
+              subtitle="Immerse yourself in our meticulously curated beauty collections, designed to inspire and enhance your natural radiance."
+              titleClass="text-2xl sm:text-3xl lg:text-4xl"
+              subtitleClass="text-sm sm:text-base lg:text-lg"
+            />
+          </div> :
+          <div className="text-center">
+            <SectionHeader
+              title="Shop by Tags"
+              subtitle="Immerse yourself in our meticulously curated beauty collections, designed to inspire and enhance your natural radiance."
+              titleClass="text-2xl sm:text-3xl lg:text-4xl"
+              subtitleClass="text-sm sm:text-base lg:text-lg"
+            />
+          </div>
+        }
 
         {/* Category Tabs with Animation */}
         <motion.div
@@ -98,8 +108,8 @@ export default function TopCategoriesClient({ categories, type }: Props) {
                 key={category.id}
                 onClick={() => handleCategoryClick(category.id)}
                 className={`flex-shrink-0 mx-1 px-4 py-2 text-sm sm:text-base font-medium whitespace-nowrap relative group snap-center rounded-md transition-colors duration-300 ${selectedId === category.id
-                    ? "bg-[#22365D] text-[#F8F8F8]"
-                    : "bg-transparent text-gray-600 hover:text-[#22365D]"
+                  ? "bg-[#22365D] text-[#F8F8F8]"
+                  : "bg-transparent text-gray-600 hover:text-[#22365D]"
                   }`}
                 variants={{
                   hidden: { opacity: 0, x: 100 },
