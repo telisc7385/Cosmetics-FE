@@ -32,24 +32,26 @@ const Navbar = ({ companyDetails }: NavbarProps) => {
           scrolled ? "bg-white/80 shadow" : "bg-white/80"
         }`}
       >
-        <div className="max-w-7xl mx-auto w-full px-4 flex flex-col gap-4 mb-2">
+        <div className="max-w-7xl mx-auto w-full px-4 flex flex-col gap-6 py-2">
           {/* Desktop View */}
           <div className="hidden lg:flex items-center justify-between w-full">
-            {/* Left: Nav Items */}
-            <div className="flex gap-8">
-              <NavItems />
-            </div>
-
-            {/* Center: Logo */}
-            <div className="flex justify-center flex-1">
+            {/* Left: Logo */}
+            <div className="flex items-center">
               <Link href="/">
                 <Image src={logoUrl} alt="Logo" width={140} height={50} />
               </Link>
             </div>
 
-            {/* Right: Search Bar and Icons */}
-            <div className="flex items-center gap-4">
-              <div className="w-[180px]">
+            {/* Center: Nav Items */}
+            <div className="flex justify-center flex-1">
+              <NavItems />
+            </div>
+
+            {/* Right: Search Bar and Icons (grouped together) */}
+            <div className="flex items-center gap-6">
+              {" "}
+              {/* Use gap for spacing between search bar and icons */}
+              <div className="w-[350px]">
                 <SearchBar />
               </div>
               <NavbarIconsWrapper />
@@ -61,8 +63,8 @@ const Navbar = ({ companyDetails }: NavbarProps) => {
             <Link href="/">
               <Image src={logoUrl} alt="Logo" width={140} height={50} />
             </Link>
-            <div className="flex items-center gap-4">
-              <div className="w-[180px]">
+            <div className="flex items-center gap-6">
+              <div className="w-[280px]">
                 <SearchBar />
               </div>
               <NavbarIconsWrapper />
@@ -72,7 +74,7 @@ const Navbar = ({ companyDetails }: NavbarProps) => {
 
           {/* Mobile View */}
           <div className="flex flex-col md:hidden w-full">
-            <div className="flex justify-between items-center w-full">
+            <div className="flex justify-between items-center w-full pb-2">
               <Link href="/">
                 <Image src={logoUrl} alt="Logo" width={120} height={40} />
               </Link>

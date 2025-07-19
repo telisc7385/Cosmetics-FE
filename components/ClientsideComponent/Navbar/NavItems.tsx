@@ -39,7 +39,7 @@ const NavItems = () => {
   );
 
   return (
-    <ul className="flex gap-10 ">
+    <ul className="flex gap-5">
       {navItems.map((item) =>
         item.is_active ? (
           item.name.toLowerCase() === "categories" ? (
@@ -90,9 +90,7 @@ const NavItems = () => {
                                   {(sub.subsubcategories ?? []).map(
                                     (subsub) => (
                                       <li key={subsub.id}>
-                                        <Link
-                                          href={`/category/${subsub.id}`}
-                                        >
+                                        <Link href={`/category/${subsub.id}`}>
                                           <span className="block px-4 py-2 hover:bg-[#edf3f8] text-sm">
                                             {subsub.name}
                                           </span>

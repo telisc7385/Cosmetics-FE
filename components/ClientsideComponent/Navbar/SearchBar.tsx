@@ -59,7 +59,10 @@ const SearchBar = () => {
   };
 
   return (
-    <div className="relative w-full max-w-sm mx-auto text-[#213E5A]">
+    // Increased max-width for the search bar container
+    <div className="relative w-full max-w-lg mx-auto text-[#213E5A]">
+      {" "}
+      {/* Changed from max-w-sm to max-w-lg, or you can use a specific px value like w-[350px] */}
       <form onSubmit={handleSearch}>
         <div className="relative">
           <input
@@ -82,14 +85,17 @@ const SearchBar = () => {
           )}
         </div>
       </form>
-
       {/* 🔽 Suggestion dropdown */}
       {filtered.length > 0 && (
-        <div className="absolute z-50 w-full mt-2 bg-[#f3f4f6] border-1 border-gray-300 rounded-lg shadow-lg overflow-hidden">
+        // Increased width for the suggestion dropdown. Changed 'w-full' to a specific width.
+        <div className="absolute z-50 w-[calc(100%+0px)] mt-2 bg-[#f3f4f6] border-1 border-gray-300 rounded-lg shadow-lg overflow-hidden">
+          {" "}
+          {/* Changed w-full to w-[calc(100%+0px)] which means it takes the full width of its parent */}
           {filtered.map((product) => (
             <div
               key={product.id}
               onClick={() => handleSelect(product.slug)}
+              // No change needed here for width, as it already takes the available width of its parent
               className="flex items-center gap-3 px-4 py-2 cursor-pointer hover:bg-gray-100"
             >
               <Image
@@ -115,7 +121,6 @@ const SearchBar = () => {
           ))}
         </div>
       )}
-
       {/* Optional: No results */}
       {query && !loading && filtered.length === 0 && (
         <div className="absolute z-50 w-full mt-2 bg-white border rounded-lg shadow px-4 py-2 text-sm text-gray-500">
