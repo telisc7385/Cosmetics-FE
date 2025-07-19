@@ -31,21 +31,14 @@ const Navbar = ({ companyDetails }: NavbarProps) => {
   }, [homeCouponHeight]);
 
   return (
-    <>
-      {/* HomeCoupon component - fixed at the very top with a higher z-index */}
-      <div className="fixed top-0 left-0 w-full z-[51] mb-5">
-        {" "}
-        {/* Increased z-index to 51 */}
-        <HomeCoupon />
-      </div>
-
-      {/* Main Navbar component - fixed below the HomeCoupon */}
+    <div className="mb-20 md:mb-16">
       <nav
         // The 'top' property is set dynamically based on the homeCouponHeight
-        className={`w-full fixed top-[${homeCouponHeight}px] z-50 transition-all duration-300 backdrop-blur-md mt-6 ${
-          scrolled ? "bg-white/80 shadow" : "bg-white/80"
+        className={`w-full top-0 z-50 transition-all duration-300 backdrop-blur-md fixed ${
+          scrolled ? "bg-white/80 shadow " : "bg-white/80"
         }`}
       >
+        {/* <HomeCoupon /> */}
         <div className="max-w-7xl mx-auto w-full px-4 flex flex-col gap-6 py-2">
           {/* Desktop View */}
           <div className="hidden lg:flex items-center justify-between w-full">
@@ -97,23 +90,20 @@ const Navbar = ({ companyDetails }: NavbarProps) => {
                 <MobileMenu companyDetails={companyDetails} />
               </div>
             </div>
-            <div >
+            <div>
               <SearchBar />
             </div>
           </div>
         </div>
       </nav>
 
-      {/* Spacer div to add margin under the fixed HomeCoupon and Navbar */}
-      {/* Total height = HomeCoupon height + Navbar height */}
-      {/* Navbar height: ~100px for mobile, ~60px for desktop (based on original spacer) */}
       <div
-        className={`h-[${homeCouponHeight + 100}px] lg:h-[${
+        className={`h-[${homeCouponHeight + 80}px] lg:h-[${
           homeCouponHeight + 60
         }px]`}
         aria-hidden="true"
       />
-    </>
+    </div>
   );
 };
 

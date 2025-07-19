@@ -57,7 +57,7 @@ const NavItems = () => {
               </span>
 
               {/* Subcategories Dropdown */}
-              <ul className="absolute top-full left-0 mt-2 text-black bg-white border border-gray-300 rounded shadow-lg opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all duration-200 z-50 min-w-[220px]">
+              <ul className="absolute top-full left-0 mt-2 text-black bg-white border border-gray-300 rounded shadow-lg opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all duration-200 z-30 min-w-[220px]">
                 {categories.map((cat) => (
                   <li key={cat.id} className="relative group/subcat">
                     <Link href={`/category/${cat.slug}`}>

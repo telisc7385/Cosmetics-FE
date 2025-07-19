@@ -82,7 +82,7 @@ const HomeCoupon: React.FC = () => {
             key={coupon.id}
             className="text-center md:text-left text-md md:text-md px-1"
           >
-            Use <span className="font-bold">{coupon.code}</span> for{" "}
+            {coupon.name}: Use <span className="font-bold">{coupon.code}</span> for{" "}
             <span className="font-bold">{coupon.discount}%</span> off
           </p>
         ))}
