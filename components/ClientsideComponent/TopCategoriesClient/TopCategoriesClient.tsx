@@ -15,15 +15,16 @@ import { motion, AnimatePresence } from "framer-motion";
 
 type Props = {
   categories: Category[];
+  type: string;
 };
 
-export default function TopCategoriesClient({ categories }: Props) {
+export default function TopCategoriesClient({ categories, type }: Props) {
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    if (categories.length > 0) {
+    if (categories && categories?.length > 0) {
       setSelectedId(categories[0].id);
     }
   }, [categories]);
@@ -35,15 +36,21 @@ export default function TopCategoriesClient({ categories }: Props) {
       try {
         setLoading(true);
         const params = new URLSearchParams();
-        params.append("category", selectedId.toString());
+        if (type === "category") {
+          params.append("category", selectedId.toString());
+        } else {
+          params.append("tag", selectedId.toString());
+        }
         params.append("page", "1");
         params.append("limit", "20");
+        params.append("is_active", true.toString());
 
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/category/id?${params.toString()}`
+          `${process.env.NEXT_PUBLIC_BASE_URL}/product?${params.toString()}`
         );
         const json = await res.json();
-        setFilteredProducts(json.data?.products || []);
+        console.log("json", json)
+        setFilteredProducts(json?.products || []);
       } catch (error) {
         console.error("Error fetching products by category:", error);
         setFilteredProducts([]);
@@ -86,15 +93,14 @@ export default function TopCategoriesClient({ categories }: Props) {
             className="flex flex-nowrap overflow-x-auto scrollbar-hide justify-start sm:justify-center py-2 px-1 -mx-1 snap-x snap-mandatory"
             variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
           >
-            {categories.map((category) => (
+            {categories && categories?.map((category) => (
               <motion.button
                 key={category.id}
                 onClick={() => handleCategoryClick(category.id)}
-                className={`flex-shrink-0 mx-1 px-4 py-2 text-sm sm:text-base font-medium whitespace-nowrap relative group snap-center rounded-md transition-colors duration-300 ${
-                  selectedId === category.id
+                className={`flex-shrink-0 mx-1 px-4 py-2 text-sm sm:text-base font-medium whitespace-nowrap relative group snap-center rounded-md transition-colors duration-300 ${selectedId === category.id
                     ? "bg-[#22365D] text-[#F8F8F8]"
                     : "bg-transparent text-gray-600 hover:text-[#22365D]"
-                }`}
+                  }`}
                 variants={{
                   hidden: { opacity: 0, x: 100 },
                   visible: {

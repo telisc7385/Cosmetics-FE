@@ -331,8 +331,8 @@ const CartPage = () => {
 
   return (
     <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 lg:py-8 bg-[#F3F6F7]">
-      <div className="flex gap-52 items-center mb-6 lg:mb-4">
-        {" "}
+      <div className="flex justify-between items-center mb-6 lg:mb-4">
+        
         {/* Flex container for title and clear all */}
         <h1 className="text-xl font-bold text-gray-800">Shopping Cart</h1>
         <button
@@ -341,6 +341,7 @@ const CartPage = () => {
         >
           Clear all
         </button>
+        <div></div>
       </div>
       <div className="flex flex-col lg:flex-row gap-8">
         <div className="w-full lg:w-3/5">

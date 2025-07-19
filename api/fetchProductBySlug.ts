@@ -14,3 +14,9 @@ export async function fetchProductBySlug(slug: string): Promise<Product | null> 
     return null;
   }
 }
+
+
+export async function fetchAllTag() {
+  const response:any = await apiCore(`/product-tag`, "GET");
+  return response?.results;
+}
