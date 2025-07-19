@@ -20,10 +20,11 @@ import {
 } from "@/api/fetchWhyChooseUs";
 import { getProducts } from "@/api/fetchFeaturedSlider";
 import Counter from "@/components/ClientsideComponent/Counter/counter";
-import TagProductFilter from "@/components/ClientsideComponent/TagProductFilter/TagProductFilter";
+import { fetchAllTag } from "@/api/fetchProductBySlug";
+import PromotionBanner from "@/components/ClientsideComponent/PromotionBanner/PromotionBanner";
 
 export default async function HomePage() {
-  const [banners, categoriesResponse, , product, testimonials, gallery] =
+  const [banners, categoriesResponse, , product, testimonials, gallery, tagData] =
     await Promise.all([
       getBanners(),
       fetchCategories(),
@@ -31,6 +32,7 @@ export default async function HomePage() {
       getProducts(),
       getTestimonials(),
       getGallery(),
+      fetchAllTag()
     ]);
 
   const { categories } = categoriesResponse;
@@ -40,10 +42,12 @@ export default async function HomePage() {
       <HeroBanner banners={banners} />
       <CategorySection categories={categories} />
       <Counter />
-      <TopCategoriesClient categories={categories} />
+      <TopCategoriesClient categories={categories} type={"category"} />
       <FeaturesBanner />
       <HotListWrapper />
-      <TagProductFilter />
+
+      <TopCategoriesClient categories={tagData} type={"tag"} />
+      {/* <TagProductFilter /> */}
 
       <FeaturedSliderComponent product={product} />
 
@@ -51,7 +55,7 @@ export default async function HomePage() {
       <GalleryPage gallery={gallery} />
       <NewsletterSignup />
 
-      {/* <PromotionBanner />  */}
+      <PromotionBanner /> 
     </div>
   );
 }

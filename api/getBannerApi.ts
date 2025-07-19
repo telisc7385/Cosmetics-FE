@@ -1,4 +1,4 @@
-import { apiCore } from "@/api/ApiCore";
+import { apiCore, Coupon } from "@/api/ApiCore";
 import { BannerType } from "@/types/banner";
 
 // Explicitly define the response shape
@@ -19,9 +19,16 @@ export const getBanners = async (): Promise<BannerType[]> => {
       return [];
     }
 
-    console.error("Banner API error:", err instanceof Error ? err.message : err);
     return [];
   }
 };
 
- 
+export async function getCouponData(token: string) {
+  const response = await apiCore<{ success: boolean; data: Coupon[] }>(
+    `/coupon/discounts`,
+    "GET",
+    {},
+    token
+  );
+  return response;
+}

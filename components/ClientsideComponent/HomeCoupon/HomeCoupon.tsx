@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { apiCore, Coupon } from "@/api/ApiCore";
+import { Coupon } from "@/api/ApiCore";
 import { useSelector } from "react-redux";
 import { selectToken, selectIsLoggedIn } from "@/store/slices/authSlice";
+import { getCouponData } from "@/api/getBannerApi";
 
 const HomeCoupon: React.FC = () => {
   const token = useSelector(selectToken);
@@ -20,12 +21,7 @@ const HomeCoupon: React.FC = () => {
       }
 
       try {
-        const res = await apiCore<{ success: boolean; data: Coupon[] }>(
-          "/coupon/discounts",
-          "GET",
-          {}, // body
-          token // token (used correctly here)
-        );
+        const res = await getCouponData(token)
 
         if (res?.success && Array.isArray(res.data)) {
           const homepageCoupons = res.data.filter((c) => c.show_on_homepage);
