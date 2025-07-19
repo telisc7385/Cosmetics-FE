@@ -251,12 +251,13 @@ const UserCheckout = () => {
   // Calculate final total amount based on new logic
   useEffect(() => {
     let calculatedTotal = taxableAmount + taxAmount; // Start with taxable amount + tax
-    // if (appliedCoupon && discountAmount > 0) {
-    //   calculatedTotal -= discountAmount;
+    if (appliedCoupon && discountAmount > 0) {
+      // calculatedTotal -= discountAmount;
 
-    //   setAbandentApplied(false)
-    // } else {
-    //   calculatedTotal -= abandentDiscountAmount;
+      setAbandentApplied(false)
+    } 
+    // else {
+    //   // calculatedTotal -= abandentDiscountAmount;
     // }
 
     setFinalTotalAmount(Math.max(0, calculatedTotal));
@@ -1475,7 +1476,7 @@ const UserCheckout = () => {
                   </div>
                   <div className="flex space-x-2">
                     <button
-                      onClick={() => (setAbandentApplied(!abandentApplied), setShowCouponSection(!showCouponSection))}
+                      onClick={() => (setAbandentApplied(!abandentApplied), setShowCouponSection(!showCouponSection), handleRemoveCoupon())}
                       // disabled={abandentApplied}
                       className="bg-[#213E5A] text-white text-sm px-3 py-1 rounded-md hover:bg-[#1a324a] disabled:opacity-50"
                     >
