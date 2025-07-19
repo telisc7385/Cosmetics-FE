@@ -17,30 +17,34 @@ const GalleryPage = ({ gallery }: GalleryPageProps) => {
 
   if (images.length === 0) {
     return (
-      <div className="h-auto bg-white px-4 md:px-[40px] max-w-7xl mx-auto text-center py-10">
+      <section className="w-full mt-4 md:mt-8 ">
+        <div className="max-w-7xl mx-auto p-4">
+          <SectionHeader
+            title="Our Gallery"
+            subtitle="A glimpse into beauty, confidence, and satisfaction."
+            titleClass="text-2xl sm:text-3xl lg:text-4xl"
+            subtitleClass="text-sm sm:text-base lg:text-lg"
+          />
+          <p className="text-gray-600 mt-5">
+            No active gallery images found at the moment.
+          </p>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="w-full mt-4 md:mt-8 ">
+      <div className="max-w-7xl mx-auto p-4">
         <SectionHeader
           title="Our Gallery"
           subtitle="A glimpse into beauty, confidence, and satisfaction."
           titleClass="text-2xl sm:text-3xl lg:text-4xl"
           subtitleClass="text-sm sm:text-base lg:text-lg"
         />
-        <p className="text-gray-600 mt-5">
-          No active gallery images found at the moment.
-        </p>
+        <Gallery images={images} />
       </div>
-    );
-  }
-
-  return (
-    <div className="h-auto bg-white px-4 pt-10 md:px-[40px] max-w-7xl mx-auto">
-      <SectionHeader
-        title="Our Gallery"
-        subtitle="A glimpse into beauty, confidence, and satisfaction."
-        titleClass="text-2xl sm:text-3xl lg:text-4xl"
-        subtitleClass="text-sm sm:text-base lg:text-lg"
-      />
-      <Gallery images={images} />
-    </div>
+    </section>
   );
 };
 

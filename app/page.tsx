@@ -24,11 +24,11 @@ import { fetchAllTag } from "@/api/fetchProductBySlug";
 import PromotionBanner from "@/components/ClientsideComponent/PromotionBanner/PromotionBanner";
 
 export default async function HomePage() {
-  const [banners, categoriesResponse, , product, testimonials, gallery, tagData] =
+  const [banners, categoriesResponse, product, testimonials, gallery, tagData] =
     await Promise.all([
       getBanners(),
       fetchCategories(),
-      getWhyChooseUs(),
+      // getWhyChooseUs(),
       getProducts(),
       getTestimonials(),
       getGallery(),
@@ -45,17 +45,14 @@ export default async function HomePage() {
       <TopCategoriesClient categories={categories} type={"category"} />
       <FeaturesBanner />
       <HotListWrapper />
-
+      <FeaturedSliderComponent product={product} />
       <TopCategoriesClient categories={tagData} type={"tag"} />
       {/* <TagProductFilter /> */}
-
-      <FeaturedSliderComponent product={product} />
-
       <TestimonialsSection testimonials={testimonials} />
       <GalleryPage gallery={gallery} />
       <NewsletterSignup />
 
-      <PromotionBanner /> 
+      <PromotionBanner />
     </div>
   );
 }

@@ -19,15 +19,15 @@ const FeaturesBanner = () => {
   }, []);
 
   return (
-    <>
-      <SectionHeader
-        title="Why Choose US"
-        subtitle="Discover trust, quality, and lasting value."
-        titleClass="text-2xl sm:text-3xl lg:text-4x "
-        subtitleClass="text-sm sm:text-base lg:text-lg mb-4"
-      />
-      <div className="bg-[#f9fafb] mb-14 py-6 px-4">
-        <div className="max-w-7xl mx-auto flex flex-wrap justify-center gap-x-8 gap-y-12">
+    <section className="w-full py-4 md:py-8 bg-gray-50">
+      <div className="max-w-7xl mx-auto p-4">
+        <SectionHeader
+          title="Why Choose US"
+          subtitle="Discover trust, quality, and lasting value."
+          titleClass="text-2xl sm:text-3xl lg:text-4xl"
+          subtitleClass="text-sm sm:text-base lg:text-lg"
+        />
+        <div className="mt-4 md:mt-8 max-w-7xl mx-auto flex flex-wrap justify-center gap-x-8 gap-y-12">
           {features.map((item) => (
             <div
               key={item.id}
@@ -54,7 +54,7 @@ const FeaturesBanner = () => {
           ))}
         </div>
       </div>
-    </>
+    </section>
   );
 };
 

@@ -10,26 +10,23 @@ import Link from "next/link";
 import { Product } from "@/types/product";
 import { motion } from "framer-motion";
 import { useState } from "react";
+import SectionHeader from "@/components/CommonComponents/SectionHeader";
 
 export default function FeaturedSlider({ products }: { products: Product[] }) {
   const [activeIndex, setActiveIndex] = useState(0);
 
   return (
     <div className="relative w-full overflow-hidden">
-      {/* ✅ Background Image */}
-      <div className="absolute inset-0 z-0">
-        <Image
-          src="/testimonialbg.png"
-          alt="Featured Background"
-          fill
-          className="object-cover object-center"
-        />
-        <div className="absolute inset-0 bg-[#F7EFE0] opacity-40 z-10" />
-      </div>
 
       {/* ✅ Swiper content */}
-      <div className="relative z-20 py-4 px-3 sm:px-4 lg:px-6">
-        <div className="max-w-6xl mx-auto">
+      <div className="relative z-20">
+        <SectionHeader
+          title="Shop Our Best Sellers"
+          subtitle="Trusted by Thousands, Loved for a Reason."
+          titleClass="text-2xl sm:text-3xl lg:text-4xl"
+          subtitleClass="text-sm sm:text-base lg:text-lg"
+        />
+        <div className="max-w-6xl mx-auto mt-4 md:mt-8">
           <Swiper
             modules={[Navigation, Autoplay]}
             spaceBetween={20}

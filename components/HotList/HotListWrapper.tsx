@@ -35,19 +35,8 @@ export default function HotListWrapper() {
   }
 
   return (
-    <div className="relative">
-      {/* ✅ Floating Decorative Image at top-right, outside container */}
-      <div className="absolute -top-20 my-6 right-0 z-10 hidden md:block">
-        <Image
-          src="/flowerDecor.png" // 🔁 Replace with your actual image path
-          alt="Hotlist Decoration"
-          width={220}
-          height={220}
-          className="object-contain"
-        />
-      </div>
-
-      <div className="max-w-7xl mx-auto relative z-10 flex flex-col gap-4 p-2 md:p-4">
+    <section className="w-full mt-4 md:mt-8 ">
+      <div className="max-w-7xl mx-auto p-4">
         <SectionHeader
           title="Hot List"
           subtitle="Out the most popular and trending products."
@@ -55,7 +44,7 @@ export default function HotListWrapper() {
           subtitleClass="text-sm sm:text-base lg:text-lg"
         />
 
-        <div className="relative pb-6">
+        <div className="relative mt-4 md:mt-8">
           <Swiper
             modules={[Autoplay, Pagination]}
             loop={true}
@@ -76,7 +65,7 @@ export default function HotListWrapper() {
               1024: { slidesPerView: 5 },
               1280: { slidesPerView: 5 },
             }}
-            className="py-4"
+            className="relative mb-6"
           >
             {products.map((product) => (
               <SwiperSlide key={product.id} className="py-0 my-2">
@@ -88,6 +77,6 @@ export default function HotListWrapper() {
           <div className="swiper-pagination-custom absolute bottom-0 left-0 right-0 flex justify-center space-x-3" />
         </div>
       </div>
-    </div>
+    </section>
   );
 }

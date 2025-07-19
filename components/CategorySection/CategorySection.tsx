@@ -12,12 +12,8 @@ type Props = {
 
 export default async function CategorySection({ categories }: Props) {
   return (
-    <section className="w-full sm:px-6 md:px-10 mt-0">
-      <div className="max-w-7xl mx-auto flex flex-col">
-        <div className="w-full mt-10">
-          <CategorySlider categories={categories} />
-        </div>
-      </div>
+    <section className="w-full mt-4 md:mt-8">
+      <CategorySlider categories={categories} />
     </section>
   );
 }

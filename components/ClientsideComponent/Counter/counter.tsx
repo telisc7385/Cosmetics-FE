@@ -26,41 +26,39 @@ const Counter = () => {
   }, [inView, startCount]);
 
   return (
-    <div ref={ref} className="w-full my-10 rounded-xl px-4 sm:px-6 lg:px-8 ">
-      {/* Section header shown only once at top */}
-      <div className="px-[20px] mt-2 max-w-7xl mx-auto mb-8 text-center">
+    <section ref={ref} className="w-full py-4 md:py-8 bg-gray-50">
+      <div className="max-w-7xl mx-auto p-4">
         <SectionHeader
           title="Our Achievement"
-          subtitle="Track how we’ve grown over time."
+          subtitle="Track how we've grown over time."
           titleClass="text-2xl sm:text-3xl lg:text-4xl"
           subtitleClass="text-sm sm:text-base lg:text-lg"
         />
+        <div className="mt-4 md:mt-8 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-2 gap-y-6 text-center relative">
+          {stats.map((stat, index) => (
+            <div
+              key={index}
+              className="relative flex flex-col items-center justify-center"
+            >
+              <StatItem number={stat.number} title={stat.title} />
+
+              {/* Desktop vertical divider */}
+              {index !== stats.length - 1 && (
+                <div className="hidden lg:block absolute right-[-4px] top-1/2 transform -translate-y-1/2 h-12 w-[2px] bg-gradient-to-b from-[#10626B] via-[#50A1A8] to-[#10626B] rounded-full" />
+              )}
+
+              {/* Mobile divider logic (only when 2 items per row) */}
+              {index % 2 === 0 && index + 1 < stats.length && (
+                <>
+                  {/* Vertical divider between 2 columns (keep only this for mobile) */}
+                  <div className="block lg:hidden absolute top-1/2 -translate-y-1/2 right-0 h-10 w-[2px] bg-gradient-to-b from-[#10626B] via-[#50A1A8] to-[#10626B] rounded-full" />
+                </>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
-
-      <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-2 gap-y-6 text-center relative">
-        {stats.map((stat, index) => (
-          <div
-            key={index}
-            className="relative flex flex-col items-center justify-center"
-          >
-            <StatItem number={stat.number} title={stat.title} />
-
-            {/* Desktop vertical divider */}
-            {index !== stats.length - 1 && (
-              <div className="hidden lg:block absolute right-[-4px] top-1/2 transform -translate-y-1/2 h-12 w-[2px] bg-gradient-to-b from-[#10626B] via-[#50A1A8] to-[#10626B] rounded-full" />
-            )}
-
-            {/* Mobile divider logic (only when 2 items per row) */}
-            {index % 2 === 0 && index + 1 < stats.length && (
-              <>
-                {/* Vertical divider between 2 columns (keep only this for mobile) */}
-                <div className="block lg:hidden absolute top-1/2 -translate-y-1/2 right-0 h-10 w-[2px] bg-gradient-to-b from-[#10626B] via-[#50A1A8] to-[#10626B] rounded-full" />
-              </>
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
+    </section>
   );
 };
 
