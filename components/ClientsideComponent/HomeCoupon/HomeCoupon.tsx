@@ -21,8 +21,8 @@ const HomeCoupon: React.FC = () => {
 
       try {
         const res = await apiCore<{ success: boolean; data: Coupon[] }>(
-          "/coupon/user-coupon",
-          "POST",
+          "/coupon/discounts",
+          "GET",
           {}, // body
           token // token (used correctly here)
         );
@@ -46,8 +46,8 @@ const HomeCoupon: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="w-full shadow-lg overflow-hidden rounded-lg">
-        <div className="bg-[#22365D] text-white py-2 text-center text-lg font-semibold rounded-lg">
+      <div className="w-full shadow-lg overflow-hidden ">
+        <div className="bg-[#22365D] text-white py-2 text-center text-lg font-semibold ">
           Loading coupons...
         </div>
       </div>
@@ -56,8 +56,8 @@ const HomeCoupon: React.FC = () => {
 
   if (error) {
     return (
-      <div className="w-full shadow-lg overflow-hidden rounded-lg">
-        <div className="bg-red-600 text-white py-2 text-center text-lg font-semibold rounded-lg">
+      <div className="w-full shadow-lg overflow-hidden ">
+        <div className="bg-red-600 text-white py-2 text-center text-lg font-semibold ">
           {error}
         </div>
       </div>
@@ -66,8 +66,8 @@ const HomeCoupon: React.FC = () => {
 
   if (coupons.length === 0) {
     return (
-      <div className="w-full shadow-lg overflow-hidden rounded-lg">
-        <div className="bg-[#22365D] text-white py-2 text-center text-lg rounded-lg">
+      <div className="w-full shadow-lg overflow-hidden ">
+        <div className="bg-[#22365D] text-white py-2 text-center text-lg ">
           No special offers available right now.
         </div>
       </div>
@@ -75,12 +75,12 @@ const HomeCoupon: React.FC = () => {
   }
 
   return (
-    <div className="w-full shadow-lg overflow-hidden rounded-lg">
-      <div className="flex flex-col md:flex-row items-center justify-center py-2 bg-[#22365D] text-white rounded-lg">
+    <div className="w-full shadow-lg overflow-hidden ">
+      <div className="flex flex-col md:flex-row items-center justify-center py-2 bg-[#22365D] text-white ">
         {coupons.map((coupon) => (
           <p
             key={coupon.id}
-            className="text-center md:text-left text-md md:text-md px-2 py-1"
+            className="text-center md:text-left text-md md:text-md px-2 "
           >
             Use <span className="font-bold">{coupon.code}</span> for{" "}
             <span className="font-bold">{coupon.discount}%</span> off
