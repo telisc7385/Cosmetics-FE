@@ -15,7 +15,7 @@ interface UserInfo {
   bio: string | null;
   firstName: string;
   lastName: string;
-  imageUrl: string | null; // Keep imageUrl for display, but won't update it
+  imageUrl: string | null;
   phone: string;
 }
 
@@ -75,7 +75,6 @@ export default function PersonalInfo() {
 
       const loadingToastId = toast.loading("Saving changes...");
 
-      // ✨ FIX: Type assertion for the response of apiCore
       const updatedUser = await apiCore<UserInfo>(
         "/user/update", // Endpoint for user update
         "PATCH",
@@ -89,7 +88,11 @@ export default function PersonalInfo() {
         updateProfile({
           firstName: updatedUser.firstName || formData.firstName,
           lastName: updatedUser.lastName || formData.lastName,
-          imageUrl: updatedUser.imageUrl || null, // Keep existing imageUrl, not updated via this form
+          // ✨ FIX: DO NOT include imageUrl here if the form doesn't handle image uploads
+          // The Redux reducer for updateProfile should already handle preserving it
+          // if it's not present in the action payload.
+          // If updatedUser from API response *does* contain the imageUrl,
+          // then passing it is fine. If it *doesn't*, then don't force null.
           bio: updatedUser.bio || formData.bio,
           role: updatedUser.role || user?.role,
           phone: updatedUser.phone || user?.phone,
