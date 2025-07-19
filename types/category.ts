@@ -7,6 +7,7 @@ export interface SubSubCategory {
 }
 
 export interface SubCategory {
+  slug: any;
   title: React.ReactNode;
   id: number;
   name: string;
@@ -14,6 +15,7 @@ export interface SubCategory {
 }
 
 export interface Category {
+  slug: string;
   title?: React.ReactNode;
   products: Product[];
   id: number;

@@ -76,31 +76,6 @@ interface CheckoutDataFromCart {
   verifiedPincodeDetails: VerifiedPincodeDetails | null;
 }
 
-// --- Mock API for Pincode Check (if you don't have a shared apiCore for this component) ---
-// In a real app, this would be part of your actual API service
-const mockPincodeCheck = async (pincode: string) => {
-  return new Promise<{
-    available: boolean;
-    city?: string;
-    state?: string;
-    message?: string;
-  }>((resolve) => {
-    setTimeout(() => {
-      if (pincode === "400001") {
-        resolve({ available: true, city: "Mumbai", state: "Maharashtra" });
-      } else if (pincode === "110001") {
-        resolve({ available: true, city: "Delhi", state: "Delhi" });
-      } else if (pincode === "600001") {
-        resolve({ available: true, city: "Chennai", state: "Tamil Nadu" });
-      } else {
-        resolve({
-          available: false,
-          message: "Delivery not available to this pincode.",
-        });
-      }
-    }, 300);
-  });
-};
 
 // --- Pincode Input Component for Address Forms ---
 interface PincodeInputProps {
@@ -130,7 +105,6 @@ const PincodeInput: React.FC<PincodeInputProps> = ({
   disabled = false,
   setLocalPincodeValidationMessage,
 }) => {
-  const [checkingPincode, setCheckingPincode] = useState(false);
   const [internalValidationMessage, setInternalValidationMessage] = useState<
     string | null
   >(null);
@@ -144,41 +118,8 @@ const PincodeInput: React.FC<PincodeInputProps> = ({
         return false;
       }
 
-      setCheckingPincode(true);
       setInternalValidationMessage(null);
       setLocalPincodeValidationMessage(null); // Clear parent's message too
-      try {
-        const res = await mockPincodeCheck(pincode); // Use your actual apiCore here
-        if (!res.available) {
-          const msg = res.message || "Delivery not available to this pincode.";
-          setInternalValidationMessage(msg);
-          setLocalPincodeValidationMessage(msg);
-          return false;
-        }
-
-        // If a pincode was verified on the cart page, ensure this new address matches it
-        // This applies specifically to SHIPPING addresses being created/edited
-        if (verifiedPincodeFromCart && pincode !== verifiedPincodeFromCart) {
-          const msg = `This address pincode must match your verified delivery pincode (${verifiedPincodeFromCart}).`;
-          setInternalValidationMessage(msg);
-          setLocalPincodeValidationMessage(msg);
-          return false;
-        }
-
-        setCity(res.city || "");
-        setState(res.state || "");
-        setInternalValidationMessage(null);
-        setLocalPincodeValidationMessage(null);
-        return true;
-      } catch (error) {
-        console.error("Pincode validation error:", error);
-        const msg = "Failed to verify pincode. Please try again.";
-        setInternalValidationMessage(msg);
-        setLocalPincodeValidationMessage(msg);
-        return false;
-      } finally {
-        setCheckingPincode(false);
-      }
     },
     [
       verifiedPincodeFromCart,
@@ -236,7 +177,7 @@ const PincodeInput: React.FC<PincodeInputProps> = ({
         value={value}
         onChange={onChange}
         onBlur={handleBlur}
-        disabled={isVerifiedAndDisabled || disabled || checkingPincode} // Disable if autofilled, externally disabled, or checking
+        disabled={isVerifiedAndDisabled || disabled } // Disable if autofilled, externally disabled, or checking
         className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 ${isVerifiedAndDisabled || disabled
           ? "bg-gray-100 cursor-not-allowed"
           : ""
@@ -246,17 +187,14 @@ const PincodeInput: React.FC<PincodeInputProps> = ({
       {internalValidationMessage && (
         <p className="mt-1 text-sm text-red-600">{internalValidationMessage}</p>
       )}
-      {checkingPincode && (
-        <p className="mt-1 text-sm text-gray-500">Checking pincode...</p>
-      )}
-      {value &&
+      
+      {/* {value &&
         !internalValidationMessage &&
-        !checkingPincode &&
         !isVerifiedAndDisabled && (
           <div className="mt-1 text-sm text-green-600">
             City: {cityValue}, State: {stateValue}
           </div>
-        )}
+        )} */}
     </div>
   );
 };
@@ -289,12 +227,6 @@ const UserCheckout = () => {
     );
   }, [items]);
 
-  // Use values from checkoutData for calculations if available, otherwise default to 0
-  const shippingRate = checkoutData?.shippingRate || 0;
-  const taxableAmount = currentSubtotal + shippingRate; // Calculation from CartPage
-  const taxPercentage = checkoutData?.taxPercentage || 0;
-  const taxAmount = taxableAmount * (taxPercentage / 100); // Calculation from CartPage
-  const taxType = checkoutData?.taxType || "N/A"; // Tax type from CartPage
 
   const [showCouponSection, setShowCouponSection] = useState<boolean>(false);
   const [availableCoupons, setAvailableCoupons] = useState<Coupon[]>([]);
@@ -309,22 +241,29 @@ const UserCheckout = () => {
   const searchParams = useSearchParams();
   const abandonedStatus = searchParams.get('abandoned');
 
+  // checkout calculation
+  const shippingRate = checkoutData?.shippingRate || 0;
+  const taxableAmount = currentSubtotal + shippingRate - discountAmount - abandentDiscountAmount; // Calculation from CartPage
+  const taxPercentage = checkoutData?.taxPercentage || 0;
+  const taxAmount = taxableAmount * (taxPercentage / 100); // Calculation from CartPage
+  const taxType = checkoutData?.taxType || "N/A";
+
   // Calculate final total amount based on new logic
   useEffect(() => {
     let calculatedTotal = taxableAmount + taxAmount; // Start with taxable amount + tax
-    if (appliedCoupon && discountAmount > 0) {
-      calculatedTotal -= discountAmount;
+    // if (appliedCoupon && discountAmount > 0) {
+    //   calculatedTotal -= discountAmount;
 
-      setAbandentApplied(false)
-    } else {
-      calculatedTotal -= abandentDiscountAmount;
-    }
+    //   setAbandentApplied(false)
+    // } else {
+    //   calculatedTotal -= abandentDiscountAmount;
+    // }
 
     setFinalTotalAmount(Math.max(0, calculatedTotal));
   }, [taxableAmount, taxAmount, appliedCoupon, discountAmount, abandentDiscountAmount]);
 
   useEffect(() => {
-    if(abandonedStatus === "true" || abandonedStatus !== null) {
+    if (abandonedStatus === "true" || abandonedStatus !== null) {
       setAbandentApplied(true);
     }
   }, [abandonedStatus])
@@ -708,28 +647,6 @@ const UserCheckout = () => {
     // Pincode validation using the mockPincodeCheck
     let isPincodeValid = true;
     let currentPincodeValidationMessage: string | null = null;
-
-    try {
-      const pincodeCheckResult = await mockPincodeCheck(pincode);
-      if (!pincodeCheckResult.available) {
-        isPincodeValid = false;
-        currentPincodeValidationMessage =
-          pincodeCheckResult.message ||
-          "Delivery not available to this pincode.";
-      } else {
-        // If pincode is valid, ensure city and state are updated from the check
-        setFormData((prev) => ({
-          ...prev,
-          city: pincodeCheckResult.city || prev.city,
-          state: pincodeCheckResult.state || prev.state,
-        }));
-      }
-    } catch (error) {
-      console.error("Pincode validation API error:", error);
-      isPincodeValid = false;
-      currentPincodeValidationMessage =
-        "Failed to verify pincode. Please try again.";
-    }
 
     // Additional check for SHIPPING address if pincode was verified on cart page
     if (
@@ -1734,7 +1651,7 @@ const UserCheckout = () => {
                 />
               </div>
 
-              <PincodeInput 
+              <PincodeInput
                 value={formData.pincode}
                 onChange={handleFormChange}
                 onBlur={() => { }} // PincodeInput handles its own blur
@@ -1872,8 +1789,6 @@ const UserCheckout = () => {
                   className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                   required
                 >
-                  <option value="HOME">HOME</option>
-                  <option value="WORK">WORK</option>
                   <option value="BILLING">BILLING</option>
                   <option value="SHIPPING">SHIPPING</option>
                 </select>

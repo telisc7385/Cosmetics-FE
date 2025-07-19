@@ -12,7 +12,7 @@ import { Product } from "@/types/product";
 
 interface Props {
   category: Category;
-  initialProducts: Product[];
+  // initialProducts: Product[];
   initialPage: number;
   totalPagesFromServer: number;
 }
@@ -21,7 +21,7 @@ type SortOrder = "" | "price_asc" | "price_desc";
 
 export default function CategoryInfo({
   category,
-  initialProducts,
+  // initialProducts,
   initialPage,
   totalPagesFromServer,
 }: Props) {
@@ -29,7 +29,8 @@ export default function CategoryInfo({
   const pathname = usePathname();
   const router = useRouter();
 
-  const [products, setProducts] = useState<Product[]>(initialProducts || []);
+  console.log("category",category)
+  const [products, setProducts] = useState<Product[]>( []);
   const [totalPages, setTotalPages] = useState(totalPagesFromServer || 1);
 
   const sortOrder = (searchParams.get("sort") ?? "") as SortOrder;
@@ -62,7 +63,7 @@ export default function CategoryInfo({
             ? "-selling_price"
             : "";
 
-      const url = `${base}/product?is_active=true&page=${currentPage}&limit=${limit}&category=${category.id
+      const url = `${base}/product?is_active=true&page=${currentPage}&limit=${limit}&category_slug=${category.slug
         }${sortParam ? `&sort=${sortParam}` : ""}`;
 
       try {
@@ -76,7 +77,7 @@ export default function CategoryInfo({
     };
 
     fetchProducts();
-  }, [category.id, sortOrder, currentPage]);
+  }, [category, sortOrder, currentPage]);
 
   // const activeProducts = products.filter((product) => product.isActive)
   // console.log("Active Products:", activeProducts);
