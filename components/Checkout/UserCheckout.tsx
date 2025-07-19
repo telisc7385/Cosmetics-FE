@@ -5,7 +5,7 @@ import React, { JSX, useEffect, useState, useCallback } from "react";
 import { useLoggedInCart } from "@/CartProvider/LoggedInCartProvider";
 import Image from "next/image";
 import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAppSelector } from "@/store/hooks/hooks";
 import { selectToken, selectUser } from "@/store/slices/authSlice";
 import Link from "next/link";
@@ -306,6 +306,9 @@ const UserCheckout = () => {
   const [abandentApplied, setAbandentApplied] = useState<boolean>(false);
   const [abandentDiscountAmount, setAbandentDiscountAmount] = useState<number>(0);
 
+  const searchParams = useSearchParams();
+  const abandonedStatus = searchParams.get('abandoned');
+
   // Calculate final total amount based on new logic
   useEffect(() => {
     let calculatedTotal = taxableAmount + taxAmount; // Start with taxable amount + tax
@@ -319,6 +322,12 @@ const UserCheckout = () => {
 
     setFinalTotalAmount(Math.max(0, calculatedTotal));
   }, [taxableAmount, taxAmount, appliedCoupon, discountAmount, abandentDiscountAmount]);
+
+  useEffect(() => {
+    if(abandonedStatus === "true" || abandonedStatus !== null) {
+      setAbandentApplied(true);
+    }
+  }, [abandonedStatus])
 
   useEffect(() => {
     if (abandentApplied) {
@@ -1725,7 +1734,7 @@ const UserCheckout = () => {
                 />
               </div>
 
-              <PincodeInput
+              <PincodeInput 
                 value={formData.pincode}
                 onChange={handleFormChange}
                 onBlur={() => { }} // PincodeInput handles its own blur
