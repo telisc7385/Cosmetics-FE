@@ -96,7 +96,7 @@ export default function LoginForm({
               >
                 ← Back to Login
               </button>
-              <ForgotPassword />
+              <ForgotPassword setShowForgotPassword={setShowForgotPassword} />
             </>
           ) : (
             <>

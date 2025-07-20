@@ -21,7 +21,10 @@ import {
   verifyOtpSuccess,
 } from "@/store/slices/authSlice";
 
-export default function ForgotPassword() {
+type Props = {
+  setShowForgotPassword: (value: boolean) => void;
+};
+export default function ForgotPassword({ setShowForgotPassword }: Props) {
   const dispatch = useDispatch();
   const router = useRouter();
 
@@ -127,6 +130,9 @@ export default function ForgotPassword() {
       if (res.ok) {
         dispatch(verifyOtpSuccess());
         toast.success("OTP verified!", { id: toastId });
+        // router.push('/auth')
+  
+
       } else {
         dispatch(verifyOtpFailure(data.error || "OTP verification failed"));
         toast.dismiss(toastId);
@@ -162,6 +168,7 @@ export default function ForgotPassword() {
       if (res.ok) {
         dispatch(resetPasswordSuccess());
         toast.dismiss(toastId);
+        setShowForgotPassword(false)
       } else {
         dispatch(resetPasswordFailure(data.error || "Reset failed"));
         toast.dismiss(toastId);
