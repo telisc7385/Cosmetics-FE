@@ -18,7 +18,7 @@ const TermsPage: React.FC = () => {
         {/* py-12 for increased vertical padding */}
         {/* bg-white for background, rounded-lg for rounded corners */}
         {/* shadow-md for a more subtle shadow */}
-        <div className="w-full max-w-7xl bg-white shadow-md rounded-lg p-4 sm:p-10 lg:p-12">
+        <div className="w-full max-w-7xl bg-white shadow-md rounded-lg p-4 sm:p-10 lg:p-8">
           {/* Page Title */}
           {/* Reduced from text-4xl lg:text-5xl to text-3xl lg:text-4xl */}
           <h1 className="text-3xl lg:text-4xl font-extrabold text-gray-900 mb-8 text-center">

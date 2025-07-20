@@ -13,6 +13,8 @@ import ProductTabs from "./ProductTabs";
 import toast from "react-hot-toast";
 import Link from "next/link";
 import Head from "next/head"; // ✅ Added for SEO
+import "keen-slider/keen-slider.min.css";
+import { useKeenSlider } from "keen-slider/react";
 
 type Props = {
   product: Product;
@@ -142,6 +144,34 @@ export default function ProductDetailClient({
     el?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [sliderRef, instanceRef] = useKeenSlider<HTMLDivElement>({
+    loop: true,
+    slides: {
+      perView: 2,
+      spacing: 15,
+    },
+    breakpoints: {
+      "(min-width: 640px)": {
+        slides: { perView: 3, spacing: 15 },
+      },
+      "(min-width: 768px)": {
+        slides: { perView: 4, spacing: 15 },
+      },
+      "(min-width: 1024px)": {
+        slides: { perView: 5, spacing: 15 },
+      },
+    },
+    created: (slider) => {
+      setInterval(() => {
+        slider.next();
+      }, 3000);
+    },
+    slideChanged(slider) {
+      setCurrentSlide(slider.track.details.rel);
+    },
+  });
+
   return (
     <>
       {/* ✅ SEO Metadata */}
@@ -155,7 +185,7 @@ export default function ProductDetailClient({
           }
         />
       </Head>
-      <section className="bg-[#f3f4f6] py-10 px-4 sm:px-6 lg:px-8">
+      <section className="bg-[#f3f4f6] py-10 px-3 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <nav className="mb-4 text-sm text-gray-600">
             <Link href="/">Home</Link> / <Link href="/shop">Shop</Link> /{" "}
@@ -194,7 +224,7 @@ export default function ProductDetailClient({
                         alt={`thumb-${idx}`}
                         width={64}
                         height={64}
-                        className="object-cover"
+                        className="h-full object-contain"
                       />
                     </div>
                   ))}
@@ -221,7 +251,7 @@ export default function ProductDetailClient({
                         alt={`${idx}`}
                         width={80}
                         height={80}
-                        className="object-cover"
+                        className="h-full object-contain"
                       />
                     </div>
                   ))}
@@ -256,16 +286,13 @@ export default function ProductDetailClient({
                 <div className="text-sm text-[#213E5A] line-through decoration-dashed decoration-1">
                   ₹{sellingPrice}
                 </div>
-                {basePrice > 0 && (
-                  <div className="text-lg text-[#213E5A]">
-                    ₹{basePrice}
-                    {priceDifferencePercent > 0 && (
-                      <span className="text-green-600 text-xs ml-1">
-                        ({priceDifferencePercent}% OFF)
-                      </span>
-                    )}
-                  </div>
-                )}
+
+                <div className="text-lg text-[#213E5A]">
+                  ₹{basePrice}
+                  <span className="text-green-600 text-xs ml-1">
+                    ({priceDifferencePercent}% OFF)
+                  </span>
+                </div>
               </div>
 
               {currentStock === 0 ? (
@@ -354,14 +381,34 @@ export default function ProductDetailClient({
           </div>
 
           {relatedProducts.length > 0 && (
-            <div className="py-10  sm:px-0">
+            <div className="py-10 sm:px-0">
               <h2 className="text-2xl font-semibold lg:mb-4">
                 You may also like from {product.category.name}
               </h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+
+              <div ref={sliderRef} className="keen-slider">
                 {relatedProducts.map((item) => (
-                  <ProductCard key={item.id} product={item} />
+                  <div key={item.id} className="keen-slider__slide ">
+                    <ProductCard product={item} />
+                  </div>
                 ))}
+              </div>
+
+              <div className="mt-4 flex justify-center gap-2">
+                {instanceRef.current &&
+                  [
+                    ...Array(
+                      instanceRef.current.track.details.slides.length
+                    ).keys(),
+                  ].map((idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => instanceRef.current?.moveToIdx(idx)}
+                      className={`h-2 w-2 rounded-full ${
+                        currentSlide === idx ? "bg-black" : "bg-gray-400"
+                      }`}
+                    ></button>
+                  ))}
               </div>
             </div>
           )}

@@ -1,16 +1,15 @@
 import { Category } from "@/types/category";
 import Image from "next/image";
 import Link from "next/link";
-import { CompanySettings } from "@/api/CompanyApi"; // Import CompanySettings
-import { getNavbarData } from "@/api/NavbarApi"; // Keep this if Footer still needs nav items
+import { CompanySettings } from "@/api/CompanyApi";
+import { getNavbarData } from "@/api/NavbarApi";
 import { FaRegEnvelope } from "react-icons/fa";
 import { IoCallOutline } from "react-icons/io5";
 import { NavItem } from "@/types/nav";
 
-// Define props interface for Footer
 interface FooterProps {
   topCategories: Category[];
-  companyDetails?: CompanySettings; // Accept companyDetails as a prop
+  companyDetails?: CompanySettings;
 }
 
 const Footer = async ({ topCategories, companyDetails }: FooterProps) => {
@@ -50,15 +49,17 @@ const Footer = async ({ topCategories, companyDetails }: FooterProps) => {
               <div className="space-y-2">
                 <h4 className="font-bold text-black text-base">Menu</h4>
                 <ul className="space-y-1">
-                  {navItems.map((item) => (
-                    <li key={item.id}>
-                      <Link href={item.link}>
-                        <span className="cursor-pointer hover:text-black text-sm">
-                          {item.name}
-                        </span>
-                      </Link>
-                    </li>
-                  ))}
+                  {navItems
+                    .filter((item) => item.name !== "Categories") // remove 'Categories'
+                    .map((item) => (
+                      <li key={item.id}>
+                        <Link href={item.link}>
+                          <span className="cursor-pointer hover:text-black text-sm">
+                            {item.name}
+                          </span>
+                        </Link>
+                      </li>
+                    ))}
                 </ul>
               </div>
 
@@ -68,7 +69,7 @@ const Footer = async ({ topCategories, companyDetails }: FooterProps) => {
                 <ul className="space-y-1">
                   {topCategories.map((category) => (
                     <li key={category.id}>
-                      <Link href="#">
+                      <Link href={`/category/${category.slug}`}>
                         <span className="cursor-pointer hover:text-black text-sm">
                           {category.name}
                         </span>
@@ -90,14 +91,14 @@ const Footer = async ({ topCategories, companyDetails }: FooterProps) => {
                     </Link>
                   </li>
                   <li>
-                    <Link href="#">
+                    <Link href="/privacypolicy">
                       <span className="cursor-pointer hover:text-black text-sm">
                         Privacy Policy
                       </span>
                     </Link>
                   </li>
                   <li>
-                    <Link href="#">
+                    <Link href="/termscondition">
                       <span className="cursor-pointer hover:text-black text-sm">
                         Terms & Conditions
                       </span>
@@ -186,15 +187,17 @@ const Footer = async ({ topCategories, companyDetails }: FooterProps) => {
           <div className="hidden lg:block">
             <h4 className="font-bold text-black mb-3 text-lg">Menu</h4>
             <ul className="space-y-2">
-              {navItems.map((item) => (
-                <li key={item.id}>
-                  <Link href={item.link || "#"}>
-                    <span className="cursor-pointer hover:text-black text-md">
-                      {item.name}
-                    </span>
-                  </Link>
-                </li>
-              ))}
+              {navItems
+                .filter((item) => item.name !== "Categories") // remove 'Categories'
+                .map((item) => (
+                  <li key={item.id}>
+                    <Link href={item.link}>
+                      <span className="cursor-pointer hover:text-black text-sm">
+                        {item.name}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
             </ul>
           </div>
 
@@ -204,7 +207,7 @@ const Footer = async ({ topCategories, companyDetails }: FooterProps) => {
             <ul className="space-y-2">
               {topCategories.map((category) => (
                 <li key={category.id}>
-                  <Link href={`/category/${category.id}`}>
+                  <Link href={`/category/${category.slug}`}>
                     <span className="cursor-pointer hover:text-black text-md">
                       {category.name}
                     </span>
@@ -320,7 +323,6 @@ const Footer = async ({ topCategories, companyDetails }: FooterProps) => {
         </div>
       </div>
 
-      {/* Bottom Bar */}
       <div className="bg-[#213c66] text-white text-sm text-center py-3 w-full mt-10">
         © 2025 Glam Cosmetics. All rights reserved. Powered by{" "}
         <Link

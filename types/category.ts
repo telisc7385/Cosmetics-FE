@@ -31,5 +31,5 @@ export interface Category {
   imageUrl: string;
   banner?: string;
   description?: string;
-  parent?: number | null; // ✅ Added as requested
+  parent?: number | null;
 }
