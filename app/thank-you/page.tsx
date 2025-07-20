@@ -4,16 +4,29 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import toast from "react-hot-toast";
-import { apiCore } from "@/api/ApiCore"; // Ensure this path is correct
-import { useAppSelector } from "@/store/hooks/hooks"; // Ensure this path is correct
-import { selectToken } from "@/store/slices/authSlice"; // Ensure this path is correct
+import toast from "react-hot-toast"; // Ensure you have react-hot-toast installed
 import Image from "next/image";
-import Lottie from "react-lottie-player"; // Import Lottie
-import ShoppingCart from "@/public/ShoppingCart.json"; // Assuming your Lottie animation file path
+import Lottie from "react-lottie-player"; // Ensure you have react-lottie-player installed
+
+// --- Mock Imports (Replace these with your actual paths) ---
+// You will need to create these files in your project based on your structure.
+// For example, if you have a `api` directory, create `api/ApiCore.ts`.
+// If you have a `utils` directory, create `utils/removePincodeData.ts`.
+// If you have a `store/hooks` directory, create `store/hooks/useAuthStatus.ts`.
+
+// Mock apiCore: Replace with your actual API utility
+import { apiCore } from "@/api/ApiCore";
+
+// Mock Lottie animation JSON file: Ensure this path is correct
+import ShoppingCart from "@/public/ShoppingCart.json";
+
+// Mock utility: Replace with your actual pincode removal utility
 import { handleRemovePincode } from "@/utils/removePincodeData";
 
-// Interface Definitions (Ensure these match your backend response structure)
+// Mock authentication hook: Replace with your actual auth status hook
+import { useAuthStatus } from "@/store/hooks/useAuthStatus";
+
+// --- Interface Definitions (Ensure these match your backend response structure) ---
 interface CustomerInfo {
   first_name: string;
   last_name: string;
@@ -105,7 +118,7 @@ const ThankYouPage = () => {
   const searchParams = useSearchParams();
   const orderId = searchParams.get("orderId");
   const paymentId = searchParams.get("paymentId"); // Get paymentId from URL
-  const token = useAppSelector(selectToken); // This will be null for guest users
+  const { isLoggedIn, token } = useAuthStatus(); // Use the auth status hook
 
   const [order, setOrder] = useState<DetailedOrder | null>(null);
   const [loading, setLoading] = useState(true);
@@ -126,9 +139,9 @@ const ThankYouPage = () => {
 
       let fetchedOrder: DetailedOrder | null = null;
 
-      // 1. Attempt to load from sessionStorage for ALL sessions first,
-      // but only if a stored order with the matching ID exists.
-      if (typeof window !== "undefined") {
+      // 1. Attempt to load from sessionStorage for guest users first
+      // This ensures that even if API fetch fails, guest users can still see their order once.
+      if (!isLoggedIn && typeof window !== "undefined") {
         const storedGuestOrder = sessionStorage.getItem("lastGuestOrder");
         if (storedGuestOrder) {
           try {
@@ -144,7 +157,6 @@ const ThankYouPage = () => {
               // IMPORTANT: Remove it from sessionStorage after successful retrieval
               // to prevent showing it again on subsequent page loads/navs.
               sessionStorage.removeItem("lastGuestOrder");
-              handleRemovePincode(); // This function likely clears pincode data from local storage/session.
               console.log(
                 "ThankYouPage: Loaded guest order from sessionStorage."
               );
@@ -171,10 +183,11 @@ const ThankYouPage = () => {
         setOrder(fetchedOrder);
         setShowCelebration(true);
         setLoading(false);
+        handleRemovePincode(); // Clear pincode data after successful order (from either storage type)
         return; // Exit if a valid order was loaded from sessionStorage
       }
 
-      // 2. If no valid order found in sessionStorage, then proceed with API fetch.
+      // 2. If no valid order found in sessionStorage (or if logged in user), then proceed with API fetch.
       // This API call will now be attempted for both logged-in and guest users.
       // The success depends on your backend's endpoint configuration for guest orders.
       try {
@@ -194,6 +207,7 @@ const ThankYouPage = () => {
           console.log(
             "ThankYouPage: Successfully fetched order details from API."
           );
+          handleRemovePincode(); // Clear pincode data after successful order
         } else {
           // If API returns no results, or an empty array
           setError("Order not found or no results returned for this ID.");
@@ -236,7 +250,7 @@ const ThankYouPage = () => {
     };
 
     loadOrderDetails();
-  }, [orderId, token]); // Re-run effect if orderId or token changes
+  }, [orderId, token, isLoggedIn]); // Re-run effect if orderId, token or isLoggedIn changes
 
   const handleDownloadInvoice = () => {
     // Crucially, check if order and order.order_info exist before accessing invoice_url
@@ -285,8 +299,9 @@ const ThankYouPage = () => {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-pink-100 to-purple-100 text-red-600 p-3">
+        {/* Icon */}
         <svg
-          className="w-20 h-20 text-red-500 mx-auto mb-4"
+          className="w-20 h-20 text-yellow-500 mx-auto mb-4"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -295,24 +310,30 @@ const ThankYouPage = () => {
             strokeLinecap="round"
             strokeLinejoin="round"
             strokeWidth="2"
-            d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2A9 9 0 111 10a9 9 0 0118 0z"
+            d="M12 8v4m0 4h.01M12 2a10 10 0 100 20 10 10 0 000-20z"
           />
         </svg>
-        <h1 className="text-2xl font-bold mb-3">Error!</h1>
-        <p className="text-base text-center mb-4">{error}</p>
+
+        {/* Static Message */}
+        <h1 className="text-2xl font-bold mb-3">Payment is in progress</h1>
+        <p className="text-base text-center mb-4">
+          Please wait a few moments or try again later.
+        </p>
+
+        {/* CTA Buttons */}
         <Link
           href="/"
-          className="block bg-pink-600 text-white py-2 px-4 rounded-lg text-base font-semibold hover:bg-pink-700 transition-colors duration-300"
+          className="block bg-[#213E5A] text-white py-2 px-6 rounded-lg font-semibold hover:bg-white hover:text-[#213E5A] hover:border hover:border-[#213E5A] transition duration-300"
         >
           Go to Homepage
         </Link>
-        {/* For guests, if API fetch failed, still guide them. */}
-        <Link
+
+        {/* <Link
           href="/guest-checkout"
           className="block mt-3 text-blue-600 hover:underline text-sm"
         >
           Try Guest Checkout Again
-        </Link>
+        </Link> */}
       </div>
     );
   }
@@ -321,7 +342,7 @@ const ThankYouPage = () => {
     // This case should theoretically be covered by the `error` state now,
     // but kept as a fallback for extreme edge cases where order is null but no specific error.
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-pink-100 to-purple-100 text-gray-800 p-3">
+      <div className="flex flex-col items-center justify-center min-h-screen  text-gray-800 p-3">
         <svg
           className="w-20 h-20 text-yellow-500 mx-auto mb-4"
           fill="none"
@@ -547,12 +568,14 @@ const ThankYouPage = () => {
                 {order.customer_info.phone_number}
               </span>
               <br />
-              {order.customer_info.billing_address ? ( // ADDED NULL CHECK
+              {order.customer_info.billing_address ? (
+                // Check if it's a string (e.g., flattened address)
                 typeof order.customer_info.billing_address === "string" ? (
                   <span className="whitespace-pre-line">
                     {order.customer_info.billing_address}
                   </span>
                 ) : (
+                  // Assume it's an object with structured address fields
                   <>
                     <span>{order.customer_info.billing_address.street}</span>
                     <br />
@@ -572,7 +595,7 @@ const ThankYouPage = () => {
                   </>
                 )
               ) : (
-                <span className="italic">Billing address not provided.</span> // Fallback if null
+                <span className="italic">Billing address not provided.</span>
               )}
             </p>
           </div>
@@ -590,12 +613,14 @@ const ThankYouPage = () => {
                 {order.customer_info.phone_number}
               </span>
               <br />
-              {order.customer_info.delivery_address ? ( // ADDED NULL CHECK
+              {order.customer_info.delivery_address ? (
+                // Check if it's a string (e.g., flattened address)
                 typeof order.customer_info.delivery_address === "string" ? (
                   <span className="whitespace-pre-line">
                     {order.customer_info.delivery_address}
                   </span>
                 ) : (
+                  // Assume it's an object with structured address fields
                   <>
                     <span>{order.customer_info.delivery_address.street}</span>
                     <br />
@@ -615,7 +640,7 @@ const ThankYouPage = () => {
                   </>
                 )
               ) : (
-                <span className="italic">Shipping address not provided.</span> // Fallback if null
+                <span className="italic">Shipping address not provided.</span>
               )}
             </p>
           </div>
@@ -663,35 +688,38 @@ const ThankYouPage = () => {
                       </p>
                     </Link>
                   ) : (
-                    <p className="font-medium text-gray-900 text-sm">
-                      {item.name}
+                    <p className="font-medium text-gray-900">{item.name}</p>
+                  )}
+                  {item.specification && (
+                    <p className="text-xs text-gray-500">
+                      Variant: {item.specification}
                     </p>
                   )}
-                  {item.variant_id && (
-                    <p className="text-xs text-gray-600">SKU: {item.SKU}</p>
-                  )}
-                  <p className="text-xs text-gray-700">
-                    Quantity: {item.quantity}
-                  </p>
-                  <p className="text-sm font-semibold text-gray-800">
-                    ₹{item.unit_price.toFixed(2)} each
+                  <p className="text-sm text-gray-600">
+                    Quantity: {item.quantity} x ₹{item.unit_price.toFixed(2)}
                   </p>
                 </div>
-                <div className="text-sm font-bold text-gray-900 mt-1 sm:mt-0 sm:ml-auto">
-                  ₹{(item.quantity * item.unit_price).toFixed(2)}
+                <div className="flex-shrink-0 text-right">
+                  <p className="font-semibold text-gray-800">
+                    ₹{(item.quantity * item.unit_price).toFixed(2)}
+                  </p>
                 </div>
               </li>
             ))
           ) : (
-            <p className="text-gray-500 text-sm">
+            <p className="text-gray-500 italic">
               No items found for this order.
             </p>
           )}
         </ul>
-        <div className="text-right space-y-1">
-          <div className="flex justify-between text-sm font-semibold text-gray-700">
+
+        {/* Totals Section */}
+        <div className="flex flex-col gap-2 text-sm text-gray-700">
+          <div className="flex justify-between">
             <span>Subtotal:</span>
-            <span>₹{(order.order_info.sub_total ?? 0).toFixed(2)}</span>
+            <span className="font-semibold">
+              ₹{order.order_info.sub_total.toFixed(2)}
+            </span>
           </div>
 
           {/* Abandent Discount */}
@@ -699,8 +727,7 @@ const ThankYouPage = () => {
             <div className="flex justify-between text-sm font-semibold text-gray-700">
               <span>Abandent Discount:</span>
               <span className="font-medium text-red-600">
-                - ₹
-                {(order.order_info.abandentDiscountAmount ?? 0).toFixed(2)}
+                - ₹{(order.order_info.abandentDiscountAmount ?? 0).toFixed(2)}
               </span>
             </div>
           )}

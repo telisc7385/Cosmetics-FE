@@ -7,8 +7,8 @@ export interface SubSubCategory {
 }
 
 export interface SubCategory {
-  slug: any;
-  title: React.ReactNode;
+  slug: string; // Changed from any to string for type consistency
+  title?: string; // Changed from React.ReactNode to string | undefined
   id: number;
   name: string;
   subsubcategories?: SubSubCategory[];
@@ -16,7 +16,7 @@ export interface SubCategory {
 
 export interface Category {
   slug: string;
-  title?: React.ReactNode;
+  title?: string; // Changed from React.ReactNode to string | undefined
   products: Product[];
   id: number;
   name: string;

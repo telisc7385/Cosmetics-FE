@@ -361,7 +361,7 @@ export default function ProductDetailClient({
                   className={`px-6 py-2 text-lg rounded font-medium min-w-[150px] h-[44px] ${
                     isOutOfStock
                       ? "bg-gray-400 cursor-not-allowed"
-                      : "bg-purple-600 text-white"
+                      : "bg-[#213E5A] text-white"
                   }`}
                 >
                   {isOutOfStock ? "Out of Stock" : "Add to Bag"}
@@ -386,9 +386,9 @@ export default function ProductDetailClient({
                 You may also like from {product.category.name}
               </h2>
 
-              <div ref={sliderRef} className="keen-slider">
+              <div ref={sliderRef} className="keen-slider ">
                 {relatedProducts.map((item) => (
-                  <div key={item.id} className="keen-slider__slide ">
+                  <div key={item.id} className="keen-slider__slide py-2">
                     <ProductCard product={item} />
                   </div>
                 ))}

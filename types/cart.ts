@@ -155,7 +155,7 @@ export interface CartItemInput {
   variant?: ProductVariant | null;
   product?: Product | null;
   stock: number; // ADDED: Stock property when inputting to cart
-  slug?: string | null; // <--- **This is the only line changed here**
+slug?: string | null; // <--- **This is the only line changed here**
 }
 
 export interface LoggedInCartContextType {

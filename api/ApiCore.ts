@@ -139,7 +139,7 @@ export interface GuestOrderPayload {
   email: string;
   address: AddressInput;
   items: {
-    productId?: number;
+    // productId?: number; // This was commented out, implying it's handled differently for guests
     variantId?: number;
     quantity: number;
     price: number;
@@ -151,7 +151,7 @@ export interface GuestOrderPayload {
 
 export interface LoggedInOrderPayload {
   items: {
-    productId: number;
+    productId?: number; // ⬅️ **THIS IS THE ONLY LINE CHANGED**
     quantity: number;
     price: number;
     variantId?: number | null;
@@ -279,9 +279,10 @@ export interface CartItemFromAPI {
 export interface Category {
   id: number;
   name: string;
-  title?: string;
-  image?: string;
+  title?: string; // Changed from ReactNode to string | undefined
+  imageUrl: string; // Changed from 'image' to 'imageUrl' and made mandatory for slider
   parent?: number | null;
+  slug: string; // Added slug property
 }
 
 // Updated Coupon Interface to match UserCheckout.tsx

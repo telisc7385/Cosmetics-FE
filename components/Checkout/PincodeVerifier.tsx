@@ -5,6 +5,10 @@ import toast from "react-hot-toast";
 import { apiCore } from "@/api/ApiCore"; // Assuming you have an apiCore utility at this path
 import { handleRemovePincode } from "@/utils/removePincodeData";
 
+import { useAppSelector } from "@/store/hooks/hooks"; // To subscribe to token changes for logout
+import { selectToken } from "@/store/slices/authSlice"; // To get current token from Redux
+import { useAuthStatus } from "@/store/hooks/useAuthStatus";
+
 type PincodeData = {
   pincode: string;
   city: string;
@@ -24,14 +28,20 @@ const PincodeVerifier = ({ onVerified }: Props) => {
   const [verifiedData, setVerifiedData] = useState<PincodeData | null>(null);
   const [pincodeError, setPincodeError] = useState<string | null>(null); // New state for error message
 
+  const { isLoggedIn } = useAuthStatus(); // Use the auth status hook
+  const currentToken = useAppSelector(selectToken); // Get current token from Redux
+
   // Restore saved data on mount
   useEffect(() => {
-    const savedPincode = localStorage.getItem("verifiedPincode");
-    const savedCity = localStorage.getItem("verifiedCity");
-    const savedState = localStorage.getItem("verifiedState");
-    const savedShipping = localStorage.getItem("verifiedShipping");
-    const savedTax = localStorage.getItem("verifiedTax");
-    const savedTaxType = localStorage.getItem("verifiedTaxType");
+    // Determine which storage to check based on login status
+    const storage = isLoggedIn ? localStorage : sessionStorage;
+
+    const savedPincode = storage.getItem("verifiedPincode");
+    const savedCity = storage.getItem("verifiedCity");
+    const savedState = storage.getItem("verifiedState");
+    const savedShipping = storage.getItem("verifiedShipping");
+    const savedTax = storage.getItem("verifiedTax");
+    const savedTaxType = storage.getItem("verifiedTaxType");
 
     if (savedPincode && savedCity && savedState) {
       const data: PincodeData = {
@@ -50,7 +60,22 @@ const PincodeVerifier = ({ onVerified }: Props) => {
       // If no stored data, ensure parent is notified of unverified state
       onVerified?.(null);
     }
-  }, [onVerified]); // onVerified is a dependency because it's used inside useEffect
+  }, [onVerified, isLoggedIn]); // Re-run if login status changes
+
+  // Effect to clear pincode on logout
+  useEffect(() => {
+    // This effect runs whenever currentToken changes.
+    // If currentToken becomes null and pincode data exists, it implies logout.
+    if (!currentToken) {
+      // User logged out, clear pincode data
+      handleRemovePincode();
+      setEnteredPincode("");
+      setVerifiedData(null);
+      setPincodeError(null);
+      onVerified?.(null);
+      console.log("PincodeVerifier: User logged out, pincode data cleared.");
+    }
+  }, [currentToken, onVerified]); // Depend on currentToken and onVerified
 
   const handleVerify = async () => {
     setPincodeError(null); // Clear previous errors on new attempt
@@ -103,14 +128,15 @@ const PincodeVerifier = ({ onVerified }: Props) => {
         taxType: summaryRes.taxType,
       };
 
-      // Save in state & localStorage
+      // Save in state & correct storage based on login status
       setVerifiedData(pincodeInfo);
-      localStorage.setItem("verifiedPincode", pincodeInfo.pincode);
-      localStorage.setItem("verifiedCity", pincodeInfo.city);
-      localStorage.setItem("verifiedState", pincodeInfo.state);
-      localStorage.setItem("verifiedShipping", String(summaryRes.shippingRate));
-      localStorage.setItem("verifiedTax", String(summaryRes.taxPercentage));
-      localStorage.setItem("verifiedTaxType", summaryRes.taxType);
+      const storageToUse = isLoggedIn ? localStorage : sessionStorage;
+      storageToUse.setItem("verifiedPincode", pincodeInfo.pincode);
+      storageToUse.setItem("verifiedCity", pincodeInfo.city);
+      storageToUse.setItem("verifiedState", pincodeInfo.state);
+      storageToUse.setItem("verifiedShipping", String(summaryRes.shippingRate));
+      storageToUse.setItem("verifiedTax", String(summaryRes.taxPercentage));
+      storageToUse.setItem("verifiedTaxType", summaryRes.taxType);
 
       onVerified?.(pincodeInfo); // Pass the full data to the parent
       toast.success(
@@ -123,12 +149,7 @@ const PincodeVerifier = ({ onVerified }: Props) => {
       setPincodeError(message); // Set the error message
       setVerifiedData(null); // Clear verified data
       // Clear all related localStorage items on error
-      localStorage.removeItem("verifiedPincode");
-      localStorage.removeItem("verifiedCity");
-      localStorage.removeItem("verifiedState");
-      localStorage.removeItem("verifiedShipping");
-      localStorage.removeItem("verifiedTax");
-      localStorage.removeItem("verifiedTaxType");
+      handleRemovePincode(); // Ensure all stored pincode data is cleared on verification failure
       onVerified?.(null); // Notify parent of unverified state
     } finally {
       setVerifying(false);
@@ -139,7 +160,7 @@ const PincodeVerifier = ({ onVerified }: Props) => {
     setEnteredPincode("");
     setVerifiedData(null);
     setPincodeError(null); // Clear error message
-    handleRemovePincode()
+    handleRemovePincode(); // Ensure all stored pincode data is cleared
     onVerified?.(null); // Notify parent of cleared state
   };
 

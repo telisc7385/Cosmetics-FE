@@ -12,7 +12,7 @@ import TopCategoriesClient from "@/components/ClientsideComponent/TopCategoriesC
 // import PromotionBanner from "@/components/ClientsideComponent/PromotionBanner/PromotionBanner";
 
 import { getBanners } from "@/api/getBannerApi";
-import { fetchCategories } from "@/api/fetchCategories";
+import { fetchCategories } from "@/api/fetchCategories"; // This function's return type needs to be compatible
 import {
   getGallery,
   getTestimonials,
@@ -27,14 +27,17 @@ export default async function HomePage() {
   const [banners, categoriesResponse, product, testimonials, gallery, tagData] =
     await Promise.all([
       getBanners(),
-      fetchCategories(),
+      fetchCategories(), // The return type of this function is the source of the conflict
       // getWhyChooseUs(),
       getProducts(),
       getTestimonials(),
       getGallery(),
-      fetchAllTag()
+      fetchAllTag(),
     ]);
 
+  // This line expects `categoriesResponse` to have a `categories` property
+  // whose type matches `Category[]` from wherever `CategorySection` imports it.
+  // The fix is to ensure the `Category` types themselves are consistent.
   const { categories } = categoriesResponse;
 
   return (
