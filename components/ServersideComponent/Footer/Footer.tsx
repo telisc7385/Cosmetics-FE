@@ -36,10 +36,12 @@ const Footer = async ({ topCategories, companyDetails }: FooterProps) => {
               height={70}
               className="mx-auto lg:mx-0"
             />
-            <p className="text-sm leading-relaxed max-w-sm mx-auto lg:mx-0">
-              {companyDetails?.description ||
-                "Keep it simple, keep it minimal, yet stylish. We bring timeless, modern furniture designed for elegant, everyday living."}
-            </p>
+            {companyDetails?.description &&
+              companyDetails.description !== "undefined" && (
+                <p className="text-sm leading-relaxed max-w-sm mx-auto lg:mx-0">
+                  {companyDetails.description}
+                </p>
+              )}
           </div>
 
           {/* Mobile View: 2x2 Grid Layout */}
@@ -86,7 +88,7 @@ const Footer = async ({ topCategories, companyDetails }: FooterProps) => {
                   <li>
                     <Link href="/terms">
                       <span className="cursor-pointer hover:text-black text-sm">
-                        Terms
+                        Terms & Conditions
                       </span>
                     </Link>
                   </li>
@@ -100,7 +102,7 @@ const Footer = async ({ topCategories, companyDetails }: FooterProps) => {
                   <li>
                     <Link href="/termscondition">
                       <span className="cursor-pointer hover:text-black text-sm">
-                        Terms & Conditions
+                        Terms & Services
                       </span>
                     </Link>
                   </li>
@@ -139,8 +141,8 @@ const Footer = async ({ topCategories, companyDetails }: FooterProps) => {
                   <Image
                     src={companyDetails.facebook_icon}
                     alt="fb"
-                    width={40}
-                    height={40}
+                    width={50}
+                    height={50}
                   />
                 </Link>
               )}
@@ -152,31 +154,8 @@ const Footer = async ({ topCategories, companyDetails }: FooterProps) => {
                   <Image
                     src={companyDetails.instagram_icon}
                     alt="ig"
-                    width={40}
-                    height={40}
-                  />
-                </Link>
-              )}
-              {companyDetails?.twitter_icon && (
-                <Link href={companyDetails.twitter_link || "#"} target="_blank">
-                  <Image
-                    src={companyDetails.twitter_icon}
-                    alt="tw"
-                    width={40}
-                    height={40}
-                  />
-                </Link>
-              )}
-              {companyDetails?.linkedin_icon && (
-                <Link
-                  href={companyDetails.linkedin_link || "#"}
-                  target="_blank"
-                >
-                  <Image
-                    src={companyDetails.linkedin_icon}
-                    alt="li"
-                    width={40}
-                    height={40}
+                    width={50}
+                    height={50}
                   />
                 </Link>
               )}
@@ -224,7 +203,7 @@ const Footer = async ({ topCategories, companyDetails }: FooterProps) => {
               <li>
                 <Link href="/terms">
                   <span className="cursor-pointer hover:text-black text-md">
-                    Terms
+                    Terms & Conditions
                   </span>
                 </Link>
               </li>
@@ -238,7 +217,7 @@ const Footer = async ({ topCategories, companyDetails }: FooterProps) => {
               <li>
                 <Link href="/termscondition">
                   <span className="cursor-pointer hover:text-black text-md">
-                    Terms and Conditions
+                    Terms and Services
                   </span>
                 </Link>
               </li>
@@ -250,25 +229,21 @@ const Footer = async ({ topCategories, companyDetails }: FooterProps) => {
             <h4 className="font-bold text-black mb-3 text-lg">Get In Touch</h4>
             <div className="mb-2 flex items-center gap-2 text-lg">
               <IoCallOutline />
-              <a
-                href={`tel:${companyDetails?.phone || "+91180041224826"}`}
-                className="hover:underline"
-              >
-                {companyDetails?.phone || "+91 1800 4122 4826"}
+              <a href="tel:+91180041224826" className="hover:underline">
+                +91 1800 4122 4826
               </a>
             </div>
             <div className="mb-4 flex items-center gap-2 text-lg">
               <FaRegEnvelope />
               <a
-                href={`mailto:${
-                  companyDetails?.email || "sales@mangochairs.com"
-                }`}
+                href="mailto:sales@mangochairs.com"
                 className="hover:underline"
               >
-                {companyDetails?.email || "sales@mangochairs.com"}
+                sales@mangochairs.com
               </a>
             </div>
-            <div className="flex gap-4 text-[#213C66] text-lg -mt-2">
+            <div className="flex items-center gap-4 text-[#213C66] text-md -mt-3">
+              Follow Us :
               {companyDetails?.facebook_icon && (
                 <Link
                   href={companyDetails.facebook_link || "#"}
@@ -277,8 +252,8 @@ const Footer = async ({ topCategories, companyDetails }: FooterProps) => {
                   <Image
                     src={companyDetails.facebook_icon}
                     alt="fb"
-                    width={60}
-                    height={60}
+                    width={40}
+                    height={40}
                   />
                 </Link>
               )}
@@ -289,32 +264,9 @@ const Footer = async ({ topCategories, companyDetails }: FooterProps) => {
                 >
                   <Image
                     src={companyDetails.instagram_icon}
-                    alt="ig"
-                    width={60}
-                    height={60}
-                  />
-                </Link>
-              )}
-              {companyDetails?.twitter_icon && (
-                <Link href={companyDetails.twitter_link || "#"} target="_blank">
-                  <Image
-                    src={companyDetails.twitter_icon}
-                    alt="tw"
-                    width={60}
-                    height={60}
-                  />
-                </Link>
-              )}
-              {companyDetails?.linkedin_icon && (
-                <Link
-                  href={companyDetails.linkedin_link || "#"}
-                  target="_blank"
-                >
-                  <Image
-                    src={companyDetails.linkedin_icon}
-                    alt="li"
-                    width={60}
-                    height={60}
+                    alt="fb"
+                    width={40}
+                    height={40}
                   />
                 </Link>
               )}

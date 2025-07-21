@@ -110,7 +110,7 @@ export default function UserAvatar() {
     <div className="relative" ref={menuRef}>
       <div
         onMouseEnter={() => setMenuOpen(true)}
-        className="flex items-center gap-2 md:gap-3 cursor-pointer px-3 md:px-6 py-1 rounded-md hover:bg-gray-100 transition-all duration-200"
+        className="flex items-center gap-2 md:gap-3 cursor-pointer px-3  py-1 rounded-md hover:bg-gray-100 transition-all duration-200"
       >
         {customer.imageUrl ? (
           <Image

@@ -244,7 +244,7 @@ export default function MyOrders() {
                               />
                             )}
                             <span>
-                              {itemName} (x{item.quantity}) - ₹
+                              {itemName} (₹{item.price} x {item.quantity}) = ₹
                               {(item.price * item.quantity).toFixed(2)}
                             </span>
                           </li>

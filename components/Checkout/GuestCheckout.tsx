@@ -1,4 +1,3 @@
-// GuestCheckout.tsx
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -97,7 +96,7 @@ const GuestCheckout = () => {
     null
   );
 
-  console.log("checkoutData", checkoutData)
+  console.log("checkoutData", checkoutData);
 
   const city = formData._city;
   const setCity = (value: string) =>
@@ -166,14 +165,10 @@ const GuestCheckout = () => {
 
     const formattedBillingAddress = `${formData.addressLine}, ${
       formData.landmark ? formData.landmark + ", " : ""
-    }${city}, ${formData.state} - ${
-      formData.pincode
-    }`;
+    }${city}, ${formData.state} - ${formData.pincode}`;
     const formattedShippingAddress = `${formData.addressLine}, ${
       formData.landmark ? formData.landmark + ", " : ""
-    }${city}, ${formData.state} - ${
-      formData.pincode
-    }`;
+    }${city}, ${formData.state} - ${formData.pincode}`;
 
     const payload = {
       email: formData.email,
@@ -192,7 +187,7 @@ const GuestCheckout = () => {
       subtotal: subtotal,
       shippingRate: shippingRate,
       taxAmount: taxAmount,
-      appliedTaxRate : taxPercentage,
+      appliedTaxRate: taxPercentage,
       taxableAmount: taxableAmount,
       taxType: taxType,
       isTaxInclusive: true,
@@ -203,11 +198,14 @@ const GuestCheckout = () => {
     setIsPlacingOrder(true);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/guest/checkout`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/guest/checkout`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
 
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "Checkout failed.");
@@ -233,7 +231,9 @@ const GuestCheckout = () => {
           });
         };
 
-        const scriptLoaded = await loadScript("https://checkout.razorpay.com/v1/checkout.js");
+        const scriptLoaded = await loadScript(
+          "https://checkout.razorpay.com/v1/checkout.js"
+        );
 
         if (!scriptLoaded) {
           toast.error("Failed to load Razorpay. Please try again.");
@@ -279,7 +279,6 @@ const GuestCheckout = () => {
       setIsPlacingOrder(false);
     }
   };
-
 
   // (Conditional rendering for isPlacingOrder and cartItems.length === 0 are unchanged and correct)
   if (isPlacingOrder) {
@@ -418,11 +417,12 @@ const GuestCheckout = () => {
               <option value="Razorpay">Pay Online (Razorpay)</option>
             </select>
           </div>
+          {/* Place Order button for large screens (desktop) */}
           <button
             type="button"
             onClick={handlePlaceOrder}
             disabled={isPlacingOrder}
-            className="col-span-full mt-5 text-white font-bold py-3 rounded bg-[#213E5A] hover:bg-[#1A334B] text-lg flex items-center justify-center gap-2"
+            className="col-span-full mt-5 text-white font-bold py-3 rounded bg-[#213E5A] hover:bg-[#1A334B] text-lg flex items-center justify-center gap-2 hidden lg:flex"
           >
             {isPlacingOrder ? (
               <>
@@ -455,15 +455,16 @@ const GuestCheckout = () => {
         </form>
       </div>
 
-      <div className="w-full lg:w-2/5 bg-white p-6 md:p-8 lg:p-10">
+      <div className="w-full lg:w-2/5 bg-white p-2 md:p-8 lg:p-10">
         <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center tracking-wide">
           Your Order
         </h2>
-        <ul className="space-y-4">
+
+        <ul className="space-y-2">
           {cartItems.map((item: CartItem) => (
             <li
               key={item.cartItemId}
-              className="flex gap-3 items-center p-2 rounded bg-gray-50 border"
+              className="flex gap-1 items-center p-2 rounded bg-gray-50 border"
             >
               {item.slug ? (
                 <Link href={`/product/${item.slug}`} className="flex-shrink-0">
@@ -484,9 +485,10 @@ const GuestCheckout = () => {
                   className="w-16 h-16 rounded object-cover border flex-shrink-0"
                 />
               )}
-              <div className="flex-grow">
-                <div className="flex justify-between items-start">
-                  <div>
+              <div className="flex-grow flex justify-between items-start ml-3">
+                {/* Left side: Name and Price per product */}
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-2">
                     {item.slug ? (
                       <Link href={`/product/${item.slug}`}>
                         <p className="font-semibold text-gray-900 text-base hover:text-[#007BFF] transition-colors cursor-pointer">
@@ -498,66 +500,86 @@ const GuestCheckout = () => {
                         {item.name}
                       </p>
                     )}
-                    {item.variantId && item.variant && (
-                      <p className="text-xs text-gray-600 mt-0.5">
-                        Variant:{" "}
-                        <span className="font-medium">{item.variant.name}</span>
-                      </p>
-                    )}
+                    {/* Display quantity multiplier */}
+                    <span className="text-sm text-gray-500">
+                      x{item.quantity}
+                    </span>
                   </div>
+                  {/* Display fixed selling price with "/ product" directly under the name */}
+                  <p className="text-sm text-gray-600 mt-1">
+                    ₹{item.sellingPrice.toFixed(2)} / product
+                  </p>
+                  {item.variantId && item.variant && (
+                    <p className="text-xs text-gray-600 mt-0.5">
+                      Variant:{" "}
+                      <span className="font-medium">{item.variant.name}</span>
+                    </p>
+                  )}
+                  {/* Display stock */}
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    In Stock: <span className="font-medium">{item.stock}</span>
+                  </p>
+                </div>
+
+                {/* Right side: Quantity Controls above Trash Icon */}
+                <div className="flex flex-col items-end gap-2">
+                  {/* Quantity Controls */}
+                  <div className="flex items-center  rounded-md overflow-hidden">
+                    <button
+                      onClick={() =>
+                        item.quantity > 1 &&
+                        dispatch(decrementQuantity(item.cartItemId))
+                      }
+                      disabled={item.quantity <= 1}
+                      className={`w-6 h-6 flex items-center justify-center rounded-full text-gray-600  ${
+                        item.quantity <= 1
+                          ? "cursor-not-allowed bg-gray-200 text-gray-400"
+                          : "hover:bg-gray-100"
+                      }`}
+                    >
+                      -
+                    </button>
+                    <span className="px-3 py-1 text-sm font-medium text-[#213E5A]  border-gray-300">
+                      {item.quantity}
+                    </span>
+                    <button
+                      onClick={() =>
+                        item.quantity < item.stock &&
+                        dispatch(incrementQuantity(item.cartItemId))
+                      }
+                      disabled={item.quantity >= item.stock}
+                      className={`w-6 h-6 flex items-center justify-center rounded-full text-gray-600 ${
+                        item.quantity >= item.stock
+                          ? "cursor-not-allowed bg-gray-200 text-gray-400"
+                          : "hover:bg-gray-100"
+                      }`}
+                    >
+                      +
+                    </button>
+                  </div>
+                  {/* Delete Button */}
                   <button
                     onClick={() => dispatch(removeFromCart(item.cartItemId))}
                     className="text-gray-400 hover:text-red-600 transition"
                   >
-                    <Trash2 size={16} />
+                    <Trash2 size={20} />
                   </button>
                 </div>
-
-                <div className="flex items-center mt-2 gap-2">
-                  <button
-                    onClick={() =>
-                      item.quantity > 1 &&
-                      dispatch(decrementQuantity(item.cartItemId))
-                    }
-                    disabled={item.quantity <= 1}
-                    className={`px-2 py-1 rounded border text-sm text-[#213E5A] ${item.quantity <= 1
-                      ? "cursor-not-allowed bg-gray-200 text-gray-400"
-                      : "hover:bg-gray-200"
-                      }`}
-                  >
-                    -
-                  </button>
-                  <span className="text-sm font-medium text-[#213E5A]">
-                    {item.quantity}
-                  </span>
-                  <button
-                    onClick={() =>
-                      item.quantity < item.stock &&
-                      dispatch(incrementQuantity(item.cartItemId))
-                    }
-                    disabled={item.quantity >= item.stock}
-                    className={`px-2 py-1 rounded border text-sm text-[#213E5A] ${item.quantity >= item.stock
-                      ? "cursor-not-allowed bg-gray-200 text-gray-400"
-                      : "hover:bg-gray-200"
-                      }`}
-                  >
-                    +
-                  </button>
-                </div>
-
-                {item.quantity >= item.stock && (
-                  <p className="text-xs text-red-500 mt-1">
-                    Stock limit reached
-                  </p>
-                )}
-
-                <p className="text-base text-gray-800 font-bold mt-2">
-                  ₹{(item.quantity * item.sellingPrice).toFixed(2)}
-                </p>
               </div>
             </li>
           ))}
         </ul>
+
+        {/* Back to Shop Button */}
+        <div className="flex justify-center mt-8">
+          <button
+            onClick={() => router.push("/shop")} // Use router.push for navigation
+            className="bg-[#213E5A] hover:bg-[#1a3249] text-white font-semibold py-2 px-6 rounded-md shadow-lg transition duration-300 transform hover:scale-105"
+          >
+            Back to Shop
+          </button>
+        </div>
+
         {/* Order Summary */}
         <div className="bg-white p-3 rounded-lg shadow-md mt-10">
           <h2 className="text-2xl font-bold text-gray-800 mb-6">
@@ -565,12 +587,11 @@ const GuestCheckout = () => {
           </h2>
           <div className="space-y-3">
             <div className="flex justify-between pb-2">
-              <span className="text-gray-700 font-semibold">Subtotal</span>
+              <span className="text-gray-700 font-semibold">Subtotal:</span>
               <span className="font-medium text-gray-900">
                 ₹{subtotal.toFixed(2)}
               </span>
             </div>
-
 
             <div className="flex justify-between pb-2 border-b border-gray-200">
               <span className="text-gray-700">Shipping Charges</span>
@@ -587,9 +608,7 @@ const GuestCheckout = () => {
               </span>
             </div>
             <div className="flex justify-between pb-2 border-b border-gray-200">
-              <span className="text-gray-700">
-                Tax ({taxPercentage}%)
-              </span>
+              <span className="text-gray-700">Tax ({taxPercentage}%)</span>
               <span className="font-medium text-gray-900">
                 ₹{taxAmount.toFixed(2)}
               </span>
@@ -604,7 +623,6 @@ const GuestCheckout = () => {
               </span>
             </div> */}
 
-
             <div className="flex justify-between pt-4 border-t-2 border-gray-300">
               <span className="text-xl font-bold text-gray-900">Total</span>
               <span className="text-xl font-bold text-gray-900">
@@ -612,9 +630,43 @@ const GuestCheckout = () => {
               </span>
             </div>
           </div>
-
         </div>
       </div>
+      {/* Place Order button for mobile view - visible on small screens, hidden on large screens */}
+      <button
+        type="button"
+        onClick={handlePlaceOrder}
+        disabled={isPlacingOrder}
+        className="block lg:hidden w-full mt-5 text-white font-bold py-3 rounded bg-[#213E5A] hover:bg-[#1A334B] text-lg flex items-center justify-center gap-2"
+      >
+        {isPlacingOrder ? (
+          <>
+            <svg
+              className="animate-spin h-5 w-5 text-white"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8v4l3.536-3.536A9 9 0 1021 12h-2a7 7 0 11-7-7v4z"
+              ></path>
+            </svg>
+            Placing Order...
+          </>
+        ) : (
+          "Place Order"
+        )}
+      </button>
     </div>
   );
 };

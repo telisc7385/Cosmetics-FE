@@ -28,9 +28,9 @@ const NavbarIcons = () => {
   void isLoadingCart;
 
   return (
-    <div className="flex items-center gap-2 text-black md:gap-2 md:justify-start justify-between w-full">
+    <div className="flex items-center gap-2 text-black md:gap-2 md:justify-end justify-between">
       {/* 👇 Wrapper for mobile layout alignment */}
-      <div className="flex items-center justify-between w-full md:w-auto md:gap-2 gap-2">
+      <div className="flex items-center justify-between w-full md:w-auto md:gap-6 gap-2">
         <div className="flex items-center text-xs font-semibold">
           <UserAvatar />
         </div>
