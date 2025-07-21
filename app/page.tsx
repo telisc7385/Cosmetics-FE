@@ -29,7 +29,7 @@ export default async function HomePage() {
       getBanners(),
       fetchCategories(), // The return type of this function is the source of the conflict
       // getWhyChooseUs(),
-      getProducts(),
+      getProducts(6, 1),
       getTestimonials(),
       getGallery(),
       fetchAllTag(),
@@ -48,7 +48,7 @@ export default async function HomePage() {
       <TopCategoriesClient categories={categories} type={"category"} />
       <FeaturesBanner />
       <HotListWrapper />
-      <FeaturedSliderComponent product={product} />
+      <FeaturedSliderComponent product={product?.products} />
       <TopCategoriesClient categories={tagData} type={"tag"} />
       {/* <TagProductFilter /> */}
       <TestimonialsSection testimonials={testimonials} />

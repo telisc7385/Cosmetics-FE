@@ -9,6 +9,8 @@ interface Props {
   max: number;
   setMin: (val: number) => void;
   setMax: (val: number) => void;
+  initialMin: number,
+  initialMax: number
 }
 
 const STEP = 10;
@@ -19,17 +21,17 @@ const clamp = (value: number, min: number, max: number) => {
   return Math.min(Math.max(value, min), max);
 };
 
-const PriceRangeSlider = ({ min, max, setMin, setMax }: Props) => {
-  const clampedMin = clamp(min, MIN, MAX);
-  const clampedMax = clamp(max, MIN, MAX);
+const PriceRangeSlider = ({ min, max, setMin, setMax, initialMin, initialMax }: Props) => {
+  const clampedMin = clamp(min, initialMin, initialMax);
+  const clampedMax = clamp(max, initialMin, initialMax);
 
   const [values, setValues] = useState([clampedMin, clampedMax]);
 
   useEffect(() => {
     // Only update internal state if min/max from props actually change
     // and are within the allowed range to prevent infinite loops or unnecessary re-renders
-    const newClampedMin = clamp(min, MIN, MAX);
-    const newClampedMax = clamp(max, MIN, MAX);
+    const newClampedMin = clamp(min, initialMin, initialMax);
+    const newClampedMax = clamp(max, initialMin, initialMax);
     if (values[0] !== newClampedMin || values[1] !== newClampedMax) {
       setValues([newClampedMin, newClampedMax]);
     }
@@ -51,13 +53,13 @@ const PriceRangeSlider = ({ min, max, setMin, setMax }: Props) => {
       <Range
         values={values}
         step={STEP}
-        min={MIN}
-        max={MAX}
+        min={initialMin}
+        max={initialMax}
         onChange={handleChange}
         renderTrack={({ props, children }) => {
           const [minVal, maxVal] = values;
-          const left = `${((minVal - MIN) / (MAX - MIN)) * 100}%`;
-          const right = `${100 - ((maxVal - MIN) / (MAX - MIN)) * 100}%`;
+          const left = `${((minVal - initialMin) / (initialMax - initialMin)) * 100}%`;
+          const right = `${100 - ((maxVal - initialMin) / (initialMax - initialMin)) * 100}%`;
 
           return (
             <div

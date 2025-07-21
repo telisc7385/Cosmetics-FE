@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { Product } from "@/types/product";
+import type { Product, ProductData } from "@/types/product";
 import SidebarFilters from "@/components/ServersideComponent/SidebarFilters/SidebarFilters"; // Assuming this path is correct
 import SortDropdown from "../SortDropdown/SortDropdown"; // Assuming this path is correct
 import ProductList from "./ProductList"; // Assuming this path is correct
@@ -11,17 +11,18 @@ import { SlidersHorizontal } from "lucide-react";
 // Updated Category type to match the user's provided CategoryFilter.tsx
 interface Props {
   categories: Category[];
+  initialProducts: ProductData;
 }
 
 type SortOrder = "" | "price_asc" | "price_desc";
 
-export default function ShopPageClient({ categories }: Props) {
+export default function ShopPageClient({ categories, initialProducts }: Props) {
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedCats, setSelectedCats] = useState<number[]>([]);
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedTags, setSelectedTags] = useState<number[]>([]);
   const [sortOrder, setSortOrder] = useState<SortOrder>("");
-  const [min, setMin] = useState(0);
-  const [max, setMax] = useState(100000);
+  const [min, setMin] = useState(initialProducts?.minPrice);
+  const [max, setMax] = useState(initialProducts?.maxPrice);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
@@ -29,41 +30,12 @@ export default function ShopPageClient({ categories }: Props) {
   const limit = 8;
   const base = process.env.NEXT_PUBLIC_BASE_URL;
 
-  // State to store the mapping of tag names to their IDs
-  const [tagNameToIdMap, setTagNameToIdMap] = useState<Map<string, number>>(
-    new Map()
-  );
-
-  useEffect(() => {
-    // Fetch tags initially to build the name-to-id map
-    const fetchAllTags = async () => {
-      try {
-        const res = await fetch(`${base}/product?product-tag`); // Fetch all products or a specific endpoint that lists all tags
-        const data = await res.json();
-        const allProductsTags = data.products?.flatMap(
-          (product: any) => product.tags || [] // Assuming product.tags is an array of {id: number, name: string}
-        );
-        const newMap = new Map<string, number>();
-        allProductsTags.forEach((tag: { id: number; name: string }) => {
-          if (tag && tag.id && tag.name) {
-            newMap.set(tag.name, tag.id);
-          }
-        });
-        setTagNameToIdMap(newMap);
-      } catch (err) {
-        console.error("Failed to fetch all tags for mapping:", err);
-      }
-    };
-    fetchAllTags();
-  }, [base]); // Run once on component mount to get tags for mapping
 
   useEffect(() => {
     const qCats = selectedCats.map((id) => `category=${id}`).join("&");
     // Convert selected tag names to their corresponding IDs
     const selectedTagIds = selectedTags
-      .map((tagName) => tagNameToIdMap.get(tagName))
-      .filter((id) => id !== undefined) as number[]; // Filter out undefined and assert type
-    // Construct qTags using comma-separated IDs and the 'tags' parameter
+      .filter((id): id is number => id !== undefined);
     const qTags =
       selectedTagIds.length > 0 ? `tags=${selectedTagIds.join(",")}` : "";
 
@@ -71,8 +43,8 @@ export default function ShopPageClient({ categories }: Props) {
       sortOrder === "price_asc"
         ? "selling_price"
         : sortOrder === "price_desc"
-        ? "-selling_price"
-        : "";
+          ? "-selling_price"
+          : "";
 
     const url =
       `${base}/product?is_active=true&page=${currentPage}&limit=${limit}` +
@@ -102,15 +74,14 @@ export default function ShopPageClient({ categories }: Props) {
     max,
     currentPage,
     base,
-    tagNameToIdMap,
   ]); // Add tagNameToIdMap to dependencies
 
   const handleClearFilters = () => {
     setSelectedCats([]);
     setSelectedTags([]);
     setSortOrder("");
-    setMin(0);
-    setMax(100000);
+    setMin(initialProducts?.minPrice);
+    setMax(initialProducts?.maxPrice);
     setCurrentPage(1); // Reset to first page on clearing filters
   };
 
@@ -155,6 +126,8 @@ export default function ShopPageClient({ categories }: Props) {
                     max={max}
                     setMin={setMin}
                     setMax={setMax}
+                    initialMin={initialProducts?.minPrice}
+                    initialMax={initialProducts?.maxPrice}
                   />
                 </div>
                 <div className="p-4 border-t border-gray-200">
@@ -210,6 +183,8 @@ export default function ShopPageClient({ categories }: Props) {
                 max={max}
                 setMin={setMin}
                 setMax={setMax}
+                initialMin={initialProducts?.minPrice}
+                initialMax={initialProducts?.maxPrice}
               />
             </div>
             <button
@@ -230,11 +205,10 @@ export default function ShopPageClient({ categories }: Props) {
                   <button
                     key={i}
                     onClick={() => setCurrentPage(i + 1)}
-                    className={`cursor-pointer not-first:min-w-[36px] h-10 px-3 py-1.5 rounded-md text-sm font-medium border transition-all duration-200 ${
-                      currentPage === i + 1
-                        ? "bg-[#22365D] text-white border--[#22365D]"
-                        : "bg-white text-[#22365D] border-gray-300 hover:bg-gray-100"
-                    }`}
+                    className={`cursor-pointer not-first:min-w-[36px] h-10 px-3 py-1.5 rounded-md text-sm font-medium border transition-all duration-200 ${currentPage === i + 1
+                      ? "bg-[#22365D] text-white border--[#22365D]"
+                      : "bg-white text-[#22365D] border-gray-300 hover:bg-gray-100"
+                      }`}
                   >
                     {i + 1}
                   </button>

@@ -32,6 +32,17 @@ export interface ProductCategory {
   publicId: string;
 }
 
+export interface ProductData {
+  success: boolean;
+  count: number;
+  totalCount: number;
+  totalPages: number;
+  currentPage: number;
+  minPrice: number;
+  maxPrice: number;
+  products: Product[]
+}
+
 export interface Product {
   ratingCount: number | null;
   rating: number | null;

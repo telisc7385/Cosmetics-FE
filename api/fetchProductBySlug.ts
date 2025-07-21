@@ -17,6 +17,6 @@ export async function fetchProductBySlug(slug: string): Promise<Product | null> 
 
 
 export async function fetchAllTag() {
-  const response:any = await apiCore(`/product-tag`, "GET");
+  const response:any = await apiCore(`/product-tag?is_ative=true`, "GET");
   return response?.results;
 }
