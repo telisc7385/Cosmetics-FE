@@ -1,11 +1,9 @@
 "use client"
-
 import type React from "react"
-
 import { useEffect, useState } from "react"
-import CategoryFilter from "./CategoryFilter" // Updated import path
-import PriceFilter from "@/components/ServersideComponent/SidebarFilters/PriceFilter" // Assuming this path is correct
-import { Category } from "@/types/category"
+import CategoryFilter from "./CategoryFilter"
+import PriceFilter from "@/components/ServersideComponent/SidebarFilters/PriceFilter"
+import type { Category } from "@/types/category"
 import { fetchAllTag } from "@/api/fetchProductBySlug"
 
 interface Tag {
@@ -15,32 +13,31 @@ interface Tag {
 
 interface Props {
   categories: Category[]
-  selected: number[]
-  setSelected: React.Dispatch<React.SetStateAction<number[]>>
+  selectedCats: number[]
+  setSelectedCats: React.Dispatch<React.SetStateAction<number[]>>
+  selectedSubcats: number[]
+  setSelectedSubcats: React.Dispatch<React.SetStateAction<number[]>>
   selectedTags: number[]
   setSelectedTags: React.Dispatch<React.SetStateAction<number[]>>
   min: number
   max: number
   setMin: React.Dispatch<React.SetStateAction<number>>
   setMax: React.Dispatch<React.SetStateAction<number>>
-  initialMin: number,
+  initialMin: number
   initialMax: number
 }
 
-// Interfaces to type API response properly
 interface APITag {
   id: number
   name: string
 }
 
-interface APIProduct {
-  tags?: APITag[]
-}
-
 export default function SidebarFilters({
   categories,
-  selected,
-  setSelected,
+  selectedCats,
+  setSelectedCats,
+  selectedSubcats,
+  setSelectedSubcats,
   selectedTags,
   setSelectedTags,
   min,
@@ -48,15 +45,14 @@ export default function SidebarFilters({
   setMin,
   setMax,
   initialMin,
-  initialMax
+  initialMax,
 }: Props) {
   const [tags, setTags] = useState<Tag[]>([])
 
   useEffect(() => {
     const fetchTags = async () => {
       try {
-        const res = await fetchAllTag();
-
+        const res = await fetchAllTag()
         setTags(res)
       } catch (err) {
         console.error("Failed to fetch tags:", err)
@@ -75,20 +71,30 @@ export default function SidebarFilters({
       <div className="bg-white rounded-xl border p-3 shadow-sm">
         <h2 className="font-semibold text-base text-gray-800">Categories</h2>
         <hr className="my-1.5 border-gray-300" />
-        <CategoryFilter categories={categories} selected={selected} setSelected={setSelected} />
+        <CategoryFilter
+          categories={categories}
+          selectedCats={selectedCats}
+          setSelectedCats={setSelectedCats}
+          selectedSubcats={selectedSubcats}
+          setSelectedSubcats={setSelectedSubcats}
+        />
       </div>
 
       {/* Price Filter */}
-      <div className="bg-white rounded-xl border p-3 shadow-sm">
+      <div className="bg-white rounded-xl border p-3 shadow-sm relative">
         <h2 className="font-semibold text-base text-gray-800">Price Range</h2>
         <hr className="my-1.5 border-gray-300" />
-        <PriceFilter min={min} max={max} setMin={setMin} setMax={setMax}
+        <PriceFilter
+          min={min}
+          max={max}
+          setMin={setMin}
+          setMax={setMax}
           initialMin={initialMin}
           initialMax={initialMax}
         />
       </div>
 
-      {/* Product Tags Filter - Now with checkboxes and adjusted text size */}
+      {/* Product Tags Filter */}
       {tags.length > 0 && (
         <div className="bg-white rounded-xl border p-3 shadow-sm">
           <h2 className="font-semibold text-base text-gray-800">Tags</h2>

@@ -29,8 +29,8 @@ export default function CategoryInfo({
   const pathname = usePathname();
   const router = useRouter();
 
-  console.log("category",category)
-  const [products, setProducts] = useState<Product[]>( []);
+  console.log("category", category)
+  const [products, setProducts] = useState<Product[]>([]);
   const [totalPages, setTotalPages] = useState(totalPagesFromServer || 1);
 
   const sortOrder = (searchParams.get("sort") ?? "") as SortOrder;
@@ -127,6 +127,15 @@ export default function CategoryInfo({
               All Products
             </Link>
             <span className="text-[#213E5A]">/</span>
+            {category.categoryName && (
+              <Link
+                href={`/category/${category.slug}`}
+                className="text-black-600 hover:text-blue-800 underline underline-offset-4 transition-colors duration-200"
+              >
+                {category.categoryName}
+                <span className="text-[#213E5A]">/</span>
+              </Link>
+            )}
             <span className="text-[#213E5A]">{category.name}</span>
           </h3>
 

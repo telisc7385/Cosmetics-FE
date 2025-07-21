@@ -21,7 +21,9 @@ const clamp = (value: number, min: number, max: number) => {
   return Math.min(Math.max(value, min), max);
 };
 
+
 const PriceRangeSlider = ({ min, max, setMin, setMax, initialMin, initialMax }: Props) => {
+
   const clampedMin = clamp(min, initialMin, initialMax);
   const clampedMax = clamp(max, initialMin, initialMax);
 
@@ -35,7 +37,7 @@ const PriceRangeSlider = ({ min, max, setMin, setMax, initialMin, initialMax }: 
     if (values[0] !== newClampedMin || values[1] !== newClampedMax) {
       setValues([newClampedMin, newClampedMax]);
     }
-  }, [min, max]); // Depend on min and max props
+  }, [min, max, initialMin, initialMax]); // Depend on min and max props
 
   const handleChange = (vals: number[]) => {
     setValues(vals);
@@ -44,46 +46,48 @@ const PriceRangeSlider = ({ min, max, setMin, setMax, initialMin, initialMax }: 
   };
 
   return (
-    <div className="w-full px-3 py-4">
+    <div className="px-3 py-4">
       <div className="flex justify-between text-xs text-gray-700 mb-2 font-semibold">
         <span>₹{values[0]}</span>
         <span>₹{values[1]}</span>
       </div>
+      <div className="relative">
+        <Range
+          values={values}
+          step={STEP}
+          min={initialMin}
+          max={initialMax}
+          onChange={handleChange}
+          renderTrack={({ props, children }) => {
+            const [minVal, maxVal] = values;
+            const left = `${((minVal - initialMin) / (initialMax - initialMin)) * 100}%`;
+            const right = `${100 - ((maxVal - initialMin) / (initialMax - initialMin)) * 100}%`;
 
-      <Range
-        values={values}
-        step={STEP}
-        min={initialMin}
-        max={initialMax}
-        onChange={handleChange}
-        renderTrack={({ props, children }) => {
-          const [minVal, maxVal] = values;
-          const left = `${((minVal - initialMin) / (initialMax - initialMin)) * 100}%`;
-          const right = `${100 - ((maxVal - initialMin) / (initialMax - initialMin)) * 100}%`;
-
-          return (
+            return (
+              <div
+                {...props}
+                className="w-full h-2 rounded-full bg-purple-200 relative"
+              >
+                <div
+                  className="absolute h-2 bg-[#22365D] rounded-full"
+                  style={{
+                    left: left,
+                    right: right,
+                  }}
+                />
+                {children}
+              </div>
+            );
+          }}
+          renderThumb={({ props }) => (
             <div
               {...props}
-              className="w-full h-2 rounded-full bg-purple-200 relative"
-            >
-              <div
-                className="absolute h-2 bg-[#22365D] rounded-full"
-                style={{
-                  left: left,
-                  right: right,
-                }}
-              />
-              {children}
-            </div>
-          );
-        }}
-        renderThumb={({ props }) => (
-          <div
-            {...props}
-            className="w-4 h-4 bg-white rounded-full border-2 border-black shadow-md cursor-pointer"
-          />
-        )}
-      />
+              className="w-4 h-4 bg-white rounded-full border-2 border-black shadow-md cursor-pointer"
+            />
+          )}
+        />
+      </div>
+
     </div>
   );
 };
