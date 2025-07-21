@@ -1,8 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getNewArrivalProducts } from "@/api/fetchNewArrivalProducts";
-import { Product } from "@/types/product";
+import { ProductData } from "@/types/product";
 import ProductCard from "../CommonComponents/ProductCard/ProductCard";
 import SectionHeader from "../CommonComponents/SectionHeader";
 
@@ -10,23 +8,14 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
-import Image from "next/image";
 
-export default function HotListWrapper() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+type Props = {
+  newArrival: ProductData;
+}
+export default function HotListWrapper({ newArrival }: Props) {
 
-  useEffect(() => {
-    getNewArrivalProducts()
-      .then((res) => setProducts(res || []))
-      .finally(() => setLoading(false));
-  }, []);
 
-  if (loading) {
-    return <div className="text-center py-8">Loading...</div>;
-  }
-
-  if (products.length === 0) {
+  if (newArrival?.products.length === 0) {
     return (
       <div className="text-center py-8 text-gray-600 text-lg">
         No new arrival products found.
@@ -55,7 +44,9 @@ export default function HotListWrapper() {
             }}
             pagination={{
               clickable: true,
-              el: ".hotlist-pagination",
+              el: ".swiper-pagination-custom", // This should match the container
+              bulletClass: "swiper-pagination-bullet-custom",
+              bulletActiveClass: "swiper-pagination-bullet-custom-active",
             }}
             spaceBetween={16}
             slidesPerView={2}
@@ -67,14 +58,15 @@ export default function HotListWrapper() {
             }}
             className="relative mb-6"
           >
-            {products.map((product) => (
-              <SwiperSlide key={product.id} className="py-0 my-2">
+            {newArrival?.products?.map?.((product) => (
+              <SwiperSlide key={product.id} className="py-0 mb-10">
                 <ProductCard product={product} />
               </SwiperSlide>
             ))}
+            <div className="swiper-pagination-custom absolute bottom-0 left-0 right-0 flex justify-center space-x-3" />
+
           </Swiper>
 
-          <div className="swiper-pagination-custom absolute bottom-0 left-0 right-0 flex justify-center space-x-3" />
         </div>
       </div>
     </section>

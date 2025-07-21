@@ -1,9 +1,11 @@
 import { fetchCategories } from "@/api/fetchCategories";
+import { getProducts } from "@/api/fetchFeaturedSlider";
 import ShopPageClient from "@/components/ClientsideComponent/shopPageClient/shopPageClient";
 import Image from "next/image";
 
 export default async function ShopPage() {
   const { categories } = await fetchCategories();
+  const initialProducts = await getProducts(8, 1)
 
   return (
     <div className="flex flex-col gap-4 md:gap-8">
@@ -17,7 +19,10 @@ export default async function ShopPage() {
         />
       </div>
       <div className="mb-5 bg-white container max-w-7xl mx-auto ">
-        <ShopPageClient categories={categories} />
+        <ShopPageClient
+          categories={categories}
+          initialProducts={initialProducts}
+        />
       </div>
     </div>
   );

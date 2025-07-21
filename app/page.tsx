@@ -24,15 +24,16 @@ import { fetchAllTag } from "@/api/fetchProductBySlug";
 import PromotionBanner from "@/components/ClientsideComponent/PromotionBanner/PromotionBanner";
 
 export default async function HomePage() {
-  const [banners, categoriesResponse, product, testimonials, gallery, tagData] =
+  const [banners, categoriesResponse, product, testimonials, gallery, tagData, newArrival] =
     await Promise.all([
       getBanners(),
       fetchCategories(), // The return type of this function is the source of the conflict
       // getWhyChooseUs(),
-      getProducts(),
+      getProducts(6, 1),
       getTestimonials(),
       getGallery(),
       fetchAllTag(),
+      getProducts(10, 1, true),
     ]);
 
   // This line expects `categoriesResponse` to have a `categories` property
@@ -47,8 +48,8 @@ export default async function HomePage() {
       <Counter />
       <TopCategoriesClient categories={categories} type={"category"} />
       <FeaturesBanner />
-      <HotListWrapper />
-      <FeaturedSliderComponent product={product} />
+      <HotListWrapper newArrival={newArrival} />
+      <FeaturedSliderComponent product={product?.products} />
       <TopCategoriesClient categories={tagData} type={"tag"} />
       {/* <TagProductFilter /> */}
       <TestimonialsSection testimonials={testimonials} />

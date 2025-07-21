@@ -248,7 +248,7 @@ const UserCheckout = () => {
     currentSubtotal + shippingRate - discountAmount - abandentDiscountAmount; // Calculation from CartPage
   const taxPercentage = checkoutData?.taxPercentage || 0;
   const taxAmount = taxableAmount * (taxPercentage / 100); // Calculation from CartPage
-  const taxType = checkoutData?.taxType || "N/A";
+  const taxType = checkoutData?.taxType || "";
 
   // Calculate final total amount based on new logic
   useEffect(() => {
@@ -1037,9 +1037,7 @@ const UserCheckout = () => {
         router.push(
           `/thank-you?orderId=${
             order.id || ""
-          }&billingAddress=${encodeURIComponent(
-            formattedBillingAddress
-          )}&shippingAddress=${encodeURIComponent(formattedShippingAddress)}`
+          }`
         );
       }
     } catch (err: unknown) {
@@ -1607,7 +1605,7 @@ const UserCheckout = () => {
               </span>
             </div>
             <div className="flex justify-between pb-2 border-b border-gray-200">
-              <span className="text-gray-700">Tax ({taxPercentage}%)</span>
+              <span className="text-gray-700">{taxType} Tax ({taxPercentage}%)</span>
               <span className="font-medium text-gray-900">
                 ₹{taxAmount.toFixed(2)}
               </span>

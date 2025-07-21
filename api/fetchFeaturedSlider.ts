@@ -1,18 +1,23 @@
-import { Product } from "@/types/product";
+import { ProductData } from "@/types/product";
 import { apiCore } from "./ApiCore";
 
-interface GetProductsResponse {
-  success: boolean;
-  count: number;
-  products: Product[];
-}
+export async function getProducts(
+  limit: number,
+  page: number,
+  newArrival?: boolean
+): Promise<ProductData> {
+  const params = new URLSearchParams();
+  params.append("is_active", "true");
+  params.append("page", page.toString());
+  params.append("limit", limit.toString());
 
-export async function getProducts(limit: number = 5): Promise<Product[]> {
-  try {
-    const data = await apiCore<GetProductsResponse>("/product?is_active=true", "GET");
-    return data.products?.slice(0, limit) || [];
-  } catch (error) {
-    console.error("Error fetching products:", (error as Error).message);
-    return [];
+  if (newArrival) {
+    params.append("newArrival", "true");
   }
+  const url = `/product?${params.toString()}`;
+  // console.log("params", url)
+
+  const data = await apiCore<ProductData>(url, "GET");
+
+  return data;
 }

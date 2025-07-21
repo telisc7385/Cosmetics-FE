@@ -11,6 +11,7 @@ export interface SubCategory {
   title?: string; // Changed from React.ReactNode to string | undefined
   id: number;
   name: string;
+  isDeleted?: boolean;
   subsubcategories?: SubSubCategory[];
 }
 
@@ -19,13 +20,14 @@ export interface Category {
   title?: string; // Changed from React.ReactNode to string | undefined
   products: Product[];
   id: number;
+  categoryName: string;
   name: string;
   isDeleted?: boolean;
   publicId?: string;
   createdAt?: string;
   sequence_number?: number;
   is_active?: boolean;
-  subcategories?: SubCategory[];
+  subcategories: SubCategory[];
   seo_title?: string;
   seo_description?: string;
   imageUrl: string;

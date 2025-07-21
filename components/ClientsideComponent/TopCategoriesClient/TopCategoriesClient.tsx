@@ -184,7 +184,7 @@ export default function TopCategoriesClient({ categories, type }: Props) {
                 autoplay={{ delay: 3000, disableOnInteraction: false }}
                 pagination={{
                   clickable: true,
-                  el: ".swiper-pagination-custom",
+                  el: ".swiper-pagination-custom", // This should match the container
                   bulletClass: "swiper-pagination-bullet-custom",
                   bulletActiveClass: "swiper-pagination-bullet-custom-active",
                 }}
@@ -197,7 +197,7 @@ export default function TopCategoriesClient({ categories, type }: Props) {
                 className="px-2 py-10"
               >
                 {filteredProducts.map((product, index) => (
-                  <SwiperSlide key={product.id} className="my-2">
+                  <SwiperSlide key={product.id} className="my-2 mb-10">
                     <motion.div
                       initial={{ opacity: 0, y: 60 }}
                       whileInView={{ opacity: 1, y: 0 }}
@@ -208,9 +208,10 @@ export default function TopCategoriesClient({ categories, type }: Props) {
                     </motion.div>
                   </SwiperSlide>
                 ))}
+                <div className="swiper-pagination-custom mt-4 flex justify-center space-x-3" />
+
               </Swiper>
 
-              <div className="swiper-pagination-custom absolute bottom-0 left-0 right-0 flex justify-center space-x-3" />
             </motion.div>
           )}
         </AnimatePresence>
