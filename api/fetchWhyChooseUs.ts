@@ -20,7 +20,7 @@ export async function getWhyChooseUs(): Promise<WhyChooseUsItem[]> {
 export async function getTestimonials(): Promise<Testimonial[]> {
   try {
     const data = await apiCore<{ testimonials?: Testimonial[] }>(
-      "/frontend/testimonial",
+      "/frontend/testimonial?is_active=true",
       "GET"
     );
     return data.testimonials ?? [];

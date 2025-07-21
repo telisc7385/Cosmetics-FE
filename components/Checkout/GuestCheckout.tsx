@@ -164,6 +164,17 @@ const GuestCheckout = () => {
         : { productId: item.id }),
     }));
 
+    const formattedBillingAddress = `${formData.addressLine}, ${
+      formData.landmark ? formData.landmark + ", " : ""
+    }${city}, ${formData.state} - ${
+      formData.pincode
+    }`;
+    const formattedShippingAddress = `${formData.addressLine}, ${
+      formData.landmark ? formData.landmark + ", " : ""
+    }${city}, ${formData.state} - ${
+      formData.pincode
+    }`;
+
     const payload = {
       email: formData.email,
       address: {
@@ -175,6 +186,8 @@ const GuestCheckout = () => {
         addressLine: formData.addressLine,
         landmark: formData.landmark,
       },
+      billingAddress: formattedBillingAddress,
+      shippingAddress: formattedShippingAddress,
       items: itemsForPayload,
       subtotal: subtotal,
       shippingRate: shippingRate,

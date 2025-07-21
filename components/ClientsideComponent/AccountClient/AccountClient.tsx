@@ -9,6 +9,7 @@ import { useAppSelector } from "@/store/hooks/hooks";
 import { selectUser } from "@/store/slices/authSlice";
 import { ChevronDown, ChevronUp, X } from "lucide-react"; // Import Chevron and X icons
 import { handleRemovePincode } from "@/utils/removePincodeData";
+import { clearCart } from "@/store/slices/cartSlice";
 
 const ProfileInfo = dynamic(
   () => import("@/components/ClientsideComponent/Profile/ProfileInfo")
@@ -81,6 +82,7 @@ export default function AccountClient() {
                 toast.dismiss(t.id);
                 localStorage.clear();
                 handleRemovePincode()
+                clearCart()
                 router.push("/auth");
               }}
               className="w-full px-4 py-3 flex items-center justify-center text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors duration-200"
