@@ -12,7 +12,7 @@ import "swiper/css/pagination";
 type Props = {
   newArrival: ProductData;
 }
-export default function HotListWrapper({newArrival}: Props) {
+export default function HotListWrapper({ newArrival }: Props) {
 
 
   if (newArrival?.products.length === 0) {
@@ -44,7 +44,9 @@ export default function HotListWrapper({newArrival}: Props) {
             }}
             pagination={{
               clickable: true,
-              el: ".hotlist-pagination",
+              el: ".swiper-pagination-custom", // This should match the container
+              bulletClass: "swiper-pagination-bullet-custom",
+              bulletActiveClass: "swiper-pagination-bullet-custom-active",
             }}
             spaceBetween={16}
             slidesPerView={2}
@@ -57,13 +59,14 @@ export default function HotListWrapper({newArrival}: Props) {
             className="relative mb-6"
           >
             {newArrival?.products?.map?.((product) => (
-              <SwiperSlide key={product.id} className="py-0 my-2">
+              <SwiperSlide key={product.id} className="py-0 mb-10">
                 <ProductCard product={product} />
               </SwiperSlide>
             ))}
+            <div className="swiper-pagination-custom absolute bottom-0 left-0 right-0 flex justify-center space-x-3" />
+
           </Swiper>
 
-          <div className="swiper-pagination-custom absolute bottom-0 left-0 right-0 flex justify-center space-x-3" />
         </div>
       </div>
     </section>
