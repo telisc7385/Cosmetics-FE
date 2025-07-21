@@ -74,6 +74,7 @@ interface OrderInfo {
   taxable_amount: number; // This is number
   tax_percentage: number; // This is number
   tax_amount: number; // This is number
+  tax_type: string;
 }
 
 interface PaymentInfo {
@@ -750,7 +751,7 @@ const ThankYouPage = () => {
           </div>
 
           <div className="flex justify-between text-sm font-semibold text-gray-700 pb-2 border-b border-gray-200">
-            <span>Tax ({order.order_info.applied_tax_rate ?? 0}%):</span>
+            <span>Tax ({order.order_info.tax_type}) ({order.order_info.applied_tax_rate ?? 0}%):</span>
             <span>₹{(order.order_info.tax_amount ?? 0).toFixed(2)}</span>
           </div>
 

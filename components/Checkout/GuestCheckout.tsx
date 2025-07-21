@@ -129,7 +129,7 @@ const GuestCheckout = () => {
   const taxableAmount = subtotal + shippingRate;
   const taxPercentage = checkoutData?.taxPercentage || 0;
   const taxAmount = taxableAmount * (taxPercentage / 100); // Calculation from CartPage
-  const taxType = checkoutData?.taxType || "N/A";
+  const taxType = checkoutData?.taxType || "";
   const finalTotalAmount = taxableAmount + taxAmount;
 
   const handlePlaceOrder = async () => {
@@ -588,7 +588,7 @@ const GuestCheckout = () => {
             </div>
             <div className="flex justify-between pb-2 border-b border-gray-200">
               <span className="text-gray-700">
-                Tax ({taxPercentage}%)
+               {taxType} Tax ({taxPercentage}%)
               </span>
               <span className="font-medium text-gray-900">
                 ₹{taxAmount.toFixed(2)}
