@@ -332,7 +332,6 @@ const CartPage = () => {
   return (
     <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 lg:py-8 bg-[#F3F6F7]">
       <div className="flex justify-between items-center mb-6 lg:mb-4">
-        
         {/* Flex container for title and clear all */}
         <h1 className="text-xl font-bold text-gray-800">Shopping Cart</h1>
         <button
@@ -390,25 +389,34 @@ const CartPage = () => {
                 {/* Mobile View Specific Layout - visible only on 'sm' breakpoint and below */}
                 <div className="flex flex-col justify-between h-full w-full sm:hidden">
                   <div>
-                    {item.slug ? (
-                      <Link href={`/product/${item.slug}`}>
-                        <h3 className="text-sm font-semibold text-gray-900 line-clamp-2 hover:text-[#007BFF] transition-colors cursor-pointer">
+                    <div className="flex justify-between items-start gap-2">
+                      {item.slug ? (
+                        <Link href={`/product/${item.slug}`} className="flex-1">
+                          <h3 className="text-sm font-semibold text-gray-900 line-clamp-2 hover:text-[#007BFF] transition-colors cursor-pointer">
+                            {item.name}
+                          </h3>
+                        </Link>
+                      ) : (
+                        <h3 className="text-sm font-semibold text-gray-900 line-clamp-2 flex-1">
                           {item.name}
                         </h3>
-                      </Link>
-                    ) : (
-                      <h3 className="text-sm font-semibold text-gray-900 line-clamp-2">
-                        {item.name}
-                      </h3>
-                    )}
-                    {/* Selling price specifically for mobile view */}
-                    <p className="text-xs text-gray-700 mt-1">
-                      Price: ₹{item.sellingPrice.toFixed(2)}
-                    </p>
-                    <p className="text-xs text-gray-900 mt-1">
-                      Total: ₹{(item.sellingPrice * item.quantity).toFixed(2)}
-                    </p>
+                      )}
+                    </div>
+
+                    {/* Price with quantity and total aligned in one row */}
+                    <div className="flex justify-between items-center mt-1">
+                      <p className="text-xs text-gray-700">
+                        Price: ₹{item.sellingPrice.toFixed(2)} / item{" "}
+                        <span className="text-xs text-gray-500">
+                          x {item.quantity}
+                        </span>
+                      </p>
+                      <p className="text-xs text-gray-900 whitespace-nowrap font-semibold">
+                        ₹{(item.sellingPrice * item.quantity).toFixed(2)}
+                      </p>
+                    </div>
                   </div>
+
                   <div className="flex items-center justify-between w-full mt-3">
                     <div className="flex items-center space-x-1 border border-gray-300 rounded-md py-0.5 px-1">
                       <button
@@ -418,8 +426,6 @@ const CartPage = () => {
                         -
                       </button>
                       <span className="font-medium text-sm w-4 text-center text-[#213E5A]">
-                        {" "}
-                        {/* Reduced font size here */}
                         {item.quantity}
                       </span>
                       <button
@@ -442,29 +448,36 @@ const CartPage = () => {
                 {/* Tablet/Laptop View Specific Layout for Title, Stock, and Quantity - hidden on 'sm' breakpoint and below */}
                 <div className="hidden sm:flex flex-col justify-between h-full">
                   <div>
-                    {item.slug ? (
-                      <Link href={`/product/${item.slug}`}>
-                        <h3 className="text-lg font-semibold text-gray-900 line-clamp-2 hover:text-[#007BFF] transition-colors cursor-pointer">
+                    <div className="flex justify-between items-start gap-2">
+                      {item.slug ? (
+                        <Link href={`/product/${item.slug}`} className="flex-1">
+                          <h3 className="text-lg font-semibold text-gray-900 line-clamp-2 hover:text-[#007BFF] transition-colors cursor-pointer">
+                            {item.name}
+                          </h3>
+                        </Link>
+                      ) : (
+                        <h3 className="text-lg font-semibold text-gray-900 line-clamp-2 flex-1">
                           {item.name}
                         </h3>
-                      </Link>
-                    ) : (
-                      <h3 className="text-lg font-semibold text-gray-900 line-clamp-2">
-                        {item.name}
-                      </h3>
-                    )}
+                      )}
+                    </div>
+
+                    {/* Price per item with x{quantity} */}
                     <p className="text-sm font-semibold text-gray-900 mt-1">
-                      ₹{item.sellingPrice.toFixed(2)} / item
+                      ₹{item.sellingPrice.toFixed(2)} / item{" "}
+                      <span className="text-sm text-gray-500">
+                        x {item.quantity}
+                      </span>
                     </p>
+
                     {item.variantId && (
                       <p className="text-xs text-gray-400">
                         {/* Variant ID: {item.variantId} */}
                       </p>
                     )}
-                    {/* Increment/Decrement for Tablet/Laptop - adjusted size */}
+
+                    {/* Increment/Decrement for Tablet/Laptop */}
                     <div className="w-20 flex items-center border border-gray-300 rounded-md py-0.5 mt-2">
-                      {" "}
-                      {/* Reduced width (w-20) and vertical padding (py-0.5) */}
                       <button
                         onClick={() => handleDecrement(item.cartItemId)}
                         className="w-7 h-5 flex items-center justify-center text-gray-600 hover:bg-gray-100 rounded-sm cursor-pointer text-base"
@@ -472,8 +485,6 @@ const CartPage = () => {
                         -
                       </button>
                       <span className="font-medium text-base w-6 text-center text-[#213E5A]">
-                        {" "}
-                        {/* Reduced font size (text-base) */}
                         {item.quantity}
                       </span>
                       <button

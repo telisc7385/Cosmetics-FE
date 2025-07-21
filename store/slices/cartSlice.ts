@@ -126,7 +126,7 @@ const cartSlice = createSlice({
       const itemRemoved = state.items.find(item => item.cartItemId === action.payload);
       state.items = state.items.filter((item) => item.cartItemId !== action.payload);
       if (itemRemoved) {
-        toast.error(`${itemRemoved.name} removed from cart.`);
+        // toast.error(`${itemRemoved.name} removed from cart.`);
       }
       console.log("cartSlice: Removed item. New state.items:", state.items);
       if (typeof window !== 'undefined') {
@@ -169,7 +169,7 @@ const cartSlice = createSlice({
           state.items = state.items.filter(
             (cartItem) => cartItem.cartItemId !== action.payload
           );
-          toast.error(`${item.name} removed from cart.`); // Toast for removal on decrement to zero
+         
         } else {
             toast.success(`Decreased quantity of ${item.name}!`); // Success on decrement
         }

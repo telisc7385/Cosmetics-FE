@@ -41,24 +41,26 @@ const Navbar = ({ companyDetails }: NavbarProps) => {
         {/* <HomeCoupon /> */}
         <div className="max-w-7xl mx-auto w-full px-4 flex flex-col gap-6 py-2">
           {/* Desktop View */}
-          <div className="hidden lg:flex items-center justify-between w-full">
+          <div className="hidden lg:flex gap-6 items-center justify-between w-full">
             {/* Left: Logo */}
-            <div className="flex items-center">
-              <Link href="/">
-                <Image src={logoUrl} alt="Logo" width={140} height={50} />
-              </Link>
-            </div>
-
-            {/* Center: Nav Items */}
-            <div className="flex justify-center flex-1">
-              <NavItems />
+            <div className="flex justify-start items-center gap-8">
+              {" "}
+              <div className="flex items-center">
+                <Link href="/">
+                  <Image src={logoUrl} alt="Logo" width={140} height={50} />
+                </Link>
+              </div>
+              {/* Center: Nav Items */}
+              <div className="flex justify-between items-center flex-6">
+                <NavItems />
+              </div>
             </div>
 
             {/* Right: Search Bar and Icons (grouped together) */}
-            <div className="flex items-center gap-6">
+            <div className="flex justify-end items-center gap-4 ">
               {" "}
               {/* Use gap for spacing between search bar and icons */}
-              <div className="w-[350px]">
+              <div className="w-[250px]">
                 <SearchBar />
               </div>
               <NavbarIconsWrapper />
@@ -71,7 +73,7 @@ const Navbar = ({ companyDetails }: NavbarProps) => {
               <Image src={logoUrl} alt="Logo" width={140} height={50} />
             </Link>
             <div className="flex items-center gap-6">
-              <div className="w-[280px]">
+              <div className="w-[250px]">
                 <SearchBar />
               </div>
               <NavbarIconsWrapper />

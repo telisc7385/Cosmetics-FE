@@ -1,4 +1,3 @@
-// PersonalInfo.tsx
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
@@ -27,7 +26,14 @@ export default function PersonalInfo() {
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
+    email: "",
     bio: "",
+  });
+
+  const [errors, setErrors] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
   });
 
   const getUserInfo = useCallback(async () => {
@@ -43,15 +49,12 @@ export default function PersonalInfo() {
       setFormData({
         firstName: userData.firstName,
         lastName: userData.lastName,
+        email: userData.email,
         bio: userData.bio || "",
       });
     } catch (error: unknown) {
       console.error("Failed to load personal info:", error);
-      if (error instanceof Error) {
-        toast.error(error.message);
-      } else {
-        toast.error("Failed to load personal info");
-      }
+      toast.error("Failed to load personal info");
     }
   }, [token]);
 
@@ -62,23 +65,46 @@ export default function PersonalInfo() {
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+    setErrors((prev) => ({ ...prev, [name]: "" }));
+  };
+
+  const validate = () => {
+    const nameRegex = /^[A-Za-z\s]+$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const newErrors = {
+      firstName: !nameRegex.test(formData.firstName.trim())
+        ? "First name can contain only letters"
+        : "",
+      lastName: !nameRegex.test(formData.lastName.trim())
+        ? "Last name can contain only letters"
+        : "",
+      email: !emailRegex.test(formData.email.trim())
+        ? "Enter a valid email address"
+        : "",
+    };
+    setErrors(newErrors);
+    return Object.values(newErrors).every((e) => e === "");
   };
 
   const handleSave = async () => {
+    if (!validate()) return;
+
     try {
       const updatePayload = {
         firstName: formData.firstName,
         lastName: formData.lastName,
+        email: formData.email,
         bio: formData.bio,
       };
 
       const loadingToastId = toast.loading("Saving changes...");
 
       const updatedUser = await apiCore<UserInfo>(
-        "/user/update", // Endpoint for user update
+        "/user/update",
         "PATCH",
-        updatePayload, // Send data as JSON body
+        updatePayload,
         token
       );
 
@@ -88,26 +114,18 @@ export default function PersonalInfo() {
         updateProfile({
           firstName: updatedUser.firstName || formData.firstName,
           lastName: updatedUser.lastName || formData.lastName,
-          // ✨ FIX: DO NOT include imageUrl here if the form doesn't handle image uploads
-          // The Redux reducer for updateProfile should already handle preserving it
-          // if it's not present in the action payload.
-          // If updatedUser from API response *does* contain the imageUrl,
-          // then passing it is fine. If it *doesn't*, then don't force null.
+          email: updatedUser.email || formData.email,
           bio: updatedUser.bio || formData.bio,
           role: updatedUser.role || user?.role,
           phone: updatedUser.phone || user?.phone,
         })
       );
 
-      getUserInfo(); // Re-fetch to ensure UI is in sync with backend
-
+      getUserInfo();
       setEditing(false);
     } catch (error: unknown) {
       console.error("Failed to update profile:", error);
-      const errorMessage =
-        (error instanceof Error && error.message) ||
-        "Failed to update profile.";
-      toast.error(errorMessage, { id: toast.loading("Saving changes...") });
+      toast.error("Failed to update profile.");
     }
   };
 
@@ -122,67 +140,124 @@ export default function PersonalInfo() {
   const displayImageUrl = user.imageUrl || "/default-avatar.png";
 
   return (
-    <div className="max-w-xl mx-auto mt-10 p-6 bg-white shadow-xl rounded-2xl border border-gray-100">
-      <div className="flex items-center gap-6 relative">
-        <div className="relative !w-[144px] !h-[144px] !rounded-full overflow-hidden">
-          <Image
-            src={displayImageUrl}
-            alt={user.firstName || "Profile Image"}
-            width={144}
-            height={144}
-            className="!w-[144px] !h-[144px] object-cover border-4 border-blue-100 shadow-md"
-          />
+    <div className="max-w-2xl mx-auto mt-6 p-6 bg-white shadow-xl rounded-2xl border border-gray-100">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 relative">
+        <div className="flex-shrink-0 self-center sm:self-start">
+          <div className="relative w-28 h-28 sm:w-36 sm:h-36 rounded-full overflow-hidden border-4 border-blue-100 shadow-md">
+            <Image
+              src={displayImageUrl}
+              alt={user.firstName || "Profile Image"}
+              fill
+              className="object-cover"
+            />
+          </div>
         </div>
 
-        <div>
-          {editing ? (
-            <>
-              <input
-                type="text"
-                name="firstName"
-                value={formData.firstName}
-                onChange={handleInputChange}
-                className="text-lg font-semibold text-gray-800 border-b border-gray-300 focus:outline-none"
-                placeholder="First Name"
-              />
-              <input
-                type="text"
-                name="lastName"
-                value={formData.lastName}
-                onChange={handleInputChange}
-                className="text-lg font-semibold text-gray-800 border-b border-gray-300 focus:outline-none ml-2"
-                placeholder="Last Name"
-              />
-            </>
-          ) : (
-            <h2 className="text-2xl font-bold text-gray-800 capitalize">
-              {user.firstName} {user.lastName}
-            </h2>
-          )}
-          <p className="text-sm text-gray-600">{user.email}</p>
-          <span className="inline-block mt-1 px-3 py-0.5 text-xs rounded-full bg-blue-50 text-blue-700 font-semibold">
+        <div className="flex-1">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div className="flex flex-col w-full">
+              {editing ? (
+                <>
+                  <label
+                    htmlFor="firstName"
+                    className="text-sm text-gray-600 mb-1"
+                  >
+                    First Name
+                  </label>
+                  <input
+                    type="text"
+                    id="firstName"
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleInputChange}
+                    className="text-base font-medium text-gray-800 border border-gray-300 rounded px-3 py-1.5 mb-1 focus:outline-none"
+                    placeholder="First Name"
+                  />
+                  {errors.firstName && (
+                    <p className="text-xs text-red-500 mb-2">
+                      {errors.firstName}
+                    </p>
+                  )}
+
+                  <label
+                    htmlFor="lastName"
+                    className="text-sm text-gray-600 mb-1 mt-2"
+                  >
+                    Last Name
+                  </label>
+                  <input
+                    type="text"
+                    id="lastName"
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleInputChange}
+                    className="text-base font-medium text-gray-800 border border-gray-300 rounded px-3 py-1.5 focus:outline-none"
+                    placeholder="Last Name"
+                  />
+                  {errors.lastName && (
+                    <p className="text-xs text-red-500 mb-2">
+                      {errors.lastName}
+                    </p>
+                  )}
+
+                  <label
+                    htmlFor="email"
+                    className="text-sm text-gray-600 mb-1 mt-2"
+                  >
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={formData.email}
+                    readOnly
+                    className="text-base font-medium text-gray-500 bg-gray-100 border border-gray-300 rounded px-3 py-1.5 cursor-not-allowed"
+                    placeholder="Email"
+                  />
+                </>
+              ) : (
+                <>
+                  <h2 className="text-xl sm:text-2xl font-bold text-gray-800 capitalize">
+                    {user.firstName} {user.lastName}
+                  </h2>
+                  <p className="text-sm text-gray-600 mt-1">{user.email}</p>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="absolute top-0 right-0 sm:static sm:self-start">
+          <span className="inline-block px-3 py-1 text-xs sm:text-sm rounded-full bg-blue-50 text-blue-700 font-semibold">
             {user.role}
           </span>
         </div>
       </div>
 
       <div className="mt-6 border-t pt-4">
-        <h3 className="text-lg font-semibold text-gray-700 mb-1">Bio</h3>
+        <h3 className="text-lg font-semibold text-gray-700 mb-2">Bio</h3>
         {editing ? (
-          <textarea
-            name="bio"
-            value={formData.bio}
-            onChange={handleInputChange}
-            rows={3}
-            className="w-full text-sm text-gray-700 border border-gray-300 rounded px-3 py-2 focus:outline-none"
-            placeholder="Tell us about yourself..."
-          />
+          <>
+            <label htmlFor="bio" className="text-sm text-gray-600 mb-1 block">
+              Your Bio
+            </label>
+            <textarea
+              id="bio"
+              name="bio"
+              value={formData.bio}
+              onChange={handleInputChange}
+              rows={3}
+              className="w-full text-sm text-gray-700 border border-gray-300 rounded px-3 py-2 focus:outline-none"
+              placeholder="Tell us about yourself..."
+            />
+          </>
         ) : (
           <p className="text-gray-600 text-sm">{user.bio || "No bio added."}</p>
         )}
       </div>
 
-      <div className="mt-4 flex justify-end space-x-3">
+      <div className="mt-6 flex justify-end space-x-3">
         {editing ? (
           <>
             <button
@@ -192,18 +267,20 @@ export default function PersonalInfo() {
                   setFormData({
                     firstName: user.firstName,
                     lastName: user.lastName,
+                    email: user.email,
                     bio: user.bio || "",
                   });
+                  setErrors({ firstName: "", lastName: "", email: "" });
                 }
               }}
-              className="px-4 py-2 text-sm bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors cursor-pointer"
+              className="px-4 py-2 text-sm bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
               style={{ backgroundColor: "#203b67" }}
-              className="px-4 py-2 text-sm text-white rounded hover:opacity-90 transition-opacity cursor-pointer"
+              className="px-4 py-2 text-sm text-white rounded hover:opacity-90 transition-opacity"
             >
               Save Changes
             </button>
@@ -212,7 +289,7 @@ export default function PersonalInfo() {
           <button
             onClick={() => setEditing(true)}
             style={{ backgroundColor: "#203b67" }}
-            className="px-4 py-2 text-sm text-white rounded hover:opacity-90 transition-opacity cursor-pointer"
+            className="px-4 py-2 text-sm text-white rounded hover:opacity-90 transition-opacity"
           >
             Edit Profile
           </button>

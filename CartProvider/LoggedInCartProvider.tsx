@@ -305,13 +305,11 @@ export function LoggedInCartProvider({
       const fetchedItems = parseCartResponse(response);
       setItems(fetchedItems);
     } catch (err: any) {
-      console.error("LoggedInCartProvider: Failed to fetch cart items:", err);
-      if (err.message && err.message.includes("401")) {
-        setError(
-          "Error loading cart: Authorization failed. Please log in again."
-        );
+      console.error("Failed to found cart items", err);
+      if (err.message) {
+        setError("Please log in again.");
       } else {
-        setError(err.message || "Failed to fetch cart items.");
+        setError(err.message || "Failed to found cart items");
       }
       setItems([]);
       setCartId(null);

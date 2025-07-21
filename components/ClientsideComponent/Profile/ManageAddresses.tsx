@@ -113,7 +113,20 @@ export default function ManageAddresses() {
           className="flex items-center gap-1 text-white px-4 py-1 rounded cursor-pointer"
           style={{ backgroundColor: "#203b67" }} // Applied color
         >
-          <Plus size={16} /> {showAddForm ? "Cancel" : "Add New Address"}
+         
+          <>
+            {showAddForm ? (
+              <>
+                <X size={16} className="inline-block mr-1" />
+                Cancel
+              </>
+            ) : (
+              <>
+                <Plus size={16} className="inline-block mr-1" />
+                Add New Address
+              </>
+            )}
+          </>
         </button>
       </div>
       {showAddForm && (
@@ -134,7 +147,6 @@ export default function ManageAddresses() {
                 >
                   <option value="SHIPPING">Shipping</option>
                   <option value="BILLING">Billing</option>
-                  <option value="BOTH">Both</option>
                 </select>
               ) : (
                 <input

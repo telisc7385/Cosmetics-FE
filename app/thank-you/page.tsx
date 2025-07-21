@@ -738,7 +738,9 @@ const ThankYouPage = () => {
           {(order.order_info.discount ?? 0) > 0 &&
             !(order.order_info.coupon_discount_amount ?? 0) && (
               <div className="flex justify-between text-sm font-semibold text-gray-700">
-                <span>Discount:</span>
+                <span>
+                  Discount: {order.order_info.coupon_discount_amount}%:
+                </span>
                 <span className="font-medium text-red-600">
                   - ₹{(order.order_info.discount ?? 0).toFixed(2)}
                 </span>

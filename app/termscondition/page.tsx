@@ -19,7 +19,7 @@ const TermsAndConditionsPage: React.FC = () => {
           {/* Page Title */}
           {/* Reduced from text-4xl lg:text-5xl to text-3xl lg:text-4xl */}
           <h1 className="text-3xl lg:text-4xl font-extrabold text-gray-900 mb-8 text-center">
-            Terms & Service
+            Terms & Services
           </h1>
 
           {/* Section Heading */}

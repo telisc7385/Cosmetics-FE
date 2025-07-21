@@ -131,8 +131,6 @@ export default function ForgotPassword({ setShowForgotPassword }: Props) {
         dispatch(verifyOtpSuccess());
         toast.success("OTP verified!", { id: toastId });
         // router.push('/auth')
-  
-
       } else {
         dispatch(verifyOtpFailure(data.error || "OTP verification failed"));
         toast.dismiss(toastId);
@@ -168,7 +166,7 @@ export default function ForgotPassword({ setShowForgotPassword }: Props) {
       if (res.ok) {
         dispatch(resetPasswordSuccess());
         toast.dismiss(toastId);
-        setShowForgotPassword(false)
+        setShowForgotPassword(false);
       } else {
         dispatch(resetPasswordFailure(data.error || "Reset failed"));
         toast.dismiss(toastId);
@@ -283,7 +281,7 @@ export default function ForgotPassword({ setShowForgotPassword }: Props) {
               placeholder="New Password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              className="w-full p-2 pr-10 rounded border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#214364]"
+              className="w-full text-[#214364] p-2 pr-10 rounded border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#214364]"
               autoComplete="new-password"
             />
             <button
@@ -297,7 +295,7 @@ export default function ForgotPassword({ setShowForgotPassword }: Props) {
           <button
             onClick={handleResetPassword}
             disabled={!newPassword || resetLoading}
-            className="w-full bg-[#214364] text-white py-2 rounded-md font-semibold hover:bg-opacity-90 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-[#214364] text-white py-2 hover:cursor-pointer rounded-md font-semibold hover:bg-opacity-90 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {resetLoading ? "Resetting..." : "Reset Password"}
           </button>

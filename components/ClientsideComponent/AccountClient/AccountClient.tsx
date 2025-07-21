@@ -81,8 +81,8 @@ export default function AccountClient() {
               onClick={() => {
                 toast.dismiss(t.id);
                 localStorage.clear();
-                handleRemovePincode()
-                clearCart()
+                handleRemovePincode();
+                clearCart();
                 router.push("/auth");
               }}
               className="w-full px-4 py-3 flex items-center justify-center text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors duration-200"
@@ -112,7 +112,7 @@ export default function AccountClient() {
   void DeleteAccount;
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-gray-50">
+    <div className=" flex flex-col lg:flex-row bg-gray-50">
       {/* Sidebar */}
       <aside
         className="w-full lg:w-1/4 border-b lg:border-r lg:border-b-0 bg-white p-4 lg:p-6 text-[#213E5A]
@@ -188,7 +188,8 @@ export default function AccountClient() {
           </button> */}
           <button
             onClick={handleLogout}
-            className="w-full text-center px-4 py-2 mt-4 text-sm bg-red-50 text-red-700 font-semibold rounded hover:bg-red-100 transition-colors border border-red-200 hover:cursor-pointer"          >
+            className="w-full text-center px-4 py-2 mt-4 text-sm bg-red-50 text-red-700 font-semibold rounded hover:bg-red-100 transition-colors border border-red-200 hover:cursor-pointer"
+          >
             Logout
           </button>
 

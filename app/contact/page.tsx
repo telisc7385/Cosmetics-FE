@@ -1,4 +1,3 @@
-// app/contact/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -19,21 +18,19 @@ const countryStateMap: Record<string, string[]> = {
   UK: ["England", "Scotland", "Wales", "Northern Ireland"],
 };
 
-interface GtagEventParams {
-  event_category?: string;
-  event_label?: string;
-  value?: number;
-  form_name?: string;
-  submitted_email?: string;
-  submitted_subject?: string;
-}
-
 declare global {
   interface Window {
     gtag?: (
       command: "config" | "event" | "set",
       targetId: string,
-      params?: GtagEventParams
+      params?: {
+        event_category?: string;
+        event_label?: string;
+        value?: number;
+        form_name?: string;
+        submitted_email?: string;
+        submitted_subject?: string;
+      }
     ) => void;
   }
 }
@@ -42,6 +39,11 @@ export default function ContactFormSection() {
   const token = useAppSelector(selectToken);
   const [loading, setLoading] = useState(false);
   const [company, setCompany] = useState<CompanySettings | null>(null);
+  const [errors, setErrors] = useState<{
+    name?: string;
+    email?: string;
+    phone_number?: string;
+  }>({});
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -77,16 +79,44 @@ export default function ContactFormSection() {
     fetchCompany();
   }, []);
 
+  const validate = () => {
+    const newErrors: typeof errors = {};
+    const nameRegex = /^[A-Za-z\s]+$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    // Regex for phone number: only digits, minimum 10 digits
+    const phoneRegex = /^\d{10,}$/;
+
+    if (!nameRegex.test(formData.name.trim())) {
+      newErrors.name = "Name should contain only letters and spaces";
+    }
+
+    if (!emailRegex.test(formData.email.trim())) {
+      newErrors.email = "Please enter a valid email address";
+    }
+
+    if (!phoneRegex.test(formData.phone_number.trim())) {
+      newErrors.phone_number =
+        "Phone number must contain only numbers and be at least 10 digits long";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >
   ) => {
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validate()) return;
+
     try {
       setLoading(true);
       await apiCore(
@@ -105,9 +135,6 @@ export default function ContactFormSection() {
           submitted_email: formData.email,
           submitted_subject: formData.subject,
         });
-        console.log("GA Event sent: form_submission (Contact Form)");
-      } else {
-        console.warn("Google Analytics gtag not found. Event not sent.");
       }
 
       setFormData({
@@ -150,23 +177,66 @@ export default function ContactFormSection() {
               onSubmit={handleSubmit}
               className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-[16px]"
             >
-              {[
-                { name: "name", placeholder: "Your Name" },
-                { name: "email", type: "email", placeholder: "Email" },
-                { name: "phone_number", placeholder: "Phone Number" },
-                { name: "city", placeholder: "City" },
-              ].map((field) => (
+              <div className="flex flex-col col-span-1 sm:col-span-1">
                 <input
-                  key={field.name}
-                  name={field.name}
-                  type={field.type || "text"}
-                  placeholder={field.placeholder}
-                  value={formData[field.name as keyof typeof formData]}
+                  name="name"
+                  placeholder="Your Name"
+                  value={formData.name}
                   onChange={handleChange}
                   required
-                  className="border border-[#213E5A] text-[#213E5A] rounded-md px-2 py-1 sm:px-4 sm:py-2 bg-white text-[16px]"
+                  className="border border-[#213E5A] text-[#213E5A] rounded-md px-2 py-1 sm:px-4 sm:py-2 bg-white"
                 />
-              ))}
+                {errors.name && (
+                  <span className="text-sm text-red-500 mt-1">
+                    {errors.name}
+                  </span>
+                )}
+              </div>
+
+              <div className="flex flex-col col-span-1 sm:col-span-1">
+                <input
+                  name="email"
+                  type="email"
+                  placeholder="Email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                  className="border border-[#213E5A] text-[#213E5A] rounded-md px-2 py-1 sm:px-4 sm:py-2 bg-white"
+                />
+                {errors.email && (
+                  <span className="text-sm text-red-500 mt-1">
+                    {errors.email}
+                  </span>
+                )}
+              </div>
+
+              {/* Phone number input with validation error display */}
+              <div className="flex flex-col col-span-1 sm:col-span-1">
+                <input
+                  name="phone_number"
+                  placeholder="Phone Number"
+                  value={formData.phone_number}
+                  onChange={handleChange}
+                  required
+                  className="border border-[#213E5A] text-[#213E5A] rounded-md px-2 py-1 sm:px-4 sm:py-2 bg-white"
+                  // Added type="tel" for better mobile keyboard experience, though validation handles digits
+                  type="tel"
+                />
+                {errors.phone_number && (
+                  <span className="text-sm text-red-500 mt-1">
+                    {errors.phone_number}
+                  </span>
+                )}
+              </div>
+
+              <input
+                name="city"
+                placeholder="City"
+                value={formData.city}
+                onChange={handleChange}
+                required
+                className="border border-[#213E5A] text-[#213E5A] rounded-md px-2 py-1 sm:px-4 sm:py-2 bg-white"
+              />
 
               <select
                 name="country"
@@ -205,7 +275,7 @@ export default function ContactFormSection() {
                 value={formData.subject}
                 onChange={handleChange}
                 required
-                className="col-span-1 sm:col-span-2 border border-[#213E5A] text-[#213E5A] rounded-md px-2 py-1 sm:px-4 sm:py-2 bg-white text-[16px]"
+                className="col-span-1 sm:col-span-2 border border-[#213E5A] text-[#213E5A] rounded-md px-2 py-1 sm:px-4 sm:py-2 bg-white"
               />
 
               <textarea
@@ -214,7 +284,7 @@ export default function ContactFormSection() {
                 rows={4}
                 value={formData.message}
                 onChange={handleChange}
-                className="col-span-1 sm:col-span-2 border border-[#213E5A] text-[#213E5A] rounded-md px-2 py-1 sm:px-4 sm:py-2 bg-white text-[16px]"
+                className="col-span-1 sm:col-span-2 border border-[#213E5A] text-[#213E5A] rounded-md px-2 py-1 sm:px-4 sm:py-2 bg-white"
               />
 
               <button
