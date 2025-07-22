@@ -30,12 +30,12 @@ const SingleBlogComponent = ({ blog, otherBlogs }: Props) => {
       <div
         className="h-[250px] md:h-[350px] lg:h-[450px] bg-cover bg-center py-5 lg:py-10 flex justify-center items-center flex-col text-center px-4"
         style={{
-          backgroundImage: `linear-gradient(rgba(0,0,0,0.5),rgba(0,0,0,0.7)),url(/BG1.jpg)`, // Static banner image
+          backgroundImage: `linear-gradient(rgba(0,0,0,0.5),rgba(0,0,0,0.5)),url(/BannerBlog.jpg)`, // Static banner image
           backgroundColor: primaryColor, // Fallback background color
         }}
       >
         <h1 className="text-white sm:text-3xl md:text-5xl lg:text-5xl font-normal leading-snug sm:leading-snug md:leading-tight drop-shadow-md">
-          {blog.title}
+          {/* {blog.title} */} <p>Blogs</p>
         </h1>
         <p
           className="text-white text-sm sm:text-base md:text-lg mt-2"

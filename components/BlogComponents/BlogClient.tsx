@@ -46,7 +46,7 @@ const BlogClient = () => {
       {/* Banner */}
       <div className="w-full h-[300px] sm:h-[400px] md:h-[400px] flex items-center justify-center relative mt-4">
         <Image
-          src="/BG1.jpg"
+          src="/blogbanner2.jpg"
           alt="store Banner"
           layout="fill"
           objectFit="cover"
@@ -54,11 +54,11 @@ const BlogClient = () => {
         />
         <div className="absolute inset-0 z-10 flex items-center">
           <div className="max-w-7xl mx-auto w-full px-4 sm:px-8 md:px-16">
-            <div className="text-black text-center">
+            <div className="text-white text-center">
               <h2
                 className={`text-center text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-normal leading-snug sm:leading-snug md:leading-tight drop-shadow-md transition-opacity duration-500`}
               >
-                Insights
+                Our Blogs
               </h2>
             </div>
           </div>

@@ -113,7 +113,6 @@ export default function ManageAddresses() {
           className="flex items-center gap-1 text-white px-4 py-1 rounded cursor-pointer"
           style={{ backgroundColor: "#203b67" }} // Applied color
         >
-         
           <>
             {showAddForm ? (
               <>
