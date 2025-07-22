@@ -1,80 +1,19 @@
-import { notFound } from "next/navigation";
-import Image from "next/image";
-import type { Metadata } from "next";
-import { Suspense } from "react";
-import { getPaginatedBlogs, getSingleBlogBySlug } from "@/api/blogsApi"; // Import getSingleBlogBySlug
 import { Blog } from "@/types/blogDataTypes";
-import SingleBlogCard from "@/components/BlogComponents/SingleBlogCard";
-import BlogSkeleton from "@/components/BlogComponents/BlogSkeleton";
+import React, { Suspense } from "react";
+import BlogSkeleton from "./BlogSkeleton";
+import SingleBlogCard from "./SingleBlogCard";
+import Image from "next/image";
 
-type PageProps = {
-  params: { slug: string }; // Corrected type for params
+type Props = {
+  blog: any;
+  otherBlogs: any;
 };
 
-export async function generateMetadata({
-  params,
-}: PageProps): Promise<Metadata> {
-  const { slug } = params; // Directly access slug from params
-  // console.log("blog slug", slug); // Keep for debugging if needed
-  const Singleblog = await getSingleBlogBySlug(slug);
-  const blog = Singleblog.data;
-  if (!blog) {
-    return {
-      title: "Blog Not Found",
-      description: "This blog does not exist.",
-    };
-  }
-
-  const title = blog.title;
-  // Use seo_metadata if available, otherwise truncate content. Ensure content is string.
-  const description =
-    blog.seo_metadata ||
-    (typeof blog.content === "string" ? blog.content.slice(0, 150) : "");
-
-  return {
-    title,
-    description,
-    // alternates: { canonical: `${process.env.NEXT_PUBLIC_DOMAIN}/blog/${slug}` }, // Ensure your canonical URL matches your actual slug path
-    // openGraph: {
-    //   title,
-    //   description,
-    //   url: `${domain}/blog/${slug}`, // Ensure your Open Graph URL matches your actual slug path
-    //   images: [
-    //     {
-    //       url: `${apiBase}${blog.image}`,
-    //       alt: blog.image_alternate_text || blog.title,
-    //     },
-    //   ],
-    //   type: "article",
-    // },
-    // twitter: {
-    //   card: "summary_large_image",
-    //   title,
-    //   description,
-    //   images: [`${apiBase}${blog.image}`],
-    // },
-  };
-}
-
-export async function generateStaticParams() {
-  const response = await getPaginatedBlogs(1, 100); // Still need all slugs for static generation
-  // Ensure response.data is an array before mapping
-  return response.data
-    ? response.data.map((blog: Blog) => ({ slug: blog.slug }))
-    : [];
-}
-
-export default async function SingleBlogPage({ params }: PageProps) {
-  const { slug } = params; // Directly access slug from params
-
-  const Singleblog = await getSingleBlogBySlug(slug);
-  const blog = Singleblog.data;
-
-  // console.log(blog); // Keep for debugging if needed
-
-  if (!blog) {
-    notFound();
-  }
+const SingleBlogComponent = ({ blog, otherBlogs }: Props) => {
+  // Define the primary color for consistency
+  const primaryColor = "#1A3249";
+  const textColor = "#333333";
+  const lightTextColor = "#666666";
 
   const formattedDate = new Date(blog.publish_date).toLocaleDateString(
     "en-US",
@@ -84,18 +23,6 @@ export default async function SingleBlogPage({ params }: PageProps) {
       day: "numeric",
     }
   );
-
-  // To get other blogs, you still need to fetch paginated blogs.
-  // You might consider a separate API endpoint for "related blogs" if your backend can provide that more efficiently.
-  const allBlogsResponse = await getPaginatedBlogs(1, 100); // Or fetch only a small number of blogs for "related" section
-  const otherBlogs = allBlogsResponse.data
-    ?.filter((b: Blog) => b.slug !== slug)
-    ?.slice(0, 5); // Limit to 5 related articles
-
-  // Define the primary color for consistency
-  const primaryColor = "#1A3249";
-  const textColor = "#333333";
-  const lightTextColor = "#666666";
 
   return (
     <div className="bg-white">
@@ -196,4 +123,6 @@ export default async function SingleBlogPage({ params }: PageProps) {
       </div>
     </div>
   );
-}
+};
+
+export default SingleBlogComponent;

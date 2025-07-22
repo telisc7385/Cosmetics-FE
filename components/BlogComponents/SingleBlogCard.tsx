@@ -41,7 +41,7 @@ function SingleBlogCardComponent({ blog }: BlogCardProps) {
       }}
     >
       {/* Image with Category Overlay */}
-      <Link href={`/${slug}`} className="block relative group">
+      <Link href={`/blog/${slug}`} className="block relative group">
         <div className="relative overflow-hidden rounded-t-lg">
           <Image
             src={image}
@@ -77,7 +77,7 @@ function SingleBlogCardComponent({ blog }: BlogCardProps) {
         </div>
 
         {/* Title */}
-        <Link href={`/${slug}`} className="block mb-3">
+        <Link href={`/blog/${slug}`} className="block mb-3">
           <p
             className="text-lg lg:text-2xl font-bold line-clamp-2 leading-tight transition-colors duration-200"
             style={{ color: textColor }}
@@ -95,7 +95,7 @@ function SingleBlogCardComponent({ blog }: BlogCardProps) {
 
         {/* Continue Reading */}
         <Link
-          href={`/${slug}`}
+          href={`/blog/${slug}`}
           className="font-semibold text-base flex items-center group"
           style={{ color: primaryColor }}
         >
