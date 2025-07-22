@@ -34,6 +34,7 @@ interface Variant {
     createdAt: string;
     updatedAt: string;
   }[];
+  product: any;
 }
 
 interface Payment {
@@ -227,6 +228,7 @@ export default function MyOrders() {
                         const itemName =
                           item.variant?.name ||
                           item.product?.name ||
+                          item.variant?.product?.name ||
                           "Unknown Item";
 
                         return (
