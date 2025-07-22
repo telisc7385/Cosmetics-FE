@@ -73,8 +73,8 @@ export default function ShopPageClient({ categories, initialProducts }: Props) {
         // setInitialMaxPrice(data.maxPrice);
 
         // and reset the slider to that fresh range:
-        setMin(data.minPrice);
-        setMax(data.maxPrice);
+        // setMin(data.minPrice);
+        // setMax(data.maxPrice);
       } catch (err) {
         console.error(err);
       }
