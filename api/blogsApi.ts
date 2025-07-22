@@ -2,7 +2,7 @@ import { BlogsResponse, Blog } from "@/types/blogDataTypes";
 import { apiCore } from "./ApiCore";
 
 export async function getPaginatedBlogs(page = 1, pageSize = 12): Promise<BlogsResponse> {
-  const data = await apiCore<BlogsResponse>(`/blog/?page=${page}&page_size=${pageSize}`, "GET");
+  const data = await apiCore<BlogsResponse>(`/blog/?is_active=true&page=${page}&page_size=${pageSize}`, "GET");
   return data;
 }
 
