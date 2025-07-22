@@ -58,7 +58,7 @@ export default function ShopPageClient({ categories, initialProducts }: Props) {
       (qCats ? `&${qCats}` : "") +
       (qSubcats ? `&${qSubcats}` : "") +
       (qTags ? `&${qTags}` : "") +
-      // `&min=${initialMinPrice}&max=${initialMaxPrice}` +  // use the old bounds here
+      `&min=${min}&max=${max}` +  // use the old bounds here
       (sortParam ? `&sort=${sortParam}` : "");
 
     const fetchAndUpdateBounds = async () => {
@@ -69,8 +69,8 @@ export default function ShopPageClient({ categories, initialProducts }: Props) {
         setTotalPages(data.totalPages ?? Math.ceil((data.count ?? 0) / limit));
 
         // **only here** do we update the “available” bounds
-        setInitialMinPrice(data.minPrice);
-        setInitialMaxPrice(data.maxPrice);
+        // setInitialMinPrice(data.minPrice);
+        // setInitialMaxPrice(data.maxPrice);
 
         // and reset the slider to that fresh range:
         setMin(data.minPrice);

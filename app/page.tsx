@@ -16,18 +16,19 @@ import { fetchCategories } from "@/api/fetchCategories"; // This function's retu
 import {
   getGallery,
   getTestimonials,
-  getWhyChooseUs,
 } from "@/api/fetchWhyChooseUs";
 import { getProducts } from "@/api/fetchFeaturedSlider";
 import Counter from "@/components/ClientsideComponent/Counter/counter";
 import { fetchAllTag } from "@/api/fetchProductBySlug";
 import PromotionBanner from "@/components/ClientsideComponent/PromotionBanner/PromotionBanner";
 
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
   const [banners, categoriesResponse, product, testimonials, gallery, tagData, newArrival] =
     await Promise.all([
       getBanners(),
-      fetchCategories(), // The return type of this function is the source of the conflict
+      fetchCategories(),
       // getWhyChooseUs(),
       getProducts(6, 1),
       getTestimonials(),
@@ -35,10 +36,6 @@ export default async function HomePage() {
       fetchAllTag(),
       getProducts(10, 1, true),
     ]);
-
-  // This line expects `categoriesResponse` to have a `categories` property
-  // whose type matches `Category[]` from wherever `CategorySection` imports it.
-  // The fix is to ensure the `Category` types themselves are consistent.
   const { categories } = categoriesResponse;
 
   return (
