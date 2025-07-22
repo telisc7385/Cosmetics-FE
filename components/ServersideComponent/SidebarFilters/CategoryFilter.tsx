@@ -80,8 +80,18 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({
         return newSubs;
       });
     } else {
-      // Unchecking one: just remove it
-      setSelectedSubcats((prev) => prev.filter((id) => id !== subcategory.id));
+      // Unchecking one subcategory: remove it and add remaining subcategories if parent was selected
+      const remainingSubIds =
+        parentCategory.subcategories
+          ?.map((s) => s.id)
+          .filter((id) => id !== subcategory.id) ?? [];
+
+      setSelectedSubcats((prev) =>
+        Array.from(new Set([...prev.filter((id) => id !== subcategory.id), ...remainingSubIds]))
+      );
+
+      // Ensure parent is removed
+      setSelectedCats((prev) => prev.filter((id) => id !== parentCategory.id));
     }
   };
 
@@ -151,9 +161,8 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({
                   </div>
                   <button
                     onClick={() => toggleCategory(category.id)}
-                    className={`transform transition-transform duration-200 ${
-                      isOpen ? "rotate-180" : ""
-                    } p-1`}
+                    className={`transform transition-transform duration-200 ${isOpen ? "rotate-180" : ""
+                      } p-1`}
                   >
                     <ChevronDownIcon className="h-4 w-4 text-gray-600" />
                   </button>
