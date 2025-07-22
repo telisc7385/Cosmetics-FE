@@ -285,7 +285,7 @@ const UserCheckout = () => {
       items.forEach((cartItem) => {
         const matched = abendonedItems.find(
           (item) =>
-            item.product === cartItem.id && item.variant === cartItem?.variantId
+            item.product === cartItem.id || item.variant === cartItem?.variantId
         );
         if (matched) {
           const unitPrice = cartItem.sellingPrice;
