@@ -58,7 +58,7 @@ export default function ShopPageClient({ categories, initialProducts }: Props) {
       (qCats ? `&${qCats}` : "") +
       (qSubcats ? `&${qSubcats}` : "") +
       (qTags ? `&${qTags}` : "") +
-      `&min=${min}&max=${max}` +  // use the old bounds here
+      `&min=${min}&max=${max}` + // use the old bounds here
       (sortParam ? `&sort=${sortParam}` : "");
 
     const fetchAndUpdateBounds = async () => {
@@ -197,7 +197,7 @@ export default function ShopPageClient({ categories, initialProducts }: Props) {
                       handleClearFilters();
                       setShowMobileFilters(false);
                     }}
-                    className="w-full bg-gray-100 text-gray-700 font-medium text-sm px-4 py-2 rounded-md border border-gray-200 hover:bg-gray-200 transition"
+                    className="w-full bg-black text-white  font-medium text-sm px-4 py-2 rounded-md border  hover:bg-gray-200 transition"
                   >
                     Clear Filters
                   </button>
@@ -227,7 +227,7 @@ export default function ShopPageClient({ categories, initialProducts }: Props) {
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Desktop sidebar filters */}
           <div className="hidden lg:block lg:w-1/4">
-            <div className="bg-white p-4 rounded-lg shadow-md border border-gray-100">
+            <div className="bg-white  rounded-lg shadow-md ">
               <SidebarFilters
                 categories={categories}
                 selectedCats={selectedCats}
@@ -253,7 +253,7 @@ export default function ShopPageClient({ categories, initialProducts }: Props) {
           </div>
 
           <div className="lg:w-3/4 w-full">
-            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+            <div className="bg-white p-1  rounded-lg shadow-sm ">
               <ProductList products={products} />
             </div>
             {totalPages > 1 && (

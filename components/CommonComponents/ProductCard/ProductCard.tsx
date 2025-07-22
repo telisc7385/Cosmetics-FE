@@ -62,8 +62,8 @@ const ProductCard = ({ product }: Props) => {
     selectedVariant && selectedVariant.images.length > 0
       ? mainDisplayImage
       : hovered && secondGeneralImage
-        ? secondGeneralImage
-        : firstGeneralImage || "/placeholder.jpg";
+      ? secondGeneralImage
+      : firstGeneralImage || "/placeholder.jpg";
 
   const currentSellingPrice = Number(
     selectedVariant?.selling_price || product.sellingPrice || 0
@@ -166,12 +166,11 @@ const ProductCard = ({ product }: Props) => {
               <span className="text-sm text-gray-500">Price Unavailable</span>
             )}
 
-            {
-              currentBasePrice > currentSellingPrice && (
-                <span className="text-sm text-red-700 line-through ">
-                  ₹{currentBasePrice.toFixed(2)}
-                </span>
-              )}
+            {currentBasePrice > currentSellingPrice && (
+              <span className="text-sm text-red-700 line-through ">
+                ₹{currentBasePrice.toFixed(2)}
+              </span>
+            )}
           </div>
 
           {/* Action Button */}
@@ -179,17 +178,18 @@ const ProductCard = ({ product }: Props) => {
             <Link href={`/product/${product.slug}`}>
               <button className="text-sm md:text-base flex items-center gap-1 px-3 py-1.5 bg-[#213C66] text-white rounded-full hover:bg-[#213C66] transition">
                 <MdTune className="text-sm md:text-base" />
-                Select {/* ✅ Changed from 'Options' to 'Select' */}
+                {/* Select  */}
               </button>
             </Link>
           ) : (
             <button
               onClick={handleAddToCart}
               disabled={isOutOfStock}
-              className={`text-sm md:text-base flex items-center gap-1 px-1 md:px-3 py-1 md:py-1.5 rounded -xl md:rounded-full transition cursor-pointer ${isOutOfStock
-                ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-                : "bg-[#213C66] text-white hover:bg-[#213C66]"
-                }`}
+              className={`text-sm md:text-base flex items-center gap-1 px-1 md:px-3 py-1 md:py-1.5 rounded -xl md:rounded-full transition cursor-pointer ${
+                isOutOfStock
+                  ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                  : "bg-[#213C66] text-white hover:bg-[#213C66]"
+              }`}
             >
               <HiOutlineShoppingBag className="text-lg md:text-base" />
               <span className="hidden md:flex">Add</span>
