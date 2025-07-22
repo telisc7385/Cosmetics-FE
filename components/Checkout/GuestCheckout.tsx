@@ -16,7 +16,7 @@ import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import Lottie from "react-lottie-player";
 import ShoppingCart from "@/public/ShoppingCart.json";
-import { Trash2 } from "lucide-react";
+import { FiTrash2 } from "react-icons/fi";
 
 interface CheckoutDataFromCart {
   subtotal: number;
@@ -163,12 +163,10 @@ const GuestCheckout = () => {
         : { productId: item.id }),
     }));
 
-    const formattedBillingAddress = `${formData.addressLine}, ${
-      formData.landmark ? formData.landmark + ", " : ""
-    }${city}, ${formData.state} - ${formData.pincode}`;
-    const formattedShippingAddress = `${formData.addressLine}, ${
-      formData.landmark ? formData.landmark + ", " : ""
-    }${city}, ${formData.state} - ${formData.pincode}`;
+    const formattedBillingAddress = `${formData.addressLine}, ${formData.landmark ? formData.landmark + ", " : ""
+      }${city}, ${formData.state} - ${formData.pincode}`;
+    const formattedShippingAddress = `${formData.addressLine}, ${formData.landmark ? formData.landmark + ", " : ""
+      }${city}, ${formData.state} - ${formData.pincode}`;
 
     const payload = {
       email: formData.email,
@@ -464,106 +462,186 @@ const GuestCheckout = () => {
           {cartItems.map((item: CartItem) => (
             <li
               key={item.cartItemId}
-              className="flex gap-1 items-center p-2 rounded bg-gray-50 border"
+              className="bg-white rounded-lg p-2 sm:p-6 lg:py-3 lg:px-4 flex flex-col sm:flex-row items-start sm:items-center justify-between border border-gray-200 shadow-sm mb-4 relative"
             >
-              {item.slug ? (
-                <Link href={`/product/${item.slug}`} className="flex-shrink-0">
-                  <Image
-                    src={item.image}
-                    alt={item.name}
-                    width={70}
-                    height={70}
-                    className="w-16 h-16 rounded object-cover border cursor-pointer"
-                  />
-                </Link>
-              ) : (
-                <Image
-                  src={item.image}
-                  alt={item.name}
-                  width={70}
-                  height={70}
-                  className="w-16 h-16 rounded object-cover border flex-shrink-0"
-                />
-              )}
-              <div className="flex-grow flex justify-between items-start ml-3">
-                {/* Left side: Name and Price per product */}
-                <div className="flex flex-col">
-                  <div className="flex items-center gap-2">
-                    {item.slug ? (
-                      <Link href={`/product/${item.slug}`}>
-                        <p className="font-semibold text-gray-900 text-base hover:text-[#007BFF] transition-colors cursor-pointer">
-                          {item.name}
-                        </p>
-                      </Link>
-                    ) : (
-                      <p className="font-semibold text-gray-900 text-base">
-                        {item.name}
-                      </p>
-                    )}
-                    {/* Display quantity multiplier */}
-                    <span className="text-sm text-gray-500">
-                      x{item.quantity}
-                    </span>
-                  </div>
-                  {/* Display fixed selling price with "/ product" directly under the name */}
-                  <p className="text-sm text-gray-600 mt-1">
-                    ₹{item.sellingPrice.toFixed(2)} / product
-                  </p>
-                  {item.variantId && item.variant && (
-                    <p className="text-xs text-gray-600 mt-0.5">
-                      Variant:{" "}
-                      <span className="font-medium">{item.variant.name}</span>
+              {/* Common Left Section (Image and main text container) */}
+              <div className="flex items-start sm:items-center w-full sm:w-auto mb-1 sm:mb-0">
+                {item.slug ? (
+                  <Link
+                    href={`/product/${item.slug}`}
+                    className="flex-shrink-0 mr-4 sm:mr-6 flex flex-col items-center"
+                  >
+                    <Image
+                      src={item.image}
+                      alt={item.name}
+                      width={80}
+                      height={80}
+                      className="w-20 h-20 object-cover rounded-md cursor-pointer sm:w-28 sm:h-28"
+                    />
+                    {/* Stock under image for mobile/tablet/laptop */}
+                    <p className="text-xs text-gray-500 mt-1">
+                      Stock: {item.stock}
                     </p>
-                  )}
-                  {/* Display stock */}
-                  <p className="text-xs text-gray-500 mt-0.5">
-                    In Stock: <span className="font-medium">{item.stock}</span>
-                  </p>
+                  </Link>
+                ) : (
+                  <div className="mr-4 sm:mr-6 flex-shrink-0 flex flex-col items-center">
+                    {" "}
+                    {/* Reduced font size here */}
+                    <Image
+                      src={item.image}
+                      alt={item.name}
+                      width={80}
+                      height={80}
+                      className="w-20 h-20 object-cover rounded-md sm:w-28 sm:h-28"
+                    />
+                    {/* Stock under image for mobile/tablet/laptop */}
+                    <p className="text-xs text-gray-500 mt-1">
+                      Stock: {item.stock}
+                    </p>
+                  </div>
+                )}
+
+                {/* Mobile View Specific Layout - visible only on 'sm' breakpoint and below */}
+                <div className="flex flex-col justify-between h-full w-full sm:hidden">
+                  <div>
+                    <div className="flex justify-between items-start gap-2">
+                      {item.slug ? (
+                        <Link href={`/product/${item.slug}`} className="flex-1">
+                          <h3 className="text-sm font-semibold text-gray-900 line-clamp-2 hover:text-[#007BFF] transition-colors cursor-pointer">
+                            {item.name}
+                          </h3>
+                        </Link>
+                      ) : (
+                        <h3 className="text-sm font-semibold text-gray-900 line-clamp-2 flex-1">
+                          {item.name}
+                        </h3>
+                      )}
+                    </div>
+
+                    {/* Price with quantity and total aligned in one row */}
+                    <div className="flex justify-between items-center mt-1">
+                      <p className="text-xs text-gray-700">
+                        Price: ₹{item.sellingPrice.toFixed(2)} / item{" "}
+                        <span className="text-xs text-gray-500">
+                          x {item.quantity}
+                        </span>
+                      </p>
+                      <p className="text-xs text-gray-900 whitespace-nowrap font-semibold">
+                        ₹{(item.sellingPrice * item.quantity).toFixed(2)}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between w-full mt-3">
+                    <div className="flex items-center space-x-1 border border-gray-300 rounded-md py-0.5 px-1">
+                      <button
+                        onClick={() =>
+                          item.quantity < item.stock &&
+                          dispatch(incrementQuantity(item.cartItemId))
+                        }
+                        disabled={item.quantity >= item.stock}
+                        className="w-5 h-5 flex items-center justify-center text-gray-600 hover:bg-gray-100 rounded-sm cursor-pointer text-sm"
+                      >
+                        -
+                      </button>
+                      <span className="font-medium text-sm w-4 text-center text-[#213E5A]">
+                        {item.quantity}
+                      </span>
+                      <button
+                        onClick={() =>
+                          item.quantity > 1 &&
+                          dispatch(decrementQuantity(item.cartItemId))
+                        }
+                        disabled={item.quantity <= 1}
+                        className="w-5 h-5 flex items-center justify-center text-gray-600 hover:bg-gray-100 rounded-sm cursor-pointer text-sm"
+                      >
+                        +
+                      </button>
+                    </div>
+                    <button
+                      onClick={() => dispatch(removeFromCart(item.cartItemId))}
+                      className="text-red-500 hover:text-red-700 font-medium p-1 rounded-full transition-colors cursor-pointer"
+                      aria-label={`Remove ${item.name}`}
+                    >
+                      <FiTrash2 className="w-5 h-5" />
+                    </button>
+                  </div>
                 </div>
 
-                {/* Right side: Quantity Controls above Trash Icon */}
-                <div className="flex flex-col items-end gap-2">
-                  {/* Quantity Controls */}
-                  <div className="flex items-center  rounded-md overflow-hidden">
-                    <button
-                      onClick={() =>
-                        item.quantity > 1 &&
-                        dispatch(decrementQuantity(item.cartItemId))
-                      }
-                      disabled={item.quantity <= 1}
-                      className={`w-6 h-6 flex items-center justify-center rounded-full text-gray-600  ${
-                        item.quantity <= 1
-                          ? "cursor-not-allowed bg-gray-200 text-gray-400"
-                          : "hover:bg-gray-100"
-                      }`}
-                    >
-                      -
-                    </button>
-                    <span className="px-3 py-1 text-sm font-medium text-[#213E5A]  border-gray-300">
-                      {item.quantity}
-                    </span>
-                    <button
-                      onClick={() =>
-                        item.quantity < item.stock &&
-                        dispatch(incrementQuantity(item.cartItemId))
-                      }
-                      disabled={item.quantity >= item.stock}
-                      className={`w-6 h-6 flex items-center justify-center rounded-full text-gray-600 ${
-                        item.quantity >= item.stock
-                          ? "cursor-not-allowed bg-gray-200 text-gray-400"
-                          : "hover:bg-gray-100"
-                      }`}
-                    >
-                      +
-                    </button>
+                {/* Tablet/Laptop View Specific Layout for Title, Stock, and Quantity - hidden on 'sm' breakpoint and below */}
+                <div className="hidden sm:flex flex-col justify-between h-full">
+                  <div>
+                    <div className="flex justify-between items-start gap-2">
+                      {item.slug ? (
+                        <Link href={`/product/${item.slug}`} className="flex-1">
+                          <h3 className="text-lg font-semibold text-gray-900 line-clamp-2 hover:text-[#007BFF] transition-colors cursor-pointer">
+                            {item.name}
+                          </h3>
+                        </Link>
+                      ) : (
+                        <h3 className="text-lg font-semibold text-gray-900 line-clamp-2 flex-1">
+                          {item.name}
+                        </h3>
+                      )}
+                    </div>
+
+                    {/* Price per item with x{quantity} */}
+                    <p className="text-sm font-semibold text-gray-900 mt-1">
+                      ₹{item.sellingPrice.toFixed(2)} / item{" "}
+                      <span className="text-sm text-gray-500">
+                        x {item.quantity}
+                      </span>
+                    </p>
+
+                    {item.variantId && (
+                      <p className="text-xs text-gray-400">
+                        {/* Variant ID: {item.variantId} */}
+                      </p>
+                    )}
+
+                    {/* Increment/Decrement for Tablet/Laptop */}
+                    <div className="w-20 flex items-center border border-gray-300 rounded-md py-0.5 mt-2">
+                      <button
+                        onClick={() =>
+                          item.quantity > 1 &&
+                          dispatch(decrementQuantity(item.cartItemId))
+                        }
+                        disabled={item.quantity <= 1}
+                        className="w-7 h-5 flex items-center justify-center text-gray-600 hover:bg-gray-100 rounded-sm cursor-pointer text-base"
+                      >
+                        -
+                      </button>
+                      <span className="font-medium text-base w-6 text-center text-[#213E5A]">
+                        {item.quantity}
+                      </span>
+                      <button
+                        onClick={() =>
+                          item.quantity < item.stock &&
+                          dispatch(incrementQuantity(item.cartItemId))
+                        }
+                        disabled={item.quantity >= item.stock}
+                        className="w-7 h-5 flex items-center justify-center text-gray-600 hover:bg-gray-100 rounded-sm cursor-pointer text-base"
+                      >
+                        +
+                      </button>
+                    </div>
                   </div>
-                  {/* Delete Button */}
-                  <button
-                    onClick={() => dispatch(removeFromCart(item.cartItemId))}
-                    className="text-gray-400 hover:text-red-600 transition"
-                  >
-                    <Trash2 size={20} />
-                  </button>
+                </div>
+              </div>
+
+              {/* Tablet/Laptop View: Trash icon and Price - positioned to the right */}
+              <div className="hidden sm:flex flex-col items-end gap-4">
+                {/* Trash button for larger screens (sm and up) - absolute positioning */}
+                <button
+                  onClick={() => dispatch(removeFromCart(item.cartItemId))}
+                  className="absolute top-4 right-4 text-red-500 hover:text-red-700 font-medium p-1 rounded-full transition-colors cursor-pointer"
+                  aria-label={`Remove ${item.name}`}
+                >
+                  <FiTrash2 className="w-5 h-5" />
+                </button>
+
+                <div className="text-lg font-semibold text-gray-900 w-20 text-right mt-auto">
+                  ₹{(item.sellingPrice * item.quantity).toFixed(2)}
                 </div>
               </div>
             </li>

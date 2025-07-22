@@ -18,12 +18,12 @@ import {
   SingleAddressResponse,
   AddressInput,
 } from "@/api/ApiCore";
-import { Minus, Plus, Trash2 } from "lucide-react";
 import { FaTrashAlt } from "react-icons/fa";
 import { CiEdit } from "react-icons/ci";
 import Modal from "@/components/Modal";
 import { CartItem } from "@/types/cart"; // Import CartItem type
 import { AbandonedItem, getAbendentItems } from "@/api/AbendentDiscountApi";
+import { FiTrash2 } from "react-icons/fi";
 
 // Coupon types based on your /coupon/user-coupon API response
 interface Coupon {
@@ -178,11 +178,10 @@ const PincodeInput: React.FC<PincodeInputProps> = ({
         onChange={onChange}
         onBlur={handleBlur}
         disabled={isVerifiedAndDisabled || disabled} // Disable if autofilled, externally disabled, or checking
-        className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm  focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 ${
-          isVerifiedAndDisabled || disabled
+        className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm  focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 ${isVerifiedAndDisabled || disabled
             ? "bg-gray-100 cursor-not-allowed"
             : ""
-        }`}
+          }`}
         maxLength={6}
       />
       {internalValidationMessage && (
@@ -406,7 +405,7 @@ const UserCheckout = () => {
             billingAddresses.find((a) => a.isDefault) || billingAddresses[0];
           const initialBillingId =
             storedSelectedBillingId &&
-            billingAddresses.some((a) => a.id === storedSelectedBillingId)
+              billingAddresses.some((a) => a.id === storedSelectedBillingId)
               ? storedSelectedBillingId
               : defaultBillingAddr?.id;
           setSelectedBillingAddressId(initialBillingId || null);
@@ -435,7 +434,7 @@ const UserCheckout = () => {
               deliveryAddresses[0];
             const initialDeliveryId =
               storedSelectedDeliveryId &&
-              deliveryAddresses.some((a) => a.id === storedSelectedDeliveryId)
+                deliveryAddresses.some((a) => a.id === storedSelectedDeliveryId)
                 ? storedSelectedDeliveryId
                 : defaultDeliveryAddr?.id;
             setSelectedDeliveryAddressId(initialDeliveryId || null);
@@ -889,16 +888,12 @@ const UserCheckout = () => {
     setIsPlacingOrder(true);
 
     // Format the address objects into strings for the payload
-    const formattedBillingAddress = `${billingAddressObj.addressLine}, ${
-      billingAddressObj.landmark ? billingAddressObj.landmark + ", " : ""
-    }${billingAddressObj.city}, ${billingAddressObj.state} - ${
-      billingAddressObj.pincode
-    }`;
-    const formattedShippingAddress = `${deliveryAddressObj.addressLine}, ${
-      deliveryAddressObj.landmark ? deliveryAddressObj.landmark + ", " : ""
-    }${deliveryAddressObj.city}, ${deliveryAddressObj.state} - ${
-      deliveryAddressObj.pincode
-    }`;
+    const formattedBillingAddress = `${billingAddressObj.addressLine}, ${billingAddressObj.landmark ? billingAddressObj.landmark + ", " : ""
+      }${billingAddressObj.city}, ${billingAddressObj.state} - ${billingAddressObj.pincode
+      }`;
+    const formattedShippingAddress = `${deliveryAddressObj.addressLine}, ${deliveryAddressObj.landmark ? deliveryAddressObj.landmark + ", " : ""
+      }${deliveryAddressObj.city}, ${deliveryAddressObj.state} - ${deliveryAddressObj.pincode
+      }`;
 
     // Construct the payload with the updated logic for items
     const payload: LoggedInOrderPayload = {
@@ -1035,8 +1030,7 @@ const UserCheckout = () => {
         toast.success("Order placed successfully!");
         clearCart(); // Clear cart after successful order placement
         router.push(
-          `/thank-you?orderId=${
-            order.id || ""
+          `/thank-you?orderId=${order.id || ""
           }`
         );
       }
@@ -1075,11 +1069,10 @@ const UserCheckout = () => {
             <div
               key={a.id}
               onClick={() => onSelect(a.id)}
-              className={`border rounded-lg p-3 cursor-pointer transition-all duration-200 ${
-                selected === a.id
+              className={`border rounded-lg p-3 cursor-pointer transition-all duration-200 ${selected === a.id
                   ? "border-[#213E5A] bg-[#e6f0f7] shadow-sm"
                   : "border-gray-200 bg-white hover:border-gray-300"
-              }`}
+                }`}
             >
               <div className="flex justify-between items-start">
                 <div>
@@ -1360,49 +1353,171 @@ const UserCheckout = () => {
                 {items.map((item) => (
                   <div
                     key={item.cartItemId}
-                    className="flex items-center justify-between border-b border-gray-100 pb-4 last:border-b-0"
+                    className="bg-white rounded-lg p-2 sm:p-6 lg:py-3 lg:px-4 flex flex-col sm:flex-row items-start sm:items-center justify-between border border-gray-200 shadow-sm mb-4 relative"
                   >
-                    <div className="flex items-center">
-                      <Image
-                        src={item.image}
-                        alt={item.name}
-                        width={60}
-                        height={60}
-                        className="rounded-md object-cover mr-4"
-                      />
-                      <div className="font-medium text-gray-800 hover:text-[#213E5A] text-sm">
-                        {item.name}
+                    {/* Common Left Section (Image and main text container) */}
+                    <div className="flex items-start sm:items-center w-full sm:w-auto mb-1 sm:mb-0">
+                      {item.slug ? (
+                        <Link
+                          href={`/product/${item.slug}`}
+                          className="flex-shrink-0 mr-4 sm:mr-6 flex flex-col items-center"
+                        >
+                          <Image
+                            src={item.image}
+                            alt={item.name}
+                            width={80}
+                            height={80}
+                            className="w-20 h-20 object-cover rounded-md cursor-pointer sm:w-28 sm:h-28"
+                          />
+                          {/* Stock under image for mobile/tablet/laptop */}
+                          <p className="text-xs text-gray-500 mt-1">
+                            Stock: {item.stock}
+                          </p>
+                        </Link>
+                      ) : (
+                        <div className="mr-4 sm:mr-6 flex-shrink-0 flex flex-col items-center">
+                          {" "}
+                          {/* Reduced font size here */}
+                          <Image
+                            src={item.image}
+                            alt={item.name}
+                            width={80}
+                            height={80}
+                            className="w-20 h-20 object-cover rounded-md sm:w-28 sm:h-28"
+                          />
+                          {/* Stock under image for mobile/tablet/laptop */}
+                          <p className="text-xs text-gray-500 mt-1">
+                            Stock: {item.stock}
+                          </p>
+                        </div>
+                      )}
 
-                        <p className="text-gray-600 text-xs">
-                          ₹{item.sellingPrice.toFixed(2)}
-                        </p>
+                      {/* Mobile View Specific Layout - visible only on 'sm' breakpoint and below */}
+                      <div className="flex flex-col justify-between h-full w-full sm:hidden">
+                        <div>
+                          <div className="flex justify-between items-start gap-2">
+                            {item.slug ? (
+                              <Link href={`/product/${item.slug}`} className="flex-1">
+                                <h3 className="text-sm font-semibold text-gray-900 line-clamp-2 hover:text-[#007BFF] transition-colors cursor-pointer">
+                                  {item.name}
+                                </h3>
+                              </Link>
+                            ) : (
+                              <h3 className="text-sm font-semibold text-gray-900 line-clamp-2 flex-1">
+                                {item.name}
+                              </h3>
+                            )}
+                          </div>
+
+                          {/* Price with quantity and total aligned in one row */}
+                          <div className="flex justify-between items-center mt-1">
+                            <p className="text-xs text-gray-700">
+                              Price: ₹{item.sellingPrice.toFixed(2)} / item{" "}
+                              <span className="text-xs text-gray-500">
+                                x {item.quantity}
+                              </span>
+                            </p>
+                            <p className="text-xs text-gray-900 whitespace-nowrap font-semibold">
+                              ₹{(item.sellingPrice * item.quantity).toFixed(2)}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between w-full mt-3">
+                          <div className="flex items-center space-x-1 border border-gray-300 rounded-md py-0.5 px-1">
+                            <button
+                              onClick={() => incrementItemQuantity(item.cartItemId)}
+                              className="w-5 h-5 flex items-center justify-center text-gray-600 hover:bg-gray-100 rounded-sm cursor-pointer text-sm"
+                            >
+                              -
+                            </button>
+                            <span className="font-medium text-sm w-4 text-center text-[#213E5A]">
+                              {item.quantity}
+                            </span>
+                            <button
+                              onClick={() => decrementItemQuantity(item.cartItemId)}
+                              className="w-5 h-5 flex items-center justify-center text-gray-600 hover:bg-gray-100 rounded-sm cursor-pointer text-sm"
+                            >
+                              +
+                            </button>
+                          </div>
+                          <button
+                            onClick={() => removeCartItem(item.cartItemId)}
+                            className="text-red-500 hover:text-red-700 font-medium p-1 rounded-full transition-colors cursor-pointer"
+                            aria-label={`Remove ${item.name}`}
+                          >
+                            <FiTrash2 className="w-5 h-5" />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Tablet/Laptop View Specific Layout for Title, Stock, and Quantity - hidden on 'sm' breakpoint and below */}
+                      <div className="hidden sm:flex flex-col justify-between h-full">
+                        <div>
+                          <div className="flex justify-between items-start gap-2">
+                            {item.slug ? (
+                              <Link href={`/product/${item.slug}`} className="flex-1">
+                                <h3 className="text-lg font-semibold text-gray-900 line-clamp-2 hover:text-[#007BFF] transition-colors cursor-pointer">
+                                  {item.name}
+                                </h3>
+                              </Link>
+                            ) : (
+                              <h3 className="text-lg font-semibold text-gray-900 line-clamp-2 flex-1">
+                                {item.name}
+                              </h3>
+                            )}
+                          </div>
+
+                          {/* Price per item with x{quantity} */}
+                          <p className="text-sm font-semibold text-gray-900 mt-1">
+                            ₹{item.sellingPrice.toFixed(2)} / item{" "}
+                            <span className="text-sm text-gray-500">
+                              x {item.quantity}
+                            </span>
+                          </p>
+
+                          {item.variantId && (
+                            <p className="text-xs text-gray-400">
+                              {/* Variant ID: {item.variantId} */}
+                            </p>
+                          )}
+
+                          {/* Increment/Decrement for Tablet/Laptop */}
+                          <div className="w-20 flex items-center border border-gray-300 rounded-md py-0.5 mt-2">
+                            <button
+                              onClick={() => decrementItemQuantity(item.cartItemId)}
+                              className="w-7 h-5 flex items-center justify-center text-gray-600 hover:bg-gray-100 rounded-sm cursor-pointer text-base"
+                            >
+                              -
+                            </button>
+                            <span className="font-medium text-base w-6 text-center text-[#213E5A]">
+                              {item.quantity}
+                            </span>
+                            <button
+                              onClick={() => incrementItemQuantity(item.cartItemId)}
+                              className="w-7 h-5 flex items-center justify-center text-gray-600 hover:bg-gray-100 rounded-sm cursor-pointer text-base"
+                            >
+                              +
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() => decrementItemQuantity(item.cartItemId)}
-                        className="p-1 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-                        aria-label="Decrease quantity"
-                      >
-                        <Minus size={16} />
-                      </button>
-                      <span className="text-sm font-medium text-[#213E5A]">
-                        {item.quantity}
-                      </span>
-                      <button
-                        onClick={() => incrementItemQuantity(item.cartItemId)}
-                        className="p-1 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
-                        aria-label="Increase quantity"
-                      >
-                        <Plus size={16} />
-                      </button>
+
+                    {/* Tablet/Laptop View: Trash icon and Price - positioned to the right */}
+                    <div className="hidden sm:flex flex-col items-end gap-4">
+                      {/* Trash button for larger screens (sm and up) - absolute positioning */}
                       <button
                         onClick={() => removeCartItem(item.cartItemId)}
-                        className="p-1 rounded-full text-red-500 hover:bg-red-100"
-                        aria-label="Remove item"
+                        className="absolute top-4 right-4 text-red-500 hover:text-red-700 font-medium p-1 rounded-full transition-colors cursor-pointer"
+                        aria-label={`Remove ${item.name}`}
                       >
-                        <Trash2 size={16} />
+                        <FiTrash2 className="w-5 h-5" />
                       </button>
+
+                      <div className="text-lg font-semibold text-gray-900 w-20 text-right mt-auto">
+                        ₹{(item.sellingPrice * item.quantity).toFixed(2)}
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -1473,11 +1588,10 @@ const UserCheckout = () => {
                       <div className="flex space-x-2">
                         <button
                           onClick={() => handleCopyCoupon(coupon.code)}
-                          className={`text-sm px-3 py-1 rounded-md ${
-                            copiedCouponCode === coupon.code
+                          className={`text-sm px-3 py-1 rounded-md ${copiedCouponCode === coupon.code
                               ? "bg-green-100 text-green-700"
                               : "bg-blue-100 text-blue-700 hover:bg-blue-200"
-                          }`}
+                            }`}
                         >
                           {copiedCouponCode === coupon.code
                             ? "Copied!"
@@ -1635,14 +1749,13 @@ const UserCheckout = () => {
               !selectedDeliveryAddressId ||
               items.length === 0
             }
-            className={`w-full py-3 mt-6 text-white font-semibold rounded-md transition-colors ${
-              !isPlacingOrder &&
-              selectedBillingAddressId &&
-              selectedDeliveryAddressId &&
-              items.length > 0
+            className={`w-full py-3 mt-6 text-white font-semibold rounded-md transition-colors ${!isPlacingOrder &&
+                selectedBillingAddressId &&
+                selectedDeliveryAddressId &&
+                items.length > 0
                 ? "bg-[#1A324A] hover:bg-[#142835]"
                 : "bg-gray-300 cursor-not-allowed"
-            }`}
+              }`}
           >
             {isPlacingOrder ? "Placing Order..." : "Place Order"}
           </button>
@@ -1694,7 +1807,7 @@ const UserCheckout = () => {
             <PincodeInput
               value={formData.pincode}
               onChange={handleFormChange}
-              onBlur={() => {}} // PincodeInput handles its own blur
+              onBlur={() => { }} // PincodeInput handles its own blur
               isVerifiedAndDisabled={
                 (addressCreationIntent === "SHIPPING" ||
                   editingAddress?.type === "SHIPPING") &&
@@ -1703,7 +1816,7 @@ const UserCheckout = () => {
               }
               verifiedPincodeFromCart={
                 addressCreationIntent === "SHIPPING" ||
-                editingAddress?.type === "SHIPPING"
+                  editingAddress?.type === "SHIPPING"
                   ? checkoutData?.verifiedPincodeDetails?.pincode
                   : undefined
               }
@@ -1737,17 +1850,16 @@ const UserCheckout = () => {
                     editingAddress?.type === "SHIPPING") &&
                   !!checkoutData?.verifiedPincodeDetails?.pincode &&
                   formData.pincode ===
-                    checkoutData.verifiedPincodeDetails.pincode
+                  checkoutData.verifiedPincodeDetails.pincode
                 }
-                className={`mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-[#213E5A] ${
-                  (addressCreationIntent === "SHIPPING" ||
+                className={`mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-[#213E5A] ${(addressCreationIntent === "SHIPPING" ||
                     editingAddress?.type === "SHIPPING") &&
-                  !!checkoutData?.verifiedPincodeDetails?.pincode &&
-                  formData.pincode ===
+                    !!checkoutData?.verifiedPincodeDetails?.pincode &&
+                    formData.pincode ===
                     checkoutData.verifiedPincodeDetails.pincode
                     ? "bg-gray-100 cursor-not-allowed text-[#213E5A]"
                     : ""
-                }`}
+                  }`}
                 required
               />
             </div>
@@ -1769,17 +1881,16 @@ const UserCheckout = () => {
                     editingAddress?.type === "SHIPPING") &&
                   !!checkoutData?.verifiedPincodeDetails?.pincode &&
                   formData.pincode ===
-                    checkoutData.verifiedPincodeDetails.pincode
+                  checkoutData.verifiedPincodeDetails.pincode
                 }
-                className={`mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-[#213E5A] ${
-                  (addressCreationIntent === "SHIPPING" ||
+                className={`mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-[#213E5A] ${(addressCreationIntent === "SHIPPING" ||
                     editingAddress?.type === "SHIPPING") &&
-                  !!checkoutData?.verifiedPincodeDetails?.pincode &&
-                  formData.pincode ===
+                    !!checkoutData?.verifiedPincodeDetails?.pincode &&
+                    formData.pincode ===
                     checkoutData.verifiedPincodeDetails.pincode
                     ? "bg-gray-100 cursor-not-allowed text-[#213E5A]"
                     : ""
-                }`}
+                  }`}
                 required
               />
             </div>
