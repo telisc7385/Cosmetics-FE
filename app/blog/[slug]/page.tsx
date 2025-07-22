@@ -5,12 +5,13 @@ import { getPaginatedBlogs, getSingleBlogBySlug } from "@/api/blogsApi";
 import { Blog } from "@/types/blogDataTypes";
 import SingleBlogComponent from "@/components/BlogComponents/SingleBlogComponent";
 
+type Props = {
+  params: Promise<{ slug: string }>;
+};
 export default async function SingleBlogPage({
   params,
-}: {
-  params: { slug: string };
-}) {
-  const { slug } = params;
+}: Props) {
+  const { slug } = await params;
 
   const Singleblog = await getSingleBlogBySlug(slug);
   const blog = Singleblog?.data;
