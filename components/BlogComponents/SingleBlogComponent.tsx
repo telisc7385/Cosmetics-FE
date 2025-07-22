@@ -34,8 +34,8 @@ const SingleBlogComponent = ({ blog, otherBlogs }: Props) => {
           backgroundColor: primaryColor, // Fallback background color
         }}
       >
-        <h1 className="text-white sm:text-3xl md:text-5xl lg:text-5xl font-normal leading-snug sm:leading-snug md:leading-tight drop-shadow-md">
-          {/* {blog.title} */} <p>Blogs</p>
+        <h1 className="text-white text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-normal leading-snug sm:leading-snug md:leading-tight drop-shadow-md">
+          {/* {blog.title} */} <p>Blog</p>
         </h1>
         <p
           className="text-white text-sm sm:text-base md:text-lg mt-2"

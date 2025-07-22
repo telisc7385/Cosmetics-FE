@@ -6,7 +6,7 @@ import { GalleryImage } from "@/types/gallery";
 export async function getWhyChooseUs(): Promise<WhyChooseUsItem[]> {
   try {
     const data = await apiCore<{ items?: WhyChooseUsItem[] }>(
-      "/why-choose-us",
+      "/why-choose-us?is_active=true",
       "GET"
     );
     return data.items ?? [];
