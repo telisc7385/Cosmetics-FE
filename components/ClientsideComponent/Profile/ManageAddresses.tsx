@@ -7,7 +7,6 @@ import { apiCore } from "@/api/ApiCore";
 import { Pencil, Trash2, Save, X, Plus } from "lucide-react";
 import { Address, AddressApiResponse } from "@/types/address";
 
-// Fields list
 const ADDRESS_FIELDS: (keyof Address | "type")[] = [
   "fullName",
   "phone",
@@ -95,10 +94,17 @@ export default function ManageAddresses() {
       "addressLine",
     ];
 
-    const emptyField = requiredFields.find((field) => !formData[field]?.trim());
+    const emptyFields = requiredFields.filter(
+      (field) => !formData[field]?.trim()
+    );
 
-    if (emptyField) {
-      toast.error(`Please fill the ${emptyField} field.`);
+    if (emptyFields.length === requiredFields.length) {
+      toast.error("Please fill all fields");
+      return;
+    }
+
+    if (emptyFields.length > 0) {
+      toast.error(`Please fill ${emptyFields[0]}`);
       return;
     }
 
@@ -154,10 +160,11 @@ export default function ManageAddresses() {
               </label>
               {field === "type" ? (
                 <select
-                  value={formData.type || "SHIPPING"}
+                  value={formData.type || ""}
                   onChange={(e) => handleInputChange("type", e.target.value)}
                   className="border w-full px-2 py-1 rounded text-[#213E5A]"
                 >
+                  <option value="">Select Type</option>
                   <option value="SHIPPING">Shipping</option>
                   <option value="BILLING">Billing</option>
                 </select>
