@@ -57,6 +57,7 @@ interface CustomerInfo {
 }
 
 interface OrderInfo {
+  discountPercentage: number;
   abandentDiscountAmount: number;
   shippingRate: number;
   applied_tax_rate: number;
@@ -697,7 +698,7 @@ const ThankYouPage = () => {
                     </p>
                   )}
                   <p className="text-sm text-gray-600">
-                    Quantity: {item.quantity} x ₹{item.unit_price.toFixed(2)}
+                    Unit: ₹{item.unit_price.toFixed(2)} x {item.quantity}
                   </p>
                 </div>
                 <div className="flex-shrink-0 text-right">
@@ -716,7 +717,7 @@ const ThankYouPage = () => {
 
         {/* Totals Section */}
         <div className="flex flex-col gap-2 text-sm text-gray-700">
-          <div className="flex justify-between">
+          <div className="flex justify-between font-semibold">
             <span>Subtotal:</span>
             <span className="font-semibold">
               ₹{order.order_info.sub_total.toFixed(2)}
@@ -739,7 +740,7 @@ const ThankYouPage = () => {
             !(order.order_info.coupon_discount_amount ?? 0) && (
               <div className="flex justify-between text-sm font-semibold text-gray-700">
                 <span>
-                  Discount: {order.order_info.coupon_discount_amount}%:
+                  Discount {order.order_info.coupon_discount_amount} ({order.order_info.discountPercentage}%):
                 </span>
                 <span className="font-medium text-red-600">
                   - ₹{(order.order_info.discount ?? 0).toFixed(2)}
