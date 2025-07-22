@@ -17,7 +17,7 @@ const OurVision = ({ sectionData }: Props) => {
     <section className="max-w-7xl mx-auto p-4">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
         {/* Text Column */}
-        <div className='flex flex-col gap-4'>
+        <div className='flex flex-col gap-4 order-2 lg:order-1'>
           <h2 className={`text-[#213E5A] text-2xl sm:text-3xl lg:text-4xl`}>{heading}</h2>
           {components.map(c => (
             <p key={c.id} className=" text-gray-600 leading-relaxed text-lg">
@@ -27,7 +27,7 @@ const OurVision = ({ sectionData }: Props) => {
           }
         </div>
         {/* Image Column */}
-        <div className="w-full">
+        <div className="w-full order-1 lg:order-2">
           <img
             src={image}
             alt={heading}

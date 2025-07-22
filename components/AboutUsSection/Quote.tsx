@@ -7,7 +7,7 @@ type Props = {
 
 const Quote = ({ sectionData }: Props) => {
   return (
-    <div className="relative min-h-[300px] py-12 flex items-center justify-center overflow-hidden bg-gray-50 dark:bg-gray-900">
+    <div className="relative min-h-[300px] py-12 flex items-center justify-center overflow-hidden bg-gray-50">
       {/* Floating Decorative Image at top-right */}
       <div className="absolute top-0 right-0 z-10  md:block">
         <Image
@@ -36,12 +36,12 @@ const Quote = ({ sectionData }: Props) => {
           </h2>
         )}
         {sectionData.description && (
-          <p className="text-2xl md:text-3xl italic font-serif text-gray-700 dark:text-gray-300 max-w-2xl leading-relaxed">
+          <p className="text-2xl md:text-3xl italic font-serif text-gray-700  max-w-2xl leading-relaxed">
             &ldquo;{sectionData.description}&rdquo;
           </p>
         )}
         {sectionData.sub_heading && (
-          <p className="text-base md:text-lg font-semibold text-gray-500 dark:text-gray-400 mt-4">
+          <p className="text-base md:text-lg font-semibold text-gray-500  mt-4">
             - {sectionData.sub_heading}
           </p>
         )}
