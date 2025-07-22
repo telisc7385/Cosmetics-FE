@@ -7,7 +7,7 @@ import { apiCore } from "@/api/ApiCore";
 import { Pencil, Trash2, Save, X, Plus } from "lucide-react";
 import { Address, AddressApiResponse } from "@/types/address";
 
-// Reusable list of fields for form rendering
+// Fields list
 const ADDRESS_FIELDS: (keyof Address | "type")[] = [
   "fullName",
   "phone",
@@ -35,7 +35,6 @@ export default function ManageAddresses() {
         token || undefined
       );
       const data = res as AddressApiResponse;
-
       if (Array.isArray(data.address)) {
         setAddresses(data.address);
       } else {
@@ -87,6 +86,22 @@ export default function ManageAddresses() {
   };
 
   const handleAddAddress = async () => {
+    const requiredFields = [
+      "fullName",
+      "phone",
+      "pincode",
+      "state",
+      "city",
+      "addressLine",
+    ];
+
+    const emptyField = requiredFields.find((field) => !formData[field]?.trim());
+
+    if (emptyField) {
+      toast.error(`Please fill the ${emptyField} field.`);
+      return;
+    }
+
     try {
       await apiCore("/address", "POST", formData, token || undefined);
       toast.success("Address added");
@@ -100,8 +115,6 @@ export default function ManageAddresses() {
 
   return (
     <div className="p-4 text-[#213E5A]">
-      {" "}
-      {/* Applied to the main container */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-bold text-[#213E5A]">Manage Addresses</h2>
         <button
@@ -111,7 +124,7 @@ export default function ManageAddresses() {
             setFormData({});
           }}
           className="flex items-center gap-1 text-white px-4 py-1 rounded cursor-pointer"
-          style={{ backgroundColor: "#203b67" }} // Applied color
+          style={{ backgroundColor: "#203b67" }}
         >
           <>
             {showAddForm ? (
@@ -128,6 +141,7 @@ export default function ManageAddresses() {
           </>
         </button>
       </div>
+
       {showAddForm && (
         <div className="border p-4 rounded shadow-sm mb-6 bg-white max-w-2xl">
           <h3 className="text-lg font-semibold mb-3 text-[#213E5A]">
@@ -160,12 +174,13 @@ export default function ManageAddresses() {
           <button
             onClick={handleAddAddress}
             className="mt-3 text-white px-4 py-1 rounded cursor-pointer"
-            style={{ backgroundColor: "#203b67" }} // Applied color
+            style={{ backgroundColor: "#203b67" }}
           >
             Save Address
           </button>
         </div>
       )}
+
       <div className="grid gap-6 md:grid-cols-2">
         {addresses.map((addr) => (
           <div key={addr.id} className="self-start">
@@ -206,13 +221,13 @@ export default function ManageAddresses() {
                     <button
                       onClick={handleUpdate}
                       className="flex items-center gap-1 text-white px-3 py-1 rounded cursor-pointer"
-                      style={{ backgroundColor: "#203b67" }} // Applied color
+                      style={{ backgroundColor: "#203b67" }}
                     >
                       <Save size={16} /> Save
                     </button>
                     <button
                       onClick={() => setEditId(null)}
-                      className="flex items-center gap-1 bg-gray-300 text-black px-3 py-1 rounded cursor-pointer" // Cancel button unchanged, added cursor
+                      className="flex items-center gap-1 bg-gray-300 text-black px-3 py-1 rounded cursor-pointer"
                     >
                       <X size={16} /> Cancel
                     </button>
@@ -239,14 +254,14 @@ export default function ManageAddresses() {
                     <button
                       onClick={() => handleEdit(addr)}
                       className="flex items-center gap-1 text-white px-3 py-1 rounded cursor-pointer"
-                      style={{ backgroundColor: "#203b67" }} // Applied color
+                      style={{ backgroundColor: "#203b67" }}
                     >
                       <Pencil size={16} /> Edit
                     </button>
                     <button
                       onClick={() => handleDelete(addr.id!)}
                       className="flex items-center gap-1 text-white px-3 py-1 rounded cursor-pointer"
-                      style={{ backgroundColor: "#203b67" }} // Applied color
+                      style={{ backgroundColor: "#203b67" }}
                     >
                       <Trash2 size={16} /> Delete
                     </button>
