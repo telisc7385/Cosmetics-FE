@@ -41,7 +41,7 @@ const SingleBlogComponent = ({ blog, otherBlogs }: Props) => {
           className="text-white text-sm sm:text-base md:text-lg mt-2"
           style={{ color: "rgba(255,255,255,0.8)" }}
         >
-          By {blog.author} &bull; {formattedDate}
+          {/* By {blog.author} &bull; {formattedDate} */}
         </p>
       </div>
 
