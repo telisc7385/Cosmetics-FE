@@ -13,7 +13,6 @@ import OurValues from "./OurValues";
 import OurMission from "./OurMission";
 import GalleryPage from "../ServersideComponent/GalleryPage/GalleryPage";
 
-
 type Props = {
   sectionData: any;
 };
@@ -40,7 +39,6 @@ const AboutUsJunctionComponents = ({ sectionData }: Props) => {
                   <OurStory sectionData={section} />
                 </div>
               );
-
 
             case "superior_quality":
               return (
@@ -69,10 +67,9 @@ const AboutUsJunctionComponents = ({ sectionData }: Props) => {
             case "counter":
               return (
                 <div key={section.id}>
-                  <CounterComponent sectionData={section} />
+                  <CounterComponent />
                 </div>
               );
-
 
             // case "very_close":
             //   return (

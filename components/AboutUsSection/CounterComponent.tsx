@@ -1,105 +1,59 @@
 "use client";
 
-import { SectionDataItems } from "@/types/AboutUsTypes";
-import React, { useEffect, useRef, useState } from "react";
-import Image from "next/image";
+import { useEffect, useState } from "react";
+import { fetchHomepageStats } from "@/api/fetchStats";
+import { useInView } from "react-intersection-observer";
+import { motion, useAnimation } from "framer-motion";
+import SectionHeader from "@/components/CommonComponents/SectionHeader";
 
-type Props = {
-  sectionData: SectionDataItems;
-};
-
-interface CounterItemProps {
-  target: number;
-  label: string;
-  start: boolean;
-}
-
-const CounterItem: React.FC<CounterItemProps> = ({ target, label, start }) => {
-  const [count, setCount] = useState(0);
+const Counter = () => {
+  const [stats, setStats] = useState<{ title: string; number: number }[]>([]);
+  const [startCount, setStartCount] = useState(false);
+  const { ref, inView } = useInView({ triggerOnce: true });
 
   useEffect(() => {
-    if (!start) return;
-
-    const duration = 2000;
-    const intervalTime = 30;
-    const steps = duration / intervalTime;
-    const increment = target / steps;
-
-    let current = 0;
-    const interval = setInterval(() => {
-      current += increment;
-      if (current >= target) {
-        setCount(target);
-        clearInterval(interval);
-      } else {
-        setCount(Math.floor(current));
-      }
-    }, intervalTime);
-
-    return () => clearInterval(interval);
-  }, [start, target]);
-
-  const display = count;
-
-  return (
-    <div className="flex flex-col items-center justify-center">
-      <span className="text-4xl sm:text-6xl font-bold text-[#213e5a]">
-        {display}
-        {label === "Happy Customers" ? ` CR+` : ``}
-      </span>
-      <p className="text-base sm:text-xl mt-2 text-gray-700">{label}</p>
-    </div>
-  );
-};
-
-const CounterComponent: React.FC<Props> = ({ sectionData }) => {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const [startAnimation, setStartAnimation] = useState(false);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          setStartAnimation(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.5 }
-    );
-
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
+    if (inView && !startCount) {
+      fetchHomepageStats().then((res) => {
+        const filtered = res.filter((item) => item.is_active);
+        const formatted = filtered.map((item) => ({
+          title: item.title,
+          number: item.number,
+        }));
+        setStats(formatted);
+        setStartCount(true);
+      });
     }
-
-    return () => observer.disconnect();
-  }, []);
+  }, [inView, startCount]);
 
   return (
-    <section ref={sectionRef} className="relative w-full overflow-hidden">
-      {/* ✅ Background Image */}
-      <div className="absolute inset-0 z-0">
-        <Image
-          src="/counterbg.jpg"
-          alt="Counter Background"
-          fill
-          className="object-cover object-center"
+    <section ref={ref} className="w-full py-4 md:py-8 bg-gray-50">
+      <div className="max-w-7xl mx-auto p-4">
+        <SectionHeader
+          title="Our Achievement"
+          subtitle="Track how we've grown over time."
+          titleClass="text-2xl sm:text-3xl lg:text-4xl"
+          subtitleClass="text-sm sm:text-base lg:text-lg"
         />
-        <div className="absolute inset-0 bg-[#f7efe0] opacity-0 z-10" />
-      </div>
+        <div className="mt-4 md:mt-8 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-2 gap-y-6 text-center relative">
+          {stats.map((stat, index) => (
+            <div
+              key={index}
+              className="relative flex flex-col items-center justify-center"
+            >
+              <StatItem number={stat.number} title={stat.title} />
 
-      {/* ✅ Foreground Container */}
-      <div className="relative z-20 max-w-7xl mx-auto px-4 py-6 md:py-10">
-        <h2 className={`text-[#213E5A] text-2xl sm:text-3xl lg:text-4xl mx-auto text-center mb-4 lg:mb-8`}>
-          {sectionData.heading}
-        </h2>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-10 text-center">
-          {sectionData.components.map((item, idx) => (
-            <div key={item.id || idx} className="py-4">
-              <CounterItem
-                target={Number(item.heading)}
-                label={item.sub_heading}
-                start={startAnimation}
-              />
+              {/* Desktop vertical divider */}
+              {index !== stats.length - 1 && (
+                <div className="hidden lg:block absolute right-[-4px] top-1/2 transform -translate-y-1/2 h-12 w-[2px] bg-gradient-to-b from-[#10626B] via-[#50A1A8] to-[#10626B] rounded-full" />
+              )}
+
+              {/* Mobile divider logic (only when 2 items per row) */}
+              {index % 2 === 0 && index + 1 < stats.length && (
+                <>
+                  {/* Vertical divider between 2 columns (keep only this for mobile) */}
+                  <div className="block lg:hidden absolute top-1/2 -translate-y-1/2 right-0 h-10 w-[2px] bg-gradient-to-b from-[#10626B] via-[#50A1A8] to-[#10626B] rounded-full" />
+                </>
+              )}
             </div>
           ))}
         </div>
@@ -108,4 +62,50 @@ const CounterComponent: React.FC<Props> = ({ sectionData }) => {
   );
 };
 
-export default CounterComponent;
+const StatItem = ({ number, title }: { number: number; title: string }) => {
+  const [count, setCount] = useState(0);
+  const controls = useAnimation();
+  const duration = 2.5;
+
+  useEffect(() => {
+    if (number) {
+      controls.start({
+        opacity: 1,
+        y: 0,
+        transition: { delay: 0.2, duration: 0.5 },
+      });
+
+      let start = 0;
+      const end = number;
+      const increment = Math.ceil(end / (duration * 60));
+      const interval = setInterval(() => {
+        start += increment;
+        if (start >= end) {
+          setCount(end);
+          clearInterval(interval);
+        } else {
+          setCount(start);
+        }
+      }, 1000 / 60);
+
+      return () => clearInterval(interval);
+    }
+  }, [number, controls]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      animate={controls}
+      className="flex flex-col items-center justify-center p-2 sm:p-3 transition-all duration-300 ease-in-out transform hover:scale-105"
+    >
+      <span className="text-3xl sm:text-5xl font-extrabold text-[#10626B] mb-1 leading-none">
+        {count}
+      </span>
+      <p className="text-sm sm:text-base font-medium text-gray-800 uppercase tracking-wide">
+        {title}
+      </p>
+    </motion.div>
+  );
+};
+
+export default Counter;

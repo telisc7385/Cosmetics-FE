@@ -1,41 +1,57 @@
-"use client"
-import { useEffect, useState } from "react"
-import type { Product, ProductData } from "@/types/product"
-import SidebarFilters from "@/components/ServersideComponent/SidebarFilters/SidebarFilters"
-import SortDropdown from "../SortDropdown/SortDropdown"
-import ProductList from "./ProductList"
-import type { Category } from "@/types/category"
-import { SlidersHorizontal } from "lucide-react"
+"use client";
+import { useEffect, useState } from "react";
+import type { Product, ProductData } from "@/types/product";
+import SidebarFilters from "@/components/ServersideComponent/SidebarFilters/SidebarFilters";
+import SortDropdown from "../SortDropdown/SortDropdown";
+import ProductList from "./ProductList";
+import type { Category } from "@/types/category";
+import { SlidersHorizontal } from "lucide-react";
 
 interface Props {
-  categories: Category[]
-  initialProducts: ProductData
+  categories: Category[];
+  initialProducts: ProductData;
 }
 
-type SortOrder = "" | "price_asc" | "price_desc"
+type SortOrder = "" | "price_asc" | "price_desc";
 
 export default function ShopPageClient({ categories, initialProducts }: Props) {
-  const [products, setProducts] = useState<Product[]>([])
-  const [selectedCats, setSelectedCats] = useState<number[]>([])
-  const [selectedSubcats, setSelectedSubcats] = useState<number[]>([])
-  const [selectedTags, setSelectedTags] = useState<number[]>([])
-  const [sortOrder, setSortOrder] = useState<SortOrder>("")
-  const [min, setMin] = useState(initialProducts?.minPrice)
-  const [max, setMax] = useState(initialProducts?.maxPrice)
-  const [initialMinPrice, setInitialMinPrice] = useState(initialProducts?.minPrice)
-  const [initialMaxPrice, setInitialMaxPrice] = useState(initialProducts?.maxPrice)
-  const [currentPage, setCurrentPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
-  const [showMobileFilters, setShowMobileFilters] = useState(false)
+  const [products, setProducts] = useState<Product[]>([]);
+  const [selectedCats, setSelectedCats] = useState<number[]>([]);
+  const [selectedSubcats, setSelectedSubcats] = useState<number[]>([]);
+  const [selectedTags, setSelectedTags] = useState<number[]>([]);
+  const [sortOrder, setSortOrder] = useState<SortOrder>("");
+  const [min, setMin] = useState(initialProducts?.minPrice);
+  const [max, setMax] = useState(initialProducts?.maxPrice);
+  const [initialMinPrice, setInitialMinPrice] = useState(
+    initialProducts?.minPrice
+  );
+  const [initialMaxPrice, setInitialMaxPrice] = useState(
+    initialProducts?.maxPrice
+  );
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
-  const limit = 8
-  const base = process.env.NEXT_PUBLIC_BASE_URL
+  const limit = 8;
+  const base = process.env.NEXT_PUBLIC_BASE_URL;
 
   useEffect(() => {
-    const qCats = selectedCats.length > 0 ? selectedCats.map((id) => `category=${id}`).join("&") : ""
-    const qSubcats = selectedSubcats.length > 0 ? selectedSubcats.map((id) => `subcategory=${id}`).join("&") : ""
-    const qTags = selectedTags.length > 0 ? `tags=${selectedTags.join(",")}` : ""
-    const sortParam = sortOrder === "price_asc" ? "selling_price" : sortOrder === "price_desc" ? "-selling_price" : ""
+    const qCats =
+      selectedCats.length > 0
+        ? selectedCats.map((id) => `category=${id}`).join("&")
+        : "";
+    const qSubcats =
+      selectedSubcats.length > 0
+        ? selectedSubcats.map((id) => `subcategory=${id}`).join("&")
+        : "";
+    const qTags =
+      selectedTags.length > 0 ? `tags=${selectedTags.join(",")}` : "";
+    const sortParam =
+      sortOrder === "price_asc"
+        ? "selling_price"
+        : sortOrder === "price_desc"
+        ? "-selling_price"
+        : "";
 
     const url =
       `${base}/product?is_active=true&page=${currentPage}&limit=${limit}` +
@@ -65,20 +81,39 @@ export default function ShopPageClient({ categories, initialProducts }: Props) {
     };
 
     fetchAndUpdateBounds();
-  }, [selectedCats, selectedSubcats, selectedTags, sortOrder, base, currentPage]);
+  }, [
+    selectedCats,
+    selectedSubcats,
+    selectedTags,
+    sortOrder,
+    base,
+    currentPage,
+  ]);
 
   useEffect(() => {
-    const qCats = selectedCats.length > 0 ? selectedCats.map((id) => `category=${id}`).join("&") : ""
-    const qSubcats = selectedSubcats.length > 0 ? selectedSubcats.map((id) => `subcategory=${id}`).join("&") : ""
-    const qTags = selectedTags.length > 0 ? `tags=${selectedTags.join(",")}` : ""
-    const sortParam = sortOrder === "price_asc" ? "selling_price" : sortOrder === "price_desc" ? "-selling_price" : ""
+    const qCats =
+      selectedCats.length > 0
+        ? selectedCats.map((id) => `category=${id}`).join("&")
+        : "";
+    const qSubcats =
+      selectedSubcats.length > 0
+        ? selectedSubcats.map((id) => `subcategory=${id}`).join("&")
+        : "";
+    const qTags =
+      selectedTags.length > 0 ? `tags=${selectedTags.join(",")}` : "";
+    const sortParam =
+      sortOrder === "price_asc"
+        ? "selling_price"
+        : sortOrder === "price_desc"
+        ? "-selling_price"
+        : "";
 
     const url =
       `${base}/product?is_active=true&page=${currentPage}&limit=${limit}` +
       (qCats ? `&${qCats}` : "") +
       (qSubcats ? `&${qSubcats}` : "") +
       (qTags ? `&${qTags}` : "") +
-      `&min=${min}&max=${max}` +  // now we use the user‑driven slider values
+      `&min=${min}&max=${max}` + // now we use the user‑driven slider values
       (sortParam ? `&sort=${sortParam}` : "");
 
     const fetchProducts = async () => {
@@ -96,17 +131,17 @@ export default function ShopPageClient({ categories, initialProducts }: Props) {
     const timer = setTimeout(fetchProducts, 300);
     return () => clearTimeout(timer);
   }, [min, max, sortOrder, currentPage, base]);
-  console.log("IN SHop", initialMinPrice, initialMaxPrice)
+  console.log("IN SHop", initialMinPrice, initialMaxPrice);
 
   const handleClearFilters = () => {
-    setSelectedCats([])
-    setSelectedSubcats([])
-    setSelectedTags([])
-    setSortOrder("")
-    setMin(initialProducts?.minPrice)
-    setMax(initialProducts?.maxPrice)
-    setCurrentPage(1)
-  }
+    setSelectedCats([]);
+    setSelectedSubcats([]);
+    setSelectedTags([]);
+    setSortOrder("");
+    setMin(initialProducts?.minPrice);
+    setMax(initialProducts?.maxPrice);
+    setCurrentPage(1);
+  };
 
   return (
     <>
@@ -126,9 +161,11 @@ export default function ShopPageClient({ categories, initialProducts }: Props) {
           {/* Mobile Filters Overlay */}
           {showMobileFilters && (
             <div className="fixed inset-0 bg-black/40 z-40 flex items-end lg:hidden">
-              <div className="w-full bg-white rounded-t-2xl p-5 shadow-lg max-h-[85vh] overflow-y-auto mt-auto">
+              <div className="w-full bg-white rounded-t-2xl p-5 shadow-lg max-h-[65vh] overflow-y-auto mt-auto">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold">Filters</h3>
+                  <h3 className="text-lg font-semibold text-[#213E5A]">
+                    Filters
+                  </h3>
                   <button
                     onClick={() => setShowMobileFilters(false)}
                     className="text-gray-900 hover:text-black focus:outline-none rounded-md p-1"
@@ -157,8 +194,8 @@ export default function ShopPageClient({ categories, initialProducts }: Props) {
                 <div className="p-4 border-t border-gray-200">
                   <button
                     onClick={() => {
-                      handleClearFilters()
-                      setShowMobileFilters(false)
+                      handleClearFilters();
+                      setShowMobileFilters(false);
                     }}
                     className="w-full bg-gray-100 text-gray-700 font-medium text-sm px-4 py-2 rounded-md border border-gray-200 hover:bg-gray-200 transition"
                   >
@@ -181,7 +218,7 @@ export default function ShopPageClient({ categories, initialProducts }: Props) {
           </div>
 
           <div className="flex items-center gap-2 ml-auto">
-            <div className="bg-white rounded-md border shadow-sm flex items-center text-sm">
+            <div className="bg-white  rounded-md border shadow-sm flex items-center text-sm">
               <SortDropdown sortOrder={sortOrder} setSortOrder={setSortOrder} />
             </div>
           </div>
@@ -225,10 +262,11 @@ export default function ShopPageClient({ categories, initialProducts }: Props) {
                   <button
                     key={i}
                     onClick={() => setCurrentPage(i + 1)}
-                    className={`cursor-pointer not-first:min-w-[36px] h-10 px-3 py-1.5 rounded-md text-sm font-medium border transition-all duration-200 ${currentPage === i + 1
-                      ? "bg-[#22365D] text-white border-[#22365D]"
-                      : "bg-white text-[#22365D] border-gray-300 hover:bg-gray-100"
-                      }`}
+                    className={`cursor-pointer not-first:min-w-[36px] h-10 px-3 py-1.5 rounded-md text-sm font-medium border transition-all duration-200 ${
+                      currentPage === i + 1
+                        ? "bg-[#22365D] text-white border-[#22365D]"
+                        : "bg-white text-[#22365D] border-gray-300 hover:bg-gray-100"
+                    }`}
                   >
                     {i + 1}
                   </button>
@@ -239,5 +277,5 @@ export default function ShopPageClient({ categories, initialProducts }: Props) {
         </div>
       </div>
     </>
-  )
+  );
 }

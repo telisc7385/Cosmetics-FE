@@ -392,25 +392,25 @@ const CartPage = () => {
                     <div className="flex justify-between items-start gap-2">
                       {item.slug ? (
                         <Link href={`/product/${item.slug}`} className="flex-1">
-                          <h3 className="text-sm font-semibold text-gray-900 line-clamp-2 hover:text-[#007BFF] transition-colors cursor-pointer">
+                          <h3 className="text-sm font-semibold text-gray-900 line-clamp-1 hover:text-[#007BFF] transition-colors cursor-pointer">
                             {item.name}
                           </h3>
                         </Link>
                       ) : (
-                        <h3 className="text-sm font-semibold text-gray-900 line-clamp-2 flex-1">
+                        <h3 className="text-sm font-semibold text-gray-900 line-clamp-1 flex-1">
                           {item.name}
                         </h3>
                       )}
                     </div>
 
                     {/* Price with quantity and total aligned in one row */}
-                    <div className="flex justify-between items-center mt-1">
+                    <div className="flex justify-between gap-2 items-center mt-1">
                       <p className="text-xs text-gray-700">
-                        Price: ₹{item.sellingPrice.toFixed(2)} / item{" "}
-                        <span className="text-xs text-gray-500">
-                          x {item.quantity}
-                        </span>
+                        Price: ₹{item.sellingPrice.toFixed(2)} / Unit{" "}
                       </p>
+                      {/* <span className="text-xs text-gray-500">
+                        x {item.quantity}
+                      </span> */}
                       <p className="text-xs text-gray-900 whitespace-nowrap font-semibold">
                         ₹{(item.sellingPrice * item.quantity).toFixed(2)}
                       </p>
@@ -463,12 +463,15 @@ const CartPage = () => {
                     </div>
 
                     {/* Price per item with x{quantity} */}
-                    <p className="text-sm font-semibold text-gray-900 mt-1">
-                      ₹{item.sellingPrice.toFixed(2)} / item{" "}
-                      <span className="text-sm text-gray-500">
+                    <div className="flex items-center gap-5">
+                      {" "}
+                      <p className="text-sm font-semibold text-gray-900 mt-1">
+                        ₹{item.sellingPrice.toFixed(2)} / Unit{" "}
+                      </p>
+                      {/* <span className="text-sm text-gray-500">
                         x {item.quantity}
-                      </span>
-                    </p>
+                      </span> */}
+                    </div>
 
                     {item.variantId && (
                       <p className="text-xs text-gray-400">

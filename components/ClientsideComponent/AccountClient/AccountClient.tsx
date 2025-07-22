@@ -122,7 +122,7 @@ export default function AccountClient() {
         {/* Added relative to parent for absolute positioning of X button */}
         {/* Mobile Header (visible only on mobile) */}
         <div
-          className="lg:hidden flex items-center justify-between cursor-pointer mb-4"
+          className="lg:hidden flex items-center justify-between cursor-pointer mt-4"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         >
           <h2 className="font-bold text-lg">

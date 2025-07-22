@@ -283,12 +283,12 @@ export default function ProductDetailClient({
               />
 
               <div className="flex items-center gap-2">
-                <div className="text-sm text-[#213E5A] line-through decoration-dashed decoration-1">
-                  ₹{sellingPrice}
+                <div className="text-sm text-[#213E5A] line-through decoration-line decoration-1">
+                  ₹{basePrice}
                 </div>
 
                 <div className="text-lg text-[#213E5A]">
-                  ₹{basePrice}
+                  ₹{sellingPrice}
                   <span className="text-green-600 text-xs ml-1">
                     ({priceDifferencePercent}% OFF)
                   </span>
@@ -382,7 +382,7 @@ export default function ProductDetailClient({
 
           {relatedProducts.length > 0 && (
             <div className="py-10 sm:px-0">
-              <h2 className="text-2xl font-semibold lg:mb-4">
+              <h2 className="text-2xl font-semibold lg:mb-4 text-[#213E5A]">
                 You may also like from {product.category.name}
               </h2>
 
