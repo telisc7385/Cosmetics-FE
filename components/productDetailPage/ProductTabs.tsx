@@ -34,7 +34,7 @@ export default function ProductTabs({
           }`}
           onClick={() => setActiveTab("details")}
         >
-          OVERVIEW
+          Details
         </button>
 
         <button
@@ -46,10 +46,10 @@ export default function ProductTabs({
           }`}
           onClick={() => setActiveTab("ingredients")}
         >
-          INGREDIENTS
+          Description
         </button>
 
-        <button
+        {/* <button
           className={`pb-2 text-xs sm:text-sm ${
             // text-xs for mobile, sm:text-sm for larger screens
             activeTab === "shipping"
@@ -59,7 +59,7 @@ export default function ProductTabs({
           onClick={() => setActiveTab("shipping")}
         >
           SHIPPING & RETURNS
-        </button>
+        </button> */}
       </div>
 
       {/* Tab Content */}
@@ -75,12 +75,12 @@ export default function ProductTabs({
 
         {activeTab === "ingredients" && (
           <div>
-            <h4 className="font-semibold text-xl mb-2">Ingredients</h4>
+            <h4 className="font-semibold text-xl mb-2">Description</h4>
             <p className="text-sm leading-relaxed">{ingredients}</p>
           </div>
         )}
 
-        {activeTab === "reviews" && (
+        {/* {activeTab === "reviews" && (
           <div>
             {reviews.length > 0 ? (
               reviews.map((review, idx) => <p key={idx}>⭐ {review}</p>)
@@ -107,7 +107,7 @@ export default function ProductTabs({
               />
             </div>
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );
