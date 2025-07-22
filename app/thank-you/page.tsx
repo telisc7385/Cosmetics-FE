@@ -25,6 +25,7 @@ import { handleRemovePincode } from "@/utils/removePincodeData";
 
 // Mock authentication hook: Replace with your actual auth status hook
 import { useAuthStatus } from "@/store/hooks/useAuthStatus";
+import { istTime } from "@/utils/convertDate";
 
 // --- Interface Definitions (Ensure these match your backend response structure) ---
 interface CustomerInfo {
@@ -499,7 +500,7 @@ const ThankYouPage = () => {
             <p className="text-sm text-gray-600">
               Order Date:{" "}
               <span className="font-semibold">
-                {order.order_info.created_at_formatted}
+                {istTime(order.order_info.created_at_formatted)}
               </span>
             </p>
             <p className="text-sm text-gray-600">
