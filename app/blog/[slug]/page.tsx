@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getPaginatedBlogs, getSingleBlogBySlug } from "@/api/blogsApi";
 import { Blog } from "@/types/blogDataTypes";
 import SingleBlogComponent from "@/components/BlogComponents/SingleBlogComponent";
+export const dynamic = "force-dynamic";
 
 type Props = {
   params: Promise<{ slug: string }>;
