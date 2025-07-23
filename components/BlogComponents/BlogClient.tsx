@@ -13,17 +13,26 @@ const BlogClient = () => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
-  const pageSize = 8;
+  const pageSize = 4;
 
   const fetchBlogs = async (pageNumber: number) => {
     if (loading) return;
     setLoading(true);
     try {
       const responce = await getPaginatedBlogs(pageNumber, pageSize);
+
+      // Assuming responce.data contains the blogs for the current page
+      // And responce.total_pages is provided by the backend, calculated using Math.ceil()
+      // And responce.total_blogs (or total_count) contains the total number of blogs
+
       setBlogs((prev) =>
         pageNumber === 1 ? responce.data : [...prev, ...responce.data]
       );
-      setHasMore(pageNumber < responce.total_pages);
+
+      // Ensure your backend sends 'total_pages' accurately.
+      // If backend sends 'total_blogs' count and not 'total_pages',
+      // you could calculate it here as: Math.ceil(responce.total_blogs / pageSize)
+      setHasMore(pageNumber < responce.totalPages);
     } catch (error) {
       console.error("Failed to fetch blogs:", error);
     } finally {
@@ -63,8 +72,6 @@ const BlogClient = () => {
             </div>
           </div>
         </div>
-
-        {/* <h2 className="text-white text-4xl lg:text-6xl md:text-2xl font-extrabold z-10">{BannerData?.heading}</h2> */}
       </div>
 
       {/* Heading */}
@@ -93,7 +100,8 @@ const BlogClient = () => {
         ) : hasMore ? (
           <button
             onClick={handleLoadMore}
-            className="py-4 px-8 bg-[var(--baseOrange)] text-white rounded-md hover:bg-orange-600 transition-colors"
+            className="py-2 px-6 border bg-[#22365D] text-white rounded-md hover:bg-white hover:text-[#22365D] hover:border-[#22365D] transition-colors hover:cursor-pointer
+            "
           >
             Load More
           </button>
