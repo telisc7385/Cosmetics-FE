@@ -13,7 +13,7 @@ const BlogClient = () => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
-  const pageSize = 12;
+  const pageSize = 8;
 
   const fetchBlogs = async (pageNumber: number) => {
     if (loading) return;
@@ -75,7 +75,7 @@ const BlogClient = () => {
         />
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-4 py-10 container mx-auto">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-4 py-10 container mx-auto">
         {blogs.map((blog) => (
           <div
             className="border border-[var(--baseGrey)] rounded"
