@@ -15,6 +15,7 @@ export interface Blog {
 }
 
 export interface BlogsResponse {
+    totalPages: number;
     data: Blog[];
     total_pages: number;
     current_page: number;
