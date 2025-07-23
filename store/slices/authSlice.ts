@@ -1,15 +1,15 @@
 // store/slices/authSlice.ts
-import { AuthCustomer, User } from "@/types/auth"; // Corrected import path
+import { AuthCustomer, User } from "@/types/auth"; // Assuming AuthCustomer and User are defined here
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../store";
+import toast from "react-hot-toast"; // Import toast here
 
 interface AuthState {
-  user?: User; // General 'User' type if you use it elsewhere
-  items?: string[]; // Assuming this is an optional array of strings, or remove if unused
-  customer: AuthCustomer | null; // Stores the logged-in user's detailed data
+  user?: User;
+  items?: string[];
+  customer: AuthCustomer | null;
   token: string | null;
 
-  // State for password reset flow (as per your original code)
   resetLoading: boolean;
   resetError: string | null;
   resetStep: number;
@@ -23,8 +23,8 @@ const initialState: AuthState = {
   resetError: null,
   resetStep: 1,
   resetSuccess: false,
-  items: undefined, // Default to undefined or an empty array []
-  user: undefined,  // Default to undefined
+  items: undefined,
+  user: undefined,
 };
 
 const authSlice = createSlice({
@@ -32,9 +32,6 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     loginSuccess(state, action: PayloadAction<{ customer: AuthCustomer; token: string }>) {
-      // Explicitly set customer properties from the payload.
-      // Use fallbacks to empty string/null if the API might not always return all fields
-      // to satisfy the non-optional types in AuthCustomer.
       state.customer = {
         id: action.payload.customer.id,
         email: action.payload.customer.email,
@@ -42,25 +39,28 @@ const authSlice = createSlice({
         lastName: action.payload.customer.lastName || '',
         imageUrl: action.payload.customer.imageUrl || null,
         phone: action.payload.customer.phone || '',
-        role: action.payload.customer.role || 'user', // Default 'user' role
+        role: action.payload.customer.role || 'user',
         bio: action.payload.customer.bio || null,
-        username: action.payload.customer.username, // username is optional, no fallback needed
+        username: action.payload.customer.username,
       };
       state.token = action.payload.token;
     },
-    logout(state) {
+    // MODIFIED: logout reducer now accepts an optional message
+    logout(state, action: PayloadAction<{ message?: string } | undefined>) {
       state.customer = null;
       state.token = null;
+      // Show toast only if a message is provided in the payload
+      if (action.payload?.message) {
+        toast.error(action.payload.message);
+      }
     },
     updateProfile(state, action: PayloadAction<Partial<AuthCustomer>>) {
       if (state.customer) {
-        // This spreads the existing customer data and then
-        // overrides it with any provided fields in action.payload.
         state.customer = { ...state.customer, ...action.payload };
       }
     },
 
-    // --- Reset Password Flow Reducers (Kept as is from your provided code) ---
+    // --- Reset Password Flow Reducers (No changes) ---
     resetRequestStart(state) {
       state.resetLoading = true;
       state.resetError = null;
@@ -108,7 +108,7 @@ const authSlice = createSlice({
 
 export const {
   loginSuccess,
-  logout,
+  logout, // Export logout
   updateProfile,
   resetRequestStart,
   resetRequestSuccess,
@@ -124,5 +124,5 @@ export const {
 
 export const selectToken = (state: RootState) => state.auth.token;
 export const selectIsLoggedIn = (state: RootState) => state.auth.token !== null;
-export const selectUser = (state: RootState) => state.auth.customer; // Selector for the customer details
+export const selectUser = (state: RootState) => state.auth.customer;
 export default authSlice.reducer;

@@ -34,7 +34,7 @@ export async function getTestimonials(): Promise<Testimonial[]> {
 export async function getGallery(): Promise< GalleryImage[]> {
   try {
     const data = await apiCore<{ result?:  GalleryImage[] }>(
-      "/gallery",
+      "/gallery?is_active=true",
       "GET"
     );
     return data.result ?? [];

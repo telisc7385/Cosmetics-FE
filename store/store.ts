@@ -1,4 +1,4 @@
-// store/store.ts
+// store/store.ts (Your existing code, just for context)
 import { configureStore } from "@reduxjs/toolkit";
 import {
   persistStore,
@@ -9,14 +9,13 @@ import {
   PERSIST,
   PURGE,
   REGISTER,
-} from "redux-persist"; // Import all necessary actions
+} from "redux-persist";
 
 import { combineReducers } from "redux";
 
 import authReducer from "./slices/authSlice";
 import cartReducer from "./slices/cartSlice";
 import storage from "./storage";
-
 
 const rootReducer = combineReducers({
   auth: authReducer,
@@ -26,17 +25,16 @@ const rootReducer = combineReducers({
 const persistConfig = {
   key: "root",
   storage,
-  whitelist: ["auth", "cart"], // Ensure 'auth' and 'cart' are whitelisted to persist
+  whitelist: ["auth", "cart"],
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
-export const store = configureStore({
+export const store = configureStore({ // Exporting 'store' is essential!
   reducer: persistedReducer,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        // Ignore these Redux Persist actions for serializable check
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
     }),

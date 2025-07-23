@@ -1,4 +1,7 @@
 // api/ApiCore.ts
+// REMOVE these imports:
+// import { store } from '@/store/store';
+// import { logout } from '@/store/slices/authSlice';
 
 export const apiCore = async <T>(
   url: string,
@@ -28,12 +31,11 @@ export const apiCore = async <T>(
   const requestOptions: RequestInit = {
     method,
     headers,
-    next: { revalidate: 3600 },
+    cache: "no-store",
   };
 
   if (body && ['POST', 'PUT', 'PATCH'].includes(method)) {
     requestOptions.body = JSON.stringify(body);
-    console.log("JSON Payload being sent (stringified in apiCore):", requestOptions.body);
   }
 
   try {
@@ -52,6 +54,17 @@ export const apiCore = async <T>(
         errorData.message = res.statusText;
       }
 
+      // *** IMPORTANT CHANGE HERE ***
+      // Instead of dispatching logout here, we throw a specific error.
+      // The calling component (which must be a Client Component) will catch this
+      // and then dispatch logout. This makes apiCore server-safe.
+      if (res.status === 401) {
+        const errorMessage = errorData.message || res.statusText || "Authorization failed.";
+        const authError = new Error(errorMessage);
+        (authError as any).status = res.status; // Attach status for easier checking in components
+        throw authError; // Re-throw the error
+      }
+
       console.error(
         `[ Server ] API error: ${res.status} "${errorData.message?.slice(0, 200) || res.statusText}" for ${fullUrl}`,
         errorData
@@ -64,17 +77,18 @@ export const apiCore = async <T>(
     if (contentType?.includes("application/json")) {
       return await res.json() as T;
     } else {
-      // Depending on your API's non-JSON responses, you might want to return an empty object or throw an error.
-      // For now, keeping it as `null as T` to match the previous behavior, but be aware of this.
+      // Handle cases where the response is not JSON (e.g., a 204 No Content)
       return null as T;
     }
   } catch (error) {
+    // Re-throw the error, including the one with status 401
     console.error(`[ Server ] Fetch failed for ${fullUrl}:`, error);
     throw error;
   }
 };
 
-// --- Interfaces ---
+
+// --- Your existing Interfaces (no changes needed here) ---
 
 export interface ProductImage {
   id: number;
@@ -139,7 +153,6 @@ export interface GuestOrderPayload {
   email: string;
   address: AddressInput;
   items: {
-    // productId?: number; // This was commented out, implying it's handled differently for guests
     variantId?: number;
     quantity: number;
     price: number;
@@ -151,7 +164,7 @@ export interface GuestOrderPayload {
 
 export interface LoggedInOrderPayload {
   items: {
-    productId?: number; // ⬅️ **THIS IS THE ONLY LINE CHANGED**
+    productId?: number;
     quantity: number;
     price: number;
     variantId?: number | null;
@@ -165,7 +178,6 @@ export interface LoggedInOrderPayload {
   shippingAddress: string;
   cartId?: number;
   subtotal: number;
-  // Added these properties as per the UserCheckout component's payload
   taxAmount: number;
   appliedTaxRate: number;
   taxType: string;
@@ -279,30 +291,27 @@ export interface CartItemFromAPI {
 export interface Category {
   id: number;
   name: string;
-  title?: string; // Changed from ReactNode to string | undefined
-  imageUrl: string; // Changed from 'image' to 'imageUrl' and made mandatory for slider
+  title?: string;
+  imageUrl: string;
   parent?: number | null;
-  slug: string; // Added slug property
+  slug: string;
 }
 
-// Updated Coupon Interface to match UserCheckout.tsx
 export interface Coupon {
   id: number;
-  name: string; // Added 'name' property
+  name: string;
   code: string;
-  discount: number; // Changed from discountValue to discount
-  expiresAt: string; // Changed from expirationDate to expiresAt
+  discount: number;
+  expiresAt: string;
   createdAt: string;
-  show_on_homepage: boolean; // Added
-  redeemCount: number; // Added
-  maxRedeemCount: number; // Added
-  // Removed: discountType, minPurchase, maxDiscountAmount, isActive, usageLimitPerUser, totalUsageLimit, description, updatedAt
+  show_on_homepage: boolean;
+  redeemCount: number;
+  maxRedeemCount: number;
 }
 
-// Interface for coupon validation response from backend
 export interface CouponValidationResponse {
   isValid: boolean;
   discountAmount: number;
-  appliedCouponDetails?: Coupon; // Optional: include full coupon details if valid
-  message?: string; // e.g., "Coupon applied successfully", "Invalid coupon"
+  appliedCouponDetails?: Coupon;
+  message?: string;
 }

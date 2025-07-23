@@ -9,7 +9,7 @@ interface BannersApiResponse {
 export const getBanners = async (): Promise<BannerType[]> => {
   try {
     // Tell TypeScript what the shape of the response is
-    const res = await apiCore<{ data: BannerType[] }>("/banners", "GET");
+    const res = await apiCore<{ data: BannerType[] }>("/banners?isActive=true", "GET");
 
     // If the response is directly an array (fallback), return that; otherwise return res.data
     return Array.isArray(res) ? res : res.data || [];
@@ -25,7 +25,7 @@ export const getBanners = async (): Promise<BannerType[]> => {
 
 export async function getCouponData(token: string) {
   const response = await apiCore<{ success: boolean; data: Coupon[] }>(
-    `/coupon/discounts`,
+    `/coupon/discounts?is_active=true`,
     "GET",
     {},
     token

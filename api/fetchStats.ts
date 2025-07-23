@@ -9,6 +9,6 @@ export interface HomepageStat {
 }
 
 export const fetchHomepageStats = async (): Promise<HomepageStat[]> => {
-  const res = await apiCore<{ results: HomepageStat[] }>("/homepage_statistics", "GET");
+  const res = await apiCore<{ results: HomepageStat[] }>("/homepage_statistics?is_active=true", "GET");
   return res.results;
 };

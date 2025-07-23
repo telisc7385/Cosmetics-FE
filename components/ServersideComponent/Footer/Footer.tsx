@@ -227,22 +227,23 @@ const Footer = async ({ topCategories, companyDetails }: FooterProps) => {
           {/* Contact + Social (Desktop) */}
           <div className="hidden lg:block">
             <h4 className="font-bold text-black mb-3 text-lg">Get In Touch</h4>
-            <div className="mb-2 flex items-center gap-2 text-lg">
+            <div className="mb-2 flex items-center gap-2 text-md">
               <IoCallOutline />
-              <a href="tel:+91180041224826" className="hover:underline">
-                +91 1800 4122 4826
+              <a href={`tel:${companyDetails?.phone || "+91180041224826"}`}>
+                {companyDetails?.phone || "+91 1800 4122 4826"}
               </a>
             </div>
-            <div className="mb-4 flex items-center gap-2 text-lg">
+            <div className="mb-4 flex items-center gap-2 text-md">
               <FaRegEnvelope />
               <a
-                href="mailto:sales@mangochairs.com"
-                className="hover:underline"
+                href={`mailto:${
+                  companyDetails?.email || "sales@mangochairs.com"
+                }`}
               >
-                sales@mangochairs.com
+                {companyDetails?.email || "sales@mangochairs.com"}
               </a>
             </div>
-            <div className="flex items-center gap-4 text-[#213C66] text-md -mt-3">
+            <div className="flex items-center gap-1 text-[#213C66] text-md -mt-3">
               Follow Us :
               {companyDetails?.facebook_icon && (
                 <Link
