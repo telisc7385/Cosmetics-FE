@@ -7,6 +7,7 @@ interface AuthPromptModalProps {
   onContinueAsGuest: () => void;
 }
 
+
 const AuthPromptModal: React.FC<AuthPromptModalProps> = ({
   onClose,
   onContinueAsGuest,
