@@ -61,7 +61,7 @@ export default function TestimonialSlider({ testimonials }: Props) {
                   alt={t.name}
                   width={48}
                   height={48}
-                  className="rounded-full object-cover"
+                  className="rounded-full object-cover border border-green-300"
                 />
                 <div>
                   <h4 className="font-bold text-lg text-black">{t.name}</h4>

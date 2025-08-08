@@ -246,7 +246,7 @@ export default function ShopPageClient({ categories, initialProducts }: Props) {
             </div>
             <button
               onClick={handleClearFilters}
-              className="w-full flex justify-center items-center gap-3 text-lg font-medium px-5 py-2.5 rounded-md mt-4 text-white bg-black cursor-pointer"
+              className="w-full flex justify-center items-center gap-3 text-lg font-medium px-5 py-2.5 rounded-md mt-4 text-white bg-[#22365D] hover:bg-white hover:text-[#22365D] hover:border-[#22365D] hover:border-1 transition-all cursor-pointer"
             >
               Clear
             </button>

@@ -99,7 +99,7 @@ const StatItem = ({ number, title }: { number: number; title: string }) => {
       className="flex flex-col items-center justify-center p-2 sm:p-3 transition-all duration-300 ease-in-out transform hover:scale-105"
     >
       <span className="text-3xl sm:text-5xl font-extrabold text-[#10626B] mb-1 leading-none">
-        {count}
+        {count}+
       </span>
       <p className="text-sm sm:text-base font-medium text-gray-800 uppercase tracking-wide">
         {title}

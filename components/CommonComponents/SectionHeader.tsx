@@ -21,7 +21,7 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
     <div className="text-center">
       {" "}
       {/* Added px-4 for better mobile padding and text-center for alignment */}
-      <h2 className={`text-[#213E5A] mb-2 ${titleClass} capitalize`}>{title}</h2>
+      <h2 className={`text-[#213E5A] mb-2 ${titleClass} capitalize font-semibold`}>{title}</h2>
       {subtitle && (
         <p className={`text-[#213E5A] mb-2 ${subtitleClass}`}>{subtitle}</p>
       )}

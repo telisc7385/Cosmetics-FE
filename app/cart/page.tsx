@@ -594,10 +594,10 @@ const CartPage = () => {
               </span>
             </div>
           </div>
-
+            { pincodeVerified === false && <p className="text-center text-sm text-red-500 ">please verify pincode to continue</p> }
           <button
             onClick={handleCheckoutClick}
-            className={`w-full py-3 mt-6 text-white font-semibold rounded-md transition-colors ${
+            className={`w-full py-3 mt-4 text-white font-semibold rounded-md transition-colors ${
               pincodeVerified && items.length > 0 && orderSummaryData
                 ? "bg-[#1A324A] hover:bg-[#142636] cursor-pointer"
                 : "bg-gray-300 cursor-not-allowed"

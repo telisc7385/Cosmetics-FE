@@ -19,15 +19,27 @@ const FeaturesBanner = () => {
   }, []);
 
   return (
-    <section className="w-full py-4 md:py-8 bg-gray-50">
-      <div className="max-w-7xl mx-auto p-4">
+    <section className="relative w-full py-4 md:py-8 overflow-hidden">
+      {/* Background image and overlay */}
+      <div className="absolute inset-0 z-0">
+        <div
+          className="w-full h-full"
+          style={{
+            background: "linear-gradient(to top right, #d1f5e0 0%, #d1f5e0 100%)",
+          }}
+        />
+        <div className="absolute inset-0 bg-white/40 backdrop-blur-[6px] z-10" />
+      </div>
+
+      {/* Foreground content */}
+      <div className="relative z-20 max-w-7xl mx-auto p-4">
         <SectionHeader
           title="Why Choose US"
           subtitle="Discover trust, quality, and lasting value."
           titleClass="text-2xl sm:text-3xl lg:text-4xl"
           subtitleClass="text-sm sm:text-base lg:text-lg"
         />
-        <div className="mt-4 md:mt-8 max-w-7xl mx-auto flex flex-wrap justify-center gap-x-8 gap-y-12">
+        <div className="mt-4 md:mt-8 flex flex-wrap justify-center gap-x-8 gap-y-12">
           {features.map((item) => (
             <div
               key={item.id}

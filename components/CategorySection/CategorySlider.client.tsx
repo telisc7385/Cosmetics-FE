@@ -19,7 +19,15 @@ interface Props {
   categories: Category[];
 }
 
-const bgColors = ["#e6ffe6", "#cce0ff", "#ffb3b3", "#CCE6FF", "#FFCCCC"];
+// const bgColors = ["#e6ffe6", "#cce0ff", "#ffb3b3", "#CCE6FF", "#FFCCCC"];
+
+const bgColors = [
+  "linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%)", // Blue
+  "linear-gradient(135deg, #f6d365 0%, #fda085 100%)", // Orange
+  "linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%)", // Green
+  "linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%)", // Purple-Pink
+  "linear-gradient(135deg, #fdcbf1 0%, #e6dee9 100%)", // Pink
+];
 
 export default function CategorySlider({ categories }: Props) {
   return (
@@ -64,6 +72,7 @@ export default function CategorySlider({ categories }: Props) {
               >
                 <div
                   className={`
+                    blur-sm
                       absolute
                       bottom-[80px] sm:bottom-[100px] md:bottom-[120px] lg:bottom-[80px] /* Tablet view shifted up */
                       left-1/2
@@ -75,10 +84,10 @@ export default function CategorySlider({ categories }: Props) {
                       transition-all duration-500 ease-in-out
                       group-hover:w-[220px] sm:group-hover:w-[200px] lg:group-hover:w-[220px]
                       group-hover:h-[120px] sm:group-hover:h-[150px] lg:group-hover:h-[180px]
-                      group-hover:rounded-[10px]
+                      group-hover:rounded-[10px] group-hover:blur-none
                     `}
                   style={{
-                    backgroundColor: bgColors[index % bgColors.length],
+                    background: bgColors[index % bgColors.length],
                   }}
                 />
 
@@ -92,7 +101,7 @@ export default function CategorySlider({ categories }: Props) {
                   />
                 </div>
 
-                <h3 className="relative z-10 mt-12 lg:mt-16 text-center text-base font-semibold text-black">
+                <h3 className="relative z-10 mt-12 lg:mt-16 text-center text-base font-semibold text-black ">
                   {cat.name}
                 </h3>
               </div>

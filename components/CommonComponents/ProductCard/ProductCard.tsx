@@ -123,14 +123,14 @@ const ProductCard = ({ product }: Props) => {
 
   return (
     <div
-      className="group bg-white rounded-lg md:rounded-xl border border-blue-100 shadow-sm transition-shadow duration-300 w-full max-w-[250px] mx-auto overflow-hidden"
+      className="group bg-gradient-to-br from-white via-blue-50 to-blue-100 rounded-xl border border-blue-200 shadow-md hover:shadow-xl transition-shadow duration-300 w-full max-w-[260px] mx-auto overflow-hidden flex flex-col "
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
       {/* Product Image */}
       <Link
         href={`/product/${product.slug}`}
-        className="block relative h-[180px] md:h-52"
+        className="block relative h-[180px] md:h-[200px] bg-white overflow-hidden"
       >
         <Image
           src={currentMainImageSrc}
@@ -139,35 +139,70 @@ const ProductCard = ({ product }: Props) => {
           className="object-contain transition-transform duration-300 ease-in-out scale-100 group-hover:scale-105"
         />
         {product.priceDifferencePercent < 0 && (
-          <div className="absolute top-3 left-3 bg-red-500 text-white text-[10px] md:text-[12px] px-2 py-0.5 rounded-full font-semibold shadow-sm">
+          <div className="absolute top-3 left-3 bg-gradient-to-r from-red-500 via-pink-500 to-orange-500 text-white text-[11px] px-2 py-0.5 rounded-full font-semibold shadow-md uppercase tracking-wide">
             {product.priceDifferencePercent.toFixed(0)}% OFF
           </div>
         )}
       </Link>
 
-      {/* Content */}
-      <div className="p-1 md:p-3 flex flex-col text-left">
+      {/* Card Content */}
+      <div className="p-3 flex flex-col text-left flex-grow">
         {/* Product Name */}
         <Link href={`/product/${product.slug}`}>
-          <h3 className="text-[16px] text-gray-800 font-semibold mb-1 group-hover:text-[#213C66] transition-colors line-clamp-2 min-h-[48px]">
+          <h3 className="text-[15px] text-slate-800 font-semibold group-hover:text-[#1e3a8a] transition-colors truncate">
             {product.name}
           </h3>
         </Link>
 
-        {/* Price + Button */}
-        <div className="flex justify-between items-start mt-1  md:mt-2 mb-1">
-          {/* Price */}
+        {/* Variant Images */}
+        {product.variants && product.variants.length > 0 ? (
+          <div className="flex gap-2 flex-wrap mt-1 mb-2 max-h-[48px] overflow-hidden">
+            {product.variants.map((variant, index) => {
+              const variantImage = variant.images[0]?.url;
+              if (!variantImage) return null;
+
+              const isSelected = selectedVariant?.id === variant.id;
+
+              return (
+                <button
+                  key={variant.id}
+                  onClick={() => {
+                    setMainDisplayImage(variantImage);
+                    setSelectedVariant(variant);
+                  }}
+                  className={`relative w-10 h-10 rounded overflow-hidden border-2 transition ${
+                    isSelected
+                      ? "border-blue-500 ring-2 ring-offset-1"
+                      : "border-gray-300"
+                  }`}
+                >
+                  <Image
+                    src={variantImage}
+                    alt={`Variant ${index + 1}`}
+                    fill
+                    className="object-cover"
+                  />
+                </button>
+              );
+            })}
+          </div>
+        )
+        : 
+        <div className="flex gap-2 flex-wrap mt-1 mb-2 h-[48px] overflow-hidden text-black items-center justify-center">No variations</div>
+        }
+
+        {/* Price & Button */}
+        <div className="flex justify-between items-start mt-auto">
           <div className="flex flex-col">
             {!isNaN(currentBasePrice) && currentBasePrice > 0 ? (
-              <span className="text-sm md:text-lg font-semibold md:font-bold text-[#007C85]">
+              <span className="text-base font-semibold text-emerald-600">
                 ₹{currentSellingPrice.toFixed(2)}
               </span>
             ) : (
               <span className="text-sm text-gray-500">Price Unavailable</span>
             )}
-
             {currentBasePrice > currentSellingPrice && (
-              <span className="text-sm text-red-700 line-through ">
+              <span className="text-xs text-gray-400 line-through">
                 ₹{currentBasePrice.toFixed(2)}
               </span>
             )}
@@ -176,36 +211,37 @@ const ProductCard = ({ product }: Props) => {
           {/* Action Button */}
           {product.variants && product.variants.length > 0 ? (
             <Link href={`/product/${product.slug}`}>
-              <button className="text-sm md:text-base flex items-center gap-1 px-3 py-1.5 bg-[#213C66] text-white rounded-full hover:bg-[#213C66] transition">
-                <MdTune className="text-sm md:text-base" />
-                {/* Select  */}
+              <button className="text-xs md:text-sm flex items-center gap-1 px-3 py-1.5 bg-[#1e3a8a] text-white rounded-full hover:bg-[#172c5d] transition">
+                <MdTune className="text-base" />
+                Select
               </button>
             </Link>
           ) : (
             <button
               onClick={handleAddToCart}
               disabled={isOutOfStock}
-              className={`text-sm md:text-base flex items-center gap-1 px-1 md:px-3 py-1 md:py-1.5 rounded -xl md:rounded-full transition cursor-pointer ${
+              className={`text-xs md:text-sm flex items-center gap-1 px-3 py-1.5 rounded-full transition ${
                 isOutOfStock
                   ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-                  : "bg-[#213C66] text-white hover:bg-[#213C66]"
+                  : "bg-[#1e3a8a] text-white hover:bg-[#172c5d]"
               }`}
             >
-              <HiOutlineShoppingBag className="text-lg md:text-base" />
-              <span className="hidden md:flex">Add</span>
+              <HiOutlineShoppingBag className="text-base" />
+              Add
             </button>
           )}
         </div>
 
-        {/* Stock Info */}
+        {/* Out of Stock Notice */}
         {isOutOfStock && (
-          <p className="text-[10px] text-red-600 font-medium text-right mt-1">
+          <p className="text-[11px] text-rose-600 font-medium text-right mt-2">
             Out of Stock
           </p>
         )}
       </div>
     </div>
   );
+
 };
 
 export default ProductCard;

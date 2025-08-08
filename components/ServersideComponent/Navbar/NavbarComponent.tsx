@@ -8,7 +8,6 @@ import SearchBar from "@/components/ClientsideComponent/Navbar/SearchBar";
 import NavbarIconsWrapper from "@/components/ClientsideComponent/Navbar/NavbarIconsWrapper";
 import MobileMenu from "@/components/ClientsideComponent/Navbar/MobileMenu";
 import { CompanySettings } from "@/api/CompanyApi";
-import HomeCoupon from "@/components/ClientsideComponent/HomeCoupon/HomeCoupon"; // Ensure this path is correct
 
 interface NavbarProps {
   companyDetails?: CompanySettings;
@@ -18,48 +17,34 @@ const Navbar = ({ companyDetails }: NavbarProps) => {
   const [scrolled, setScrolled] = useState(false);
   const logoUrl = companyDetails?.logo || "/logo1.png";
 
-  // Define the approximate height of the HomeCoupon banner
-  const homeCouponHeight = 40; // px, based on py-2 (16px) + text height, rounded up for safety
-
   useEffect(() => {
     const handleScroll = () => {
-      // Adjust scroll check to account for the coupon banner
-      setScrolled(window.scrollY > 10 + homeCouponHeight);
+      setScrolled(window.scrollY > 10);
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [homeCouponHeight]);
+  }, []);
 
   return (
-    <div className="mb-20 md:mb-16">
+    <>
       <nav
-        // The 'top' property is set dynamically based on the homeCouponHeight
-        className={`w-full top-0 z-50 transition-all duration-300 backdrop-blur-md fixed ${
-          scrolled ? "bg-white/80 shadow " : "bg-white/80"
+        className={`fixed top-0 w-full z-50 transition-all duration-300 ${
+          scrolled
+            ? "bg-white/90 shadow backdrop-blur-md"
+            : "bg-white/40 backdrop-blur-md"
         }`}
       >
-        {/* <HomeCoupon /> */}
-        <div className="max-w-7xl mx-auto w-full px-4 flex flex-col gap-6 py-2">
-          {/* Desktop View */}
-          <div className="hidden lg:flex gap-6 items-center justify-between w-full">
-            {/* Left: Logo */}
-            <div className="flex justify-start items-center gap-8">
-              {" "}
-              <div className="flex items-center">
-                <Link href="/">
-                  <Image src={logoUrl} alt="Logo" width={140} height={50} />
-                </Link>
-              </div>
-              {/* Center: Nav Items */}
-              <div className="flex justify-between items-center flex-6">
-                <NavItems />
-              </div>
+        <div className="max-w-7xl mx-auto w-full px-4 flex flex-col gap-4 py-3">
+          {/* Desktop */}
+          <div className="hidden lg:flex items-center justify-between w-full">
+            <div className="flex items-center gap-8">
+              <Link href="/">
+                <Image src={logoUrl} alt="Logo" width={140} height={50} />
+              </Link>
+              <NavItems />
             </div>
 
-            {/* Right: Search Bar and Icons (grouped together) */}
-            <div className="flex justify-end items-center gap-4 ">
-              {" "}
-              {/* Use gap for spacing between search bar and icons */}
+            <div className="flex items-center gap-4">
               <div className="w-[250px]">
                 <SearchBar />
               </div>
@@ -67,13 +52,13 @@ const Navbar = ({ companyDetails }: NavbarProps) => {
             </div>
           </div>
 
-          {/* Tablet View */}
+          {/* Tablet */}
           <div className="hidden md:flex lg:hidden items-center justify-between w-full">
             <Link href="/">
-              <Image src={logoUrl} alt="Logo" width={140} height={50} />
+              <Image src={logoUrl} alt="Logo" width={120} height={40} />
             </Link>
-            <div className="flex items-center gap-6">
-              <div className="w-[250px]">
+            <div className="flex items-center gap-4">
+              <div className="w-[200px]">
                 <SearchBar />
               </div>
               <NavbarIconsWrapper />
@@ -81,31 +66,27 @@ const Navbar = ({ companyDetails }: NavbarProps) => {
             </div>
           </div>
 
-          {/* Mobile View */}
+          {/* Mobile */}
           <div className="flex flex-col md:hidden w-full">
-            <div className="flex justify-between items-center w-full pb-2">
+            <div className="flex justify-between items-center w-full">
               <Link href="/">
-                <Image src={logoUrl} alt="Logo" width={120} height={40} />
+                <Image src={logoUrl} alt="Logo" width={100} height={40} />
               </Link>
               <div className="flex items-center gap-4">
                 <NavbarIconsWrapper />
                 <MobileMenu companyDetails={companyDetails} />
               </div>
             </div>
-            <div>
+            <div className="pt-2">
               <SearchBar />
             </div>
           </div>
         </div>
       </nav>
 
-      <div
-        className={`h-[${homeCouponHeight + 80}px] lg:h-[${
-          homeCouponHeight + 60
-        }px]`}
-        aria-hidden="true"
-      />
-    </div>
+      {/* Spacer for fixed nav */}
+      <div className="h-[80px]" />
+    </>
   );
 };
 
