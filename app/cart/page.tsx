@@ -351,9 +351,9 @@ const CartPage = () => {
             >
               {/* Common Left Section (Image and main text container) */}
               <div className="flex items-start sm:items-center w-full sm:w-auto mb-1 sm:mb-0">
-                {item.slug ? (
+                {item?.product?.slug ? (
                   <Link
-                    href={`/product/${item.slug}`}
+                    href={`/product/${item.product.slug}`}
                     className="flex-shrink-0 mr-4 sm:mr-6 flex flex-col items-center"
                   >
                     <Image
@@ -390,8 +390,8 @@ const CartPage = () => {
                 <div className="flex flex-col justify-between h-full w-full sm:hidden">
                   <div>
                     <div className="flex justify-between items-start gap-2">
-                      {item.slug ? (
-                        <Link href={`/product/${item.slug}`} className="flex-1">
+                      {item?.product?.slug ? (
+                        <Link href={`/product/${item.product.slug}`} className="flex-1">
                           <h3 className="text-sm font-semibold text-gray-900 line-clamp-1 hover:text-[#007BFF] transition-colors cursor-pointer">
                             {item.name}
                           </h3>
@@ -449,8 +449,8 @@ const CartPage = () => {
                 <div className="hidden sm:flex flex-col justify-between h-full">
                   <div>
                     <div className="flex justify-between items-start gap-2">
-                      {item.slug ? (
-                        <Link href={`/product/${item.slug}`} className="flex-1">
+                      {item?.product?.slug ? (
+                        <Link href={`/product/${item?.product?.slug}`} className="flex-1">
                           <h3 className="text-lg font-semibold text-gray-900 line-clamp-2 hover:text-[#007BFF] transition-colors cursor-pointer">
                             {item.name}
                           </h3>

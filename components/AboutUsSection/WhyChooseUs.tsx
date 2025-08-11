@@ -12,7 +12,8 @@ const WhyChooseUs = ({ sectionData }: Props) => {
 
     return (
         <div className="bg-[#f9fafb]">
-            <h2 className={`text-[#213E5A] text-2xl sm:text-3xl lg:text-4xl text-center p-4`}>{sectionData.heading}</h2>
+            {/* <h2 className={`text-[#213E5A] text-2xl sm:text-3xl lg:text-4xl text-center p-4`}>{sectionData.heading}</h2> */}
+            <SectionHeader title={sectionData.heading} />
             <div className="container mx-auto flex flex-wrap justify-center gap-12 p-4">
                 {sectionData.components.map((item) => (
                     <div

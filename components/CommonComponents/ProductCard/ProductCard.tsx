@@ -86,7 +86,9 @@ const ProductCard = ({ product }: Props) => {
       quantity: 1,
       sellingPrice: currentSellingPrice,
       basePrice: currentBasePrice,
-      image: firstGeneralImage || "/placeholder.jpg",
+      image: (selectedVariant?.images && selectedVariant.images.length > 0
+              ? selectedVariant.images[0].url
+              : firstGeneralImage) || "/placeholder.jpg",
       variantId: selectedVariant?.id || null,
       variant: selectedVariant,
       product: product,
@@ -121,6 +123,10 @@ const ProductCard = ({ product }: Props) => {
       ? selectedVariant?.stock === 0
       : product.stock === 0;
 
+  const discountPercent = selectedVariant
+    ? selectedVariant.base_and_selling_price_difference_in_percent
+    : product.priceDifferencePercent;
+
   return (
     <div
       className="group bg-gradient-to-br from-white via-blue-50 to-blue-100 rounded-xl border border-blue-200 shadow-md hover:shadow-xl transition-shadow duration-300 w-full max-w-[260px] mx-auto overflow-hidden flex flex-col "
@@ -138,9 +144,9 @@ const ProductCard = ({ product }: Props) => {
           fill
           className="object-contain transition-transform duration-300 ease-in-out scale-100 group-hover:scale-105"
         />
-        {product.priceDifferencePercent < 0 && (
+        {discountPercent < 0 && (
           <div className="absolute top-3 left-3 bg-gradient-to-r from-red-500 via-pink-500 to-orange-500 text-white text-[11px] px-2 py-0.5 rounded-full font-semibold shadow-md uppercase tracking-wide">
-            {product.priceDifferencePercent.toFixed(0)}% OFF
+            {discountPercent.toFixed(0)}% OFF
           </div>
         )}
       </Link>
@@ -155,7 +161,7 @@ const ProductCard = ({ product }: Props) => {
         </Link>
 
         {/* Variant Images */}
-        {product.variants && product.variants.length > 0 ? (
+        {product.variants && product.variants.length > 1 ? (
           <div className="flex gap-2 flex-wrap mt-1 mb-2 max-h-[48px] overflow-hidden">
             {product.variants.map((variant, index) => {
               const variantImage = variant.images[0]?.url;
@@ -186,10 +192,20 @@ const ProductCard = ({ product }: Props) => {
               );
             })}
           </div>
-        )
-        : 
-        <div className="flex gap-2 flex-wrap mt-1 mb-2 h-[48px] overflow-hidden text-black items-center justify-center">No variations</div>
-        }
+        ) : (
+          <div className="relative w-10 h-10 rounded overflow-hidden border-2 border-blue-500 ring-2 ring-offset-1 mt-1 mb-2">
+            <Image
+              src={
+                (selectedVariant?.images?.[0]?.url ||
+                firstGeneralImage ||
+                "/placeholder.jpg")
+              }
+              alt={product.name}
+              fill
+              className="object-cover"
+          />
+          </div>
+        )}
 
         {/* Price & Button */}
         <div className="flex justify-between items-start mt-auto">
@@ -209,7 +225,7 @@ const ProductCard = ({ product }: Props) => {
           </div>
 
           {/* Action Button */}
-          {product.variants && product.variants.length > 0 ? (
+          {product.variants && product.variants.length > 1 ? (
             <Link href={`/product/${product.slug}`}>
               <button className="text-xs md:text-sm flex items-center gap-1 px-3 py-1.5 bg-[#1e3a8a] text-white rounded-full hover:bg-[#172c5d] transition">
                 <MdTune className="text-base" />

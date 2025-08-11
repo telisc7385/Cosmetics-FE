@@ -8,7 +8,7 @@ type Props = {
 
 const AboutUsBannerComponent = ({ BannerData }: Props) => {
   return (
-    <div className="w-full h-[300px] sm:h-[400px] md:h-[460px] lg:h-[500px] xl:h-[550px] flex items-center justify-center relative mt-4">
+    <div className="w-full h-[300px] sm:h-[400px] md:h-[460px] lg:h-[500px] xl:h-[550px] flex items-center justify-center relative">
       <Image
         src={BannerData.image}
         alt={BannerData?.heading || "Banner Image"}

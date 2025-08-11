@@ -48,7 +48,7 @@ const Modal: React.FC<ModalProps> = ({ title, onClose, children }) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
       <div
         ref={modalRef}
-        className="relative bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto"
+        className="relative bg-white/50 rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto"
       >
         <div className="flex justify-between items-center p-4 border-b border-gray-200">
           <h2 className="text-xl font-semibold text-gray-800">{title}</h2>

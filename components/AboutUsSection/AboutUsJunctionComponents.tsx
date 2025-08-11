@@ -12,13 +12,14 @@ import { getGallery, getTestimonials } from "@/api/fetchWhyChooseUs";
 import OurValues from "./OurValues";
 import OurMission from "./OurMission";
 import GalleryPage from "../ServersideComponent/GalleryPage/GalleryPage";
+import VisionAndMissionComponent from './VisionAndMissionComponent'
 
 type Props = {
   sectionData: any;
 };
 
-const testimonials = await getTestimonials(); // Assuming this function fetches testimonials
-const gallery = await getGallery(); // Assuming this function fetches gallery images
+const testimonials = await getTestimonials();
+const gallery = await getGallery();
 
 const AboutUsJunctionComponents = ({ sectionData }: Props) => {
   return (
@@ -49,7 +50,8 @@ const AboutUsJunctionComponents = ({ sectionData }: Props) => {
             case "our_mission":
               return (
                 <div key={section.id}>
-                  <OurMission sectionData={section} />
+                  {/* <OurMission sectionData={section} /> */}
+                  <VisionAndMissionComponent sectionData={section} />
                 </div>
               );
             case "our_vision":

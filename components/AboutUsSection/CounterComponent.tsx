@@ -26,7 +26,7 @@ const Counter = () => {
   }, [inView, startCount]);
 
   return (
-    <section ref={ref} className="w-full py-4 md:py-8 bg-gray-50">
+    <section ref={ref} className="w-full mt-0 py-10 md:py-16 bg-[#D1F5E0]">
       <div className="max-w-7xl mx-auto p-4">
         <SectionHeader
           title="Our Achievement"

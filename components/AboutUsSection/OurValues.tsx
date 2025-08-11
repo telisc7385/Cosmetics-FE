@@ -19,7 +19,7 @@ const OurValues = ({ sectionData }: Props) => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
                 {/* Text Column */}
                 <div className='flex flex-col gap-4 order-2 lg:order-1'>
-                    <h2 className={`text-[#213E5A] text-2xl sm:text-3xl lg:text-4xl`}>{heading}</h2>
+                    <h2 className={`text-[#213E5A] font-semibold text-2xl sm:text-3xl lg:text-4xl`}>{heading}</h2>
                     {components.map(c => (
                         <p key={c.id} className="text-gray-600 leading-relaxed text-lg">
                             {c.description}
@@ -28,11 +28,11 @@ const OurValues = ({ sectionData }: Props) => {
                     }
                 </div>
                 {/* Image Column */}
-                <div className="w-full order-1 lg:order-2">
+                <div className="w-full order-1 lg:order-2 flex justify-center">
                     <img
                         src={image}
                         alt={heading}
-                        className="w-full h-[400px] lg:h-[600px] rounded-lg shadow-lg object-cover"
+                        className="rounded-2xl shadow-xl object-cover w-full max-w-md sm:max-w-lg h-auto"
                     />
                 </div>
             </div>

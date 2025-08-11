@@ -18,11 +18,18 @@ const OurMission = ({ sectionData }: Props) => {
         <section className="max-w-7xl mx-auto p-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
                 {/* Image Column */}
-                <div className="w-full">
+                {/* <div className="w-full">
                     <img
                         src={image}
                         alt={heading}
                         className="w-full h-[400px] lg:h-[600px] rounded-lg shadow-lg object-cover"
+                    />
+                </div> */}
+                <div className="w-full order-1 lg:order-2 flex justify-center">
+                    <img
+                        src={image}
+                        alt={heading}
+                        className="rounded-2xl shadow-xl object-cover w-full max-w-md sm:max-w-lg h-auto"
                     />
                 </div>
                 {/* Text Column */}

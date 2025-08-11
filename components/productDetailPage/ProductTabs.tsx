@@ -22,7 +22,7 @@ export default function ProductTabs({
   const [activeTab, setActiveTab] = useState("details");
 
   return (
-    <div className="mb-5 rounded bg-white p-4 ">
+    <div className="mb-5 rounded bg-[#ddf1e6] border border-gray-300 p-4 ">
       {/* Tabs */}
       <div className="flex gap-6 border-b text-sm font-medium ">
         <button

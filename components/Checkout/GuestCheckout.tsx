@@ -279,23 +279,23 @@ const GuestCheckout = () => {
   };
 
   // (Conditional rendering for isPlacingOrder and cartItems.length === 0 are unchanged and correct)
-  if (isPlacingOrder) {
-    return (
-      <div className="fixed inset-0 bg-white bg-opacity-75 flex items-center justify-center z-50">
-        <div className="flex flex-col items-center">
-          <Lottie
-            loop
-            animationData={ShoppingCart}
-            play
-            style={{ width: 150, height: 150 }}
-          />
-          <p className="mt-4 text-xl font-semibold text-gray-700">
-            Placing your order, please wait...
-          </p>
-        </div>
+if (isPlacingOrder) {
+  return (
+    <div className="fixed inset-0 bg-[#213B62]/80 backdrop-blur-sm flex items-center justify-center z-[1000]">
+      <div className="flex flex-col items-center gap-4 p-6 bg-white shadow-xl rounded-xl border border-gray-200">
+        <Lottie
+          animationData={ShoppingCart}
+          loop
+          play
+          style={{ width: 120, height: 120 }}
+        />
+        <p className="text-base sm:text-lg font-medium text-gray-800 text-center">
+          Placing your order, please wait...
+        </p>
       </div>
-    );
-  }
+    </div>
+  );
+}
 
   if (cartItems.length === 0) {
     return (

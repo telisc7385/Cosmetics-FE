@@ -20,13 +20,13 @@ export default function FeaturedSlider({ products }: { products: Product[] }) {
 
       {/* ✅ Swiper content */}
       <div className="relative z-20">
-        <SectionHeader
+        {/* <SectionHeader
           title="Shop Our Best Sellers"
           subtitle="Trusted by Thousands, Loved for a Reason."
           titleClass="text-2xl sm:text-3xl lg:text-4xl"
           subtitleClass="text-sm sm:text-base lg:text-lg"
-        />
-        <div className="max-w-6xl mx-auto mt-4 md:mt-8">
+        /> */}
+        <div className="max-w-7xl xl:max-w-screen-xl mx-auto mt-4 md:mt-8 px-4">
           <Swiper
             modules={[Navigation, Autoplay]}
             spaceBetween={20}
@@ -53,7 +53,7 @@ export default function FeaturedSlider({ products }: { products: Product[] }) {
 
               return (
                 <SwiperSlide key={product.id}>
-                  <div className="flex flex-col lg:flex-row items-center gap-4 lg:gap-6 min-h-[320px] lg:min-h-[300px] px-2">
+                  <div className="flex flex-col lg:flex-row items-center gap-6 lg:gap-10 min-h-[320px] lg:min-h-[400px] px-2">
                     {/* ✅ IMAGE */}
                     <motion.div
                       initial={imageInitial}
@@ -66,7 +66,7 @@ export default function FeaturedSlider({ products }: { products: Product[] }) {
                         alt={product.name}
                         width={280}
                         height={280}
-                        className="rounded w-[140px] h-[140px] sm:w-[180px] sm:h-[180px] lg:w-[280px] lg:h-[280px] object-contain"
+                        className="rounded w-[160px] h-[160px] sm:w-[220px] sm:h-[220px] lg:w-[320px] lg:h-[320px] object-contain transition-transform duration-300 "
                       />
                     </motion.div>
 
@@ -75,7 +75,7 @@ export default function FeaturedSlider({ products }: { products: Product[] }) {
                       initial={textInitial}
                       animate={textAnimate}
                       transition={{ duration: 0.7 }}
-                      className="w-full lg:w-1/2 text-center lg:text-left"
+                      className="w-full lg:w-1/2 text-center lg:text-left  backdrop-blur-md p-4 rounded-xl flex flex-col justify-center min-h-[320px] sm:min-h-[360px] lg:min-h-[400px]"
                     >
                       <p className="text-xs sm:text-sm text-[#213e5a]">
                         {product.category?.name}
@@ -84,9 +84,9 @@ export default function FeaturedSlider({ products }: { products: Product[] }) {
                         {product.name}
                       </h3>
                       <p className="text-[#e60076] font-semibold text-base sm:text-lg mt-2">
-                        ₹{product.basePrice}
+                        ₹{product.sellingPrice}
                         <span className="line-through text-gray-500 text-xs ml-2">
-                          ₹{product.sellingPrice}
+                          ₹{product.basePrice}
                         </span>
                       </p>
 
